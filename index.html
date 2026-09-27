@@ -53,7 +53,7 @@
       flex: 1;
       padding: 12px 4px;
       text-align: center;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--muted);
       background: none;
@@ -215,13 +215,16 @@
       padding: 8px;
       min-height: 100%;
     }
+    #pdf-canvas-container {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
     #pdf-canvas-container canvas {
-      width: 100%;
-      max-width: 100%;
-      height: auto;
+      display: block;
+      margin: 0 auto 8px auto;
       box-shadow: 0 4px 16px rgba(0,0,0,0.6);
-      margin-bottom: 8px;
       border-radius: 4px;
+      /* NO width:100% — així el zoom de PDF.js funciona */
     }
     #roadbook-view {
       flex: 1 1 auto;
@@ -528,8 +531,7 @@
     <div class="tabs">
       <button class="tab active" data-screen="roadbook">Roadbook</button>
       <button class="tab" data-screen="instruments">Instruments</button>
-      <button class="tab" data-screen="editor">Editor</button>
-      <button class="tab" data-screen="gpx">Des de GPX</button>
+      <button class="tab" data-screen="manual">Manual</button>
     </div>
 
     <div id="roadbook" class="screen active">
@@ -571,7 +573,7 @@
               <p style="font-size:48px">📄</p>
               <p><strong>Terra X Correr</strong></p>
               <p>No hi ha roadbook carregat</p>
-              <p style="margin-top:14px">Usa el botó “Carregar PDF”<br>o crea’n un a la pestanya Editor</p>
+              <p style="margin-top:14px">Usa el botó PDF per carregar un roadbook</p>
             </div>
           </div>
         </div>
@@ -591,6 +593,7 @@
         <div class="rb-row">
           <button class="rb-btn wide" id="btn-load-pdf">PDF</button>
           <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
+          <button class="rb-btn wide" id="btn-reset-all-bar" style="border:2px solid var(--danger);color:#ff8a80;background:#2a1212;max-width:none;flex:0.7;">Reset</button>
         </div>
       </div>
     </div>
@@ -636,108 +639,79 @@
       </div>
     </div>
 
-    <div id="editor" class="screen">
-      <div class="editor-section">
-        <h3>Roadbook actual</h3>
-        <div class="form-row">
-          <label>Nom del roadbook</label>
-          <input type="text" id="rb-name" placeholder="Ex: Ruta del desert">
-        </div>
-        <div class="btn-row">
-          <button class="btn primary" id="btn-save-rb">Desar roadbook</button>
-          <button class="btn" id="btn-new-rb">Nou</button>
-          <button class="btn" id="btn-export-rb">Exportar JSON</button>
-          <button class="btn" id="btn-import-rb">Importar JSON</button>
-        </div>
-      </div>
-
-      <div class="editor-section">
-        <h3>Afegir nota / tulipa</h3>
-        <div class="form-row">
-          <label>Quilòmetre (parcial des de l’anterior)</label>
-          <input type="number" id="note-km" step="0.01" placeholder="0.00">
-        </div>
-        <div class="form-row">
-          <label>CAP / Rumbo (opcional)</label>
-          <input type="number" id="note-cap" placeholder="Ex: 245">
-        </div>
-        <div class="form-row">
-          <label>Descripció / nota</label>
-          <textarea id="note-text" placeholder="Ex: Gir a la dreta, pista de terra, perill roques"></textarea>
-        </div>
-        <div class="btn-row">
-          <button class="btn primary" id="btn-add-note">Afegir nota</button>
-        </div>
-      </div>
-
-      <div class="editor-section">
-        <h3>Notes del roadbook</h3>
-        <div class="notes-list" id="notes-list">
-          <div class="empty"><p>No hi ha notes encara</p></div>
-        </div>
-      </div>
-
-      <div class="editor-section">
-        <h3>Carregar PDF (per a la lectura)</h3>
-        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">
-          Pots carregar un PDF de roadbook existent per llegir-lo a la pestanya Roadbook.
-        </p>
-        <button class="btn primary" id="btn-load-pdf-editor">Seleccionar PDF</button>
-      </div>
-    </div>
-
-    <!-- ===== SCREEN 4: DES DE GPX ===== -->
-    <div id="gpx" class="screen">
-      <div style="overflow:auto; padding:14px; -webkit-overflow-scrolling:touch; flex:1;">
+    <div id="manual" class="screen">
+      <div style="overflow:auto; padding:16px; -webkit-overflow-scrolling:touch; flex:1;">
         <div class="editor-section">
-          <h3>Crear roadbook des d’una ruta GPX</h3>
-          <p style="font-size:14px; color:var(--muted); margin-bottom:14px; line-height:1.45;">
-            Carrega un fitxer <strong>GPX</strong> d’una ruta que hagis gravat (OsmAnd, Garmin, Strava, Google Fit, etc.).
-            L’app calcularà distàncies i rumbos i generarà notes automàticament.
+          <h3>Manual d’instruccions</h3>
+          <p style="font-size:14px; color:var(--muted); line-height:1.55; margin-bottom:12px;">
+            Guia ràpida de <strong>Terra X Correr</strong> per llegir roadbooks a moto.
           </p>
-          <button class="btn primary" id="btn-load-gpx" style="width:100%; margin-bottom:12px;">Seleccionar fitxer GPX</button>
-          <input type="file" id="gpx-input" accept=".gpx,application/gpx+xml,application/xml" style="display:none">
         </div>
 
         <div class="editor-section">
-          <h3>Opcions de generació</h3>
-          <div class="form-row">
-            <label>Interval mínim entre notes (metres)</label>
-            <input type="number" id="gpx-interval" value="200" min="50" max="2000" step="50">
-          </div>
-          <div class="form-row">
-            <label>Canvi de rumb mínim per crear nota (graus)</label>
-            <input type="number" id="gpx-turn" value="25" min="10" max="90" step="5">
-          </div>
-          <div class="form-row">
-            <label>Nom del roadbook generat</label>
-            <input type="text" id="gpx-name" placeholder="Ex: Ruta del coll">
-          </div>
-          <div class="btn-row">
-            <button class="btn primary" id="btn-generate-gpx" disabled>Generar roadbook</button>
-          </div>
+          <h3>1. Carregar un roadbook</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            A la pestanya <strong>Roadbook</strong>, toca el botó <strong>PDF</strong> i tria el fitxer PDF del teu roadbook.
+            Cal internet la primera vegada (per carregar la llibreria PDF). Després funciona offline.
+          </p>
         </div>
 
         <div class="editor-section">
-          <h3>Informació de la ruta</h3>
-          <div id="gpx-info" style="font-size:14px; color:var(--muted); line-height:1.6;">
-            Cap fitxer GPX carregat encara.
-          </div>
+          <h3>2. Navegar el roadbook</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            <strong>▲</strong> (taronja) = retrocedir / pujar<br>
+            <strong>▼</strong> (verd) = avançar / baixar<br>
+            <strong>− / +</strong> = fer el roadbook més petit o més gran (zoom)<br>
+            <strong>Pantalla</strong> = pantalla completa
+          </p>
         </div>
 
         <div class="editor-section">
-          <h3>Notes generades (previsualització)</h3>
-          <div class="notes-list" id="gpx-preview">
-            <div class="empty"><p>Encara no s’ha generat res</p></div>
-          </div>
-          <div class="btn-row" style="margin-top:12px;">
-            <button class="btn primary" id="btn-use-gpx" disabled>Utilitzar aquestes notes</button>
-          </div>
+          <h3>3. Odòmetre</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            L’odòmetre suma quilòmetres amb el GPS.<br>
+            <strong>− / −− / ++ / +</strong> = ajustar (−0,1 / −0,01 / +0,01 / +0,1)<br>
+            <strong>Rp</strong> = reset del parcial<br>
+            <strong>Rt</strong> = reset del total (i del parcial)
+          </p>
+        </div>
+
+        <div class="editor-section">
+          <h3>4. Velocitat i direcció</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            La <strong>velocitat</strong> surt del GPS (km/h).<br>
+            La <strong>direcció</strong> mostra una fletxa, els punts cardinals (N, NE, E…) i els graus.
+            Dona permís d’ubicació i, si cal, d’orientació del telèfon.
+          </p>
+        </div>
+
+        <div class="editor-section">
+          <h3>5. Pestanya Instruments</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            Pantalla neta només amb odòmetres, velocitat, direcció i hora.
+            Útil quan no necessites veure el PDF.
+          </p>
+        </div>
+
+        <div class="editor-section">
+          <h3>6. Reset total de l’app</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5; margin-bottom:12px;">
+            El botó <strong>Reset tot</strong> (a la barra inferior) esborra el PDF, posa els odòmetres a zero i deixa l’app com al principi.
+          </p>
+          <button class="btn danger" id="btn-reset-all" style="width:100%;">Reset tot (tornar a zero)</button>
+        </div>
+
+        <div class="editor-section">
+          <h3>Consells per a moto</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            · Munti el telèfon en un suport estable<br>
+            · Activa la ubicació precisa<br>
+            · Carrega el PDF abans de sortir (amb cobertura)<br>
+            · Usa pantalla completa per veure millor el roadbook
+          </p>
         </div>
       </div>
     </div>
-  </div>
-
   <div id="status"></div>
   <input type="file" id="pdf-input" accept="application/pdf">
   <input type="file" id="import-input" accept=".json,application/json">
@@ -962,10 +936,10 @@
     }
 
     $("btn-load-pdf").addEventListener("click", () => $("pdf-input").click());
-    $("btn-load-pdf-editor").addEventListener("click", () => $("pdf-input").click());
     $("pdf-input").addEventListener("change", e => {
       const file = e.target.files[0];
       if (file) loadPdf(file);
+      e.target.value = "";
     });
 
     function scrollRoadbook(direction) {
@@ -980,13 +954,10 @@
         showStatus("Primer carrega un PDF");
         return;
       }
-      // Always scroll up a bit
       scrollRoadbook(-1);
-      // If multi-page and near top, go previous page
       const view = $("roadbook-view");
       if (state.currentPage > 1 && view && view.scrollTop < 40) {
         renderPage(state.currentPage - 1).then(() => {
-          // jump to bottom of previous page
           setTimeout(() => {
             const v = $("roadbook-view");
             if (v) v.scrollTop = v.scrollHeight;
@@ -1011,13 +982,24 @@
         });
       }
     });
-    $("btn-zoom-in").addEventListener("click", () => {
-      state.zoom = Math.min(8, state.zoom + 0.3);
-      if (state.currentPdf) renderPage(state.currentPage);
+
+    $("btn-zoom-in").addEventListener("click", async () => {
+      if (!state.currentPdf) {
+        showStatus("Primer carrega un PDF");
+        return;
+      }
+      state.zoom = Math.min(10, +(state.zoom + 0.25).toFixed(2));
+      await renderPage(state.currentPage);
+      showStatus("Zoom " + Math.round(state.zoom * 100) + "%");
     });
-    $("btn-zoom-out").addEventListener("click", () => {
-      state.zoom = Math.max(0.25, state.zoom - 0.3);
-      if (state.currentPdf) renderPage(state.currentPage);
+    $("btn-zoom-out").addEventListener("click", async () => {
+      if (!state.currentPdf) {
+        showStatus("Primer carrega un PDF");
+        return;
+      }
+      state.zoom = Math.max(0.2, +(state.zoom - 0.25).toFixed(2));
+      await renderPage(state.currentPage);
+      showStatus("Zoom " + Math.round(state.zoom * 100) + "%");
     });
 
     $("btn-fullscreen").addEventListener("click", () => {
@@ -1031,7 +1013,8 @@
     function updateNotesOverlay() {
       const overlay = $("notes-overlay");
       const list = $("notes-overlay-list");
-      if (state.roadbook.notes.length === 0) {
+      if (!overlay || !list) return;
+      if (!state.roadbook.notes || state.roadbook.notes.length === 0) {
         overlay.classList.remove("visible");
         return;
       }
@@ -1045,267 +1028,40 @@
       `).join("");
     }
 
-    function renderNotes() {
-      const list = $("notes-list");
-      if (state.roadbook.notes.length === 0) {
-        list.innerHTML = '<div class="empty"><p>No hi ha notes encara</p></div>';
-        updateNotesOverlay();
-        return;
-      }
-      list.innerHTML = state.roadbook.notes.map((n, i) => `
-        <div class="note-item">
-          <div class="km">${n.km.toFixed(2)}</div>
-          <div class="content">
-            ${n.cap != null ? `<strong>CAP ${n.cap}°</strong><br>` : ""}
-            ${n.text || ""}
-          </div>
-          <div class="actions">
-            <button class="note-btn del" data-del="${i}">✕</button>
-          </div>
-        </div>
-      `).join("");
-      list.querySelectorAll("[data-del]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          state.roadbook.notes.splice(parseInt(btn.dataset.del), 1);
-          renderNotes();
-          saveRoadbook();
-        });
-      });
+    function resetAllApp() {
+      if (!confirm("Vols reiniciar-ho tot? S’esborrarà el PDF, els odòmetres i les dades guardades.")) return;
+      state.odoTotal = 0;
+      state.odoPartial = 0;
+      state.currentPdf = null;
+      state.currentPage = 1;
+      state.zoom = 1.3;
+      state.roadbook = { name: "Nou roadbook", notes: [] };
+      state.lastLat = null;
+      state.lastLon = null;
+      updateOdoDisplay();
       updateNotesOverlay();
+      const container = $("pdf-canvas-container");
+      if (container) {
+        container.innerHTML = `
+          <div class="empty" id="pdf-empty">
+            <p style="font-size:48px">📄</p>
+            <p><strong>Terra X Correr</strong></p>
+            <p>No hi ha roadbook carregat</p>
+            <p style="margin-top:14px">Usa el botó PDF per carregar un roadbook</p>
+          </div>`;
+      }
+      localStorage.removeItem("txc_odoTotal");
+      localStorage.removeItem("txc_odoPartial");
+      localStorage.removeItem("txc_roadbook");
+      const pdfInput = $("pdf-input");
+      if (pdfInput) pdfInput.value = "";
+      showStatus("Tot reiniciat");
     }
 
-    $("btn-add-note").addEventListener("click", () => {
-      const km = parseFloat($("note-km").value) || 0;
-      const cap = $("note-cap").value ? parseInt($("note-cap").value) : null;
-      const text = $("note-text").value.trim();
-      if (!text && cap == null) {
-        showStatus("Escriu una nota o CAP");
-        return;
-      }
-      state.roadbook.notes.push({ km, cap, text });
-      state.roadbook.notes.sort((a, b) => a.km - b.km);
-      $("note-km").value = "";
-      $("note-cap").value = "";
-      $("note-text").value = "";
-      renderNotes();
-      saveRoadbook();
-      showStatus("Nota afegida");
-    });
-
-    $("btn-save-rb").addEventListener("click", () => {
-      state.roadbook.name = $("rb-name").value || "Sense nom";
-      saveRoadbook();
-      showStatus("Roadbook desat al telèfon");
-    });
-
-    $("btn-new-rb").addEventListener("click", () => {
-      if (confirm("Vols crear un roadbook nou? Es perdran els canvis no desats.")) {
-        state.roadbook = { name: "Nou roadbook", notes: [] };
-        $("rb-name").value = state.roadbook.name;
-        renderNotes();
-        showStatus("Nou roadbook");
-      }
-    });
-
-    $("btn-export-rb").addEventListener("click", () => {
-      const data = JSON.stringify(state.roadbook, null, 2);
-      const blob = new Blob([data], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = (state.roadbook.name || "roadbook") + ".json";
-      a.click();
-      URL.revokeObjectURL(url);
-      showStatus("Exportat");
-    });
-
-    $("btn-import-rb").addEventListener("click", () => $("import-input").click());
-    $("import-input").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        try {
-          const data = JSON.parse(ev.target.result);
-          state.roadbook = data;
-          $("rb-name").value = data.name || "";
-          renderNotes();
-          saveRoadbook();
-          showStatus("Roadbook importat");
-        } catch (err) {
-          showStatus("Error en importar");
-        }
-      };
-      reader.readAsText(file);
-    });
-
-    // ========== GPX → ROADBOOK ==========
-    let gpxPoints = [];
-    let gpxGeneratedNotes = [];
-
-    function bearing(lat1, lon1, lat2, lon2) {
-      const toRad = d => d * Math.PI / 180;
-      const toDeg = r => r * 180 / Math.PI;
-      const dLon = toRad(lon2 - lon1);
-      const y = Math.sin(dLon) * Math.cos(toRad(lat2));
-      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
-                Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
-      return (toDeg(Math.atan2(y, x)) + 360) % 360;
-    }
-
-    function parseGPX(text) {
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, "text/xml");
-      const trkpts = xml.querySelectorAll("trkpt");
-      const pts = [];
-      trkpts.forEach(pt => {
-        const lat = parseFloat(pt.getAttribute("lat"));
-        const lon = parseFloat(pt.getAttribute("lon"));
-        if (!isNaN(lat) && !isNaN(lon)) pts.push({ lat, lon });
-      });
-      // Also support rtept (routes)
-      if (pts.length === 0) {
-        xml.querySelectorAll("rtept").forEach(pt => {
-          const lat = parseFloat(pt.getAttribute("lat"));
-          const lon = parseFloat(pt.getAttribute("lon"));
-          if (!isNaN(lat) && !isNaN(lon)) pts.push({ lat, lon });
-        });
-      }
-      return pts;
-    }
-
-    function generateNotesFromGPX(points, intervalM, turnDeg) {
-      if (points.length < 2) return [];
-      const notes = [];
-      let cumKm = 0;
-      let lastNoteKm = 0;
-      let lastBearing = null;
-
-      // Start note
-      notes.push({
-        km: 0,
-        cap: Math.round(bearing(points[0].lat, points[0].lon, points[1].lat, points[1].lon)),
-        text: "INICI"
-      });
-
-      for (let i = 1; i < points.length; i++) {
-        const distM = haversine(points[i-1].lat, points[i-1].lon, points[i].lat, points[i].lon);
-        cumKm += distM / 1000;
-        const brg = bearing(points[i-1].lat, points[i-1].lon, points[i].lat, points[i].lon);
-
-        let isTurn = false;
-        if (lastBearing != null) {
-          let diff = Math.abs(brg - lastBearing);
-          if (diff > 180) diff = 360 - diff;
-          if (diff >= turnDeg) isTurn = true;
-        }
-
-        const distSinceLast = (cumKm - lastNoteKm) * 1000;
-        if (isTurn || distSinceLast >= intervalM) {
-          const partialKm = cumKm - lastNoteKm;
-          notes.push({
-            km: +partialKm.toFixed(2),
-            cap: Math.round(brg),
-            text: isTurn ? "Canvi de rumb" : "Punt de pas"
-          });
-          lastNoteKm = cumKm;
-        }
-        lastBearing = brg;
-      }
-
-      // End note
-      const totalPartial = cumKm - lastNoteKm;
-      if (totalPartial > 0.02) {
-        notes.push({
-          km: +totalPartial.toFixed(2),
-          cap: lastBearing != null ? Math.round(lastBearing) : null,
-          text: "FINAL"
-        });
-      } else if (notes.length > 0) {
-        notes[notes.length - 1].text = (notes[notes.length - 1].text || "") + " · FINAL";
-      }
-
-      return notes;
-    }
-
-    $("btn-load-gpx").addEventListener("click", () => $("gpx-input").click());
-    $("gpx-input").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        try {
-          gpxPoints = parseGPX(ev.target.result);
-          if (gpxPoints.length < 2) {
-            showStatus("El GPX no té prou punts");
-            $("gpx-info").textContent = "Fitxer sense track vàlid.";
-            $("btn-generate-gpx").disabled = true;
-            return;
-          }
-          // Calculate total distance
-          let totalM = 0;
-          for (let i = 1; i < gpxPoints.length; i++) {
-            totalM += haversine(gpxPoints[i-1].lat, gpxPoints[i-1].lon, gpxPoints[i].lat, gpxPoints[i].lon);
-          }
-          $("gpx-info").innerHTML = `
-            <strong>${file.name}</strong><br>
-            Punts: ${gpxPoints.length}<br>
-            Distància aproximada: ${(totalM/1000).toFixed(2)} km
-          `;
-          $("btn-generate-gpx").disabled = false;
-          if (!$("gpx-name").value) {
-            $("gpx-name").value = file.name.replace(/\.gpx$/i, "");
-          }
-          showStatus("GPX carregat correctament");
-        } catch (err) {
-          showStatus("Error en llegir el GPX");
-          console.error(err);
-        }
-      };
-      reader.readAsText(file);
-    });
-
-    $("btn-generate-gpx").addEventListener("click", () => {
-      if (gpxPoints.length < 2) return;
-      const interval = parseInt($("gpx-interval").value) || 200;
-      const turn = parseInt($("gpx-turn").value) || 25;
-      gpxGeneratedNotes = generateNotesFromGPX(gpxPoints, interval, turn);
-
-      const preview = $("gpx-preview");
-      if (gpxGeneratedNotes.length === 0) {
-        preview.innerHTML = '<div class="empty"><p>No s’han generat notes</p></div>';
-        $("btn-use-gpx").disabled = true;
-        return;
-      }
-      preview.innerHTML = gpxGeneratedNotes.map(n => `
-        <div class="note-item">
-          <div class="km">${n.km.toFixed(2)}</div>
-          <div class="content">
-            ${n.cap != null ? `<strong>CAP ${n.cap}°</strong><br>` : ""}
-            ${n.text || ""}
-          </div>
-        </div>
-      `).join("");
-      $("btn-use-gpx").disabled = false;
-      showStatus(`${gpxGeneratedNotes.length} notes generades`);
-    });
-
-    $("btn-use-gpx").addEventListener("click", () => {
-      if (gpxGeneratedNotes.length === 0) return;
-      state.roadbook = {
-        name: $("gpx-name").value || "Roadbook des de GPX",
-        notes: gpxGeneratedNotes.slice()
-      };
-      $("rb-name").value = state.roadbook.name;
-      renderNotes();
-      saveRoadbook();
-      showStatus("Roadbook creat! Ves a la pestanya Editor o Roadbook");
-      // Switch to editor tab
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-      document.querySelector('[data-screen="editor"]').classList.add("active");
-      $("editor").classList.add("active");
-    });
+    const btnResetAll = $("btn-reset-all");
+    const btnResetBar = $("btn-reset-all-bar");
+    if (btnResetAll) btnResetAll.addEventListener("click", resetAllApp);
+    if (btnResetBar) btnResetBar.addEventListener("click", resetAllApp);
 
     function saveSettings() {
       localStorage.setItem("txc_odoTotal", state.odoTotal);
@@ -1324,8 +1080,7 @@
       if (rb) {
         try {
           state.roadbook = JSON.parse(rb);
-          $("rb-name").value = state.roadbook.name || "";
-          renderNotes();
+          updateNotesOverlay();
         } catch(e) {}
       }
     }
