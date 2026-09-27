@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-title" content="Terra X Correr">
+  <meta name="application-name" content="Terra X Correr">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Terra X Correr</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  <link rel="apple-touch-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" sizes="192x192" href="logo.jpg">
+  <link rel="apple-touch-icon" sizes="512x512" href="logo.jpg">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #121212;
+      --accent: #00e676;
+      --accent2: #ff9100;
+      --text: #f5f5f5;
+      --muted: #999;
+      --danger: #ff1744;
+      --border: #2a2a2a;
+      --card: #1a1a1a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      height: 100dvh;
+    }
+    .tabs {
+      display: flex;
+      background: var(--panel);
+      border-bottom: 2px solid var(--border);
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .tab {
+      flex: 1;
+      padding: 12px 4px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+    }
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .screen.active { display: flex; }
+    .instruments {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 6px;
+      padding: 8px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .inst {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 8px 6px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .inst .label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .inst .value {
+      font-size: 26px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+    .inst.odo .value { color: var(--accent); }
+    .inst.odo .partial {
+      font-size: 15px;
+      color: #81c784;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+    .inst.speed .value { color: #40c4ff; }
+    .inst.cap .value { color: var(--accent2); }
+    .odo-controls {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      justify-content: center;
+    }
+    .odo-btn {
+      background: #252525;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 48px;
+      min-height: 42px;
+    }
+    .odo-btn:active { background: var(--accent); color: #000; }
+    #roadbook-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #roadbook-view {
+      flex: 1;
+      overflow: auto;
+      background: #0d0d0d;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+    #pdf-canvas-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px;
+      min-height: 100%;
+    }
+    #pdf-canvas-container canvas {
+      max-width: 100%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      margin-bottom: 8px;
+      border-radius: 4px;
+    }
+    #notes-overlay {
+      display: none;
+      background: rgba(10,10,10,0.92);
+      border-top: 2px solid var(--accent);
+      max-height: 35%;
+      overflow-y: auto;
+      padding: 8px;
+      flex-shrink: 0;
+    }
+    #notes-overlay.visible { display: block; }
+    #notes-overlay h4 {
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .note-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .note-chip .km {
+      font-weight: 800;
+      color: var(--accent);
+      min-width: 52px;
+    }
+    .note-chip .cap {
+      color: var(--accent2);
+      font-weight: 700;
+      min-width: 48px;
+    }
+    .rb-toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 8px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .rb-btn {
+      background: #252525;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      min-height: 48px;
+      min-width: 48px;
+    }
+    .rb-btn:active { background: var(--accent); color: #000; }
+    .rb-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+    #instruments {
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      gap: 14px;
+      background: #050505;
+      overflow-y: auto;
+    }
+    .big-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+      max-width: 560px;
+    }
+    .big-card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 20px 14px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .big-card .label {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .big-card .value {
+      font-size: 48px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+    .big-card.odo .value { color: var(--accent); }
+    .big-card.speed .value { color: #40c4ff; }
+    .big-card.cap .value { color: var(--accent2); }
+    .big-card.time .value { color: #b0bec5; font-size: 36px; }
+    .big-card.full { grid-column: 1 / -1; }
+    .big-partial {
+      font-size: 20px;
+      color: #81c784;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+    .big-odo-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .big-odo-btn {
+      background: #252525;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 70px;
+      min-height: 52px;
+    }
+    .big-odo-btn:active { background: var(--accent); color: #000; }
+    .gps-line {
+      margin-top: 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .gps-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--danger);
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .gps-dot.ok { background: var(--accent); }
+    #editor {
+      overflow: auto;
+      padding: 14px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .editor-section {
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    .editor-section h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+    .form-row { margin-bottom: 12px; }
+    .form-row label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .form-row input, .form-row textarea {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      color: var(--text);
+      font-size: 16px;
+    }
+    .form-row textarea { min-height: 90px; resize: vertical; }
+    .notes-list { display: flex; flex-direction: column; gap: 10px; }
+    .note-item {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .note-item .km {
+      font-weight: 800;
+      color: var(--accent);
+      min-width: 64px;
+      font-size: 16px;
+    }
+    .note-item .content { flex: 1; font-size: 15px; line-height: 1.35; }
+    .note-item .actions { display: flex; flex-direction: column; gap: 6px; }
+    .note-btn {
+      background: #252525;
+      border: none;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      min-width: 44px;
+      min-height: 44px;
+    }
+    .note-btn.del { color: var(--danger); }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: #252525;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      flex: 1;
+      min-width: 130px;
+      min-height: 50px;
+      text-align: center;
+    }
+    .btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+    .btn.danger { background: #3a1515; color: var(--danger); border-color: #5a2020; }
+    #status {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      color: var(--accent);
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      display: none;
+      white-space: nowrap;
+      max-width: 90%;
+      text-align: center;
+    }
+    #pdf-input, #import-input { display: none; }
+    .empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted);
+    }
+    .empty p { margin-top: 10px; font-size: 15px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="tabs">
+      <button class="tab active" data-screen="roadbook">Roadbook</button>
+      <button class="tab" data-screen="instruments">Instruments</button>
+      <button class="tab" data-screen="editor">Editor</button>
+      <button class="tab" data-screen="gpx">Des de GPX</button>
+    </div>
+
+    <div id="roadbook" class="screen active">
+      <div class="instruments" id="rb-instruments">
+        <div class="inst odo">
+          <div class="label">Odòmetre</div>
+          <div class="value" id="odo-total">0.00</div>
+          <div class="partial">Parcial: <span id="odo-partial">0.00</span></div>
+          <div class="odo-controls">
+            <button class="odo-btn" data-adj="-0.1">−</button>
+            <button class="odo-btn" data-adj="0.1">+</button>
+            <button class="odo-btn" id="odo-reset" title="Reset parcial">R</button>
+          </div>
+        </div>
+        <div class="inst speed">
+          <div class="label">Velocitat</div>
+          <div class="value" id="speed">0</div>
+          <div class="label" style="margin-top:4px">km/h</div>
+        </div>
+        <div class="inst cap">
+          <div class="label">CAP</div>
+          <div class="value" id="cap">---</div>
+          <div class="label" style="margin-top:4px">°</div>
+        </div>
+      </div>
+
+      <div id="roadbook-main">
+        <div id="roadbook-view">
+          <div id="pdf-canvas-container">
+            <div class="empty" id="pdf-empty">
+              <p style="font-size:48px">📄</p>
+              <p><strong>Terra X Correr</strong></p>
+              <p>No hi ha roadbook carregat</p>
+              <p style="margin-top:14px">Usa el botó “Carregar PDF”<br>o crea’n un a la pestanya Editor</p>
+            </div>
+          </div>
+        </div>
+        <div id="notes-overlay">
+          <h4>Notes del roadbook</h4>
+          <div id="notes-overlay-list"></div>
+        </div>
+      </div>
+
+      <div class="rb-toolbar">
+        <button class="rb-btn" id="btn-load-pdf">Carregar PDF</button>
+        <button class="rb-btn" id="btn-prev">▲</button>
+        <button class="rb-btn" id="btn-next">▼</button>
+        <button class="rb-btn" id="btn-zoom-out">−</button>
+        <button class="rb-btn" id="btn-zoom-in">+</button>
+        <button class="rb-btn primary" id="btn-fullscreen">Pantalla completa</button>
+      </div>
+    </div>
+
+    <div id="instruments" class="screen">
+      <div class="big-grid">
+        <div class="big-card odo full">
+          <div class="label">Odòmetre Total</div>
+          <div class="value" id="big-odo-total">0.00</div>
+          <div class="big-partial">Parcial: <span id="big-odo-partial">0.00</span> km</div>
+          <div class="big-odo-controls">
+            <button class="big-odo-btn" data-adj="-1">−1</button>
+            <button class="big-odo-btn" data-adj="-0.1">−0.1</button>
+            <button class="big-odo-btn" data-adj="0.1">+0.1</button>
+            <button class="big-odo-btn" data-adj="1">+1</button>
+            <button class="big-odo-btn" id="big-odo-reset">Reset parcial</button>
+          </div>
+        </div>
+        <div class="big-card speed">
+          <div class="label">Velocitat</div>
+          <div class="value" id="big-speed">0</div>
+          <div class="label">km/h</div>
+        </div>
+        <div class="big-card cap">
+          <div class="label">CAP / Rumbo</div>
+          <div class="value" id="big-cap">---</div>
+          <div class="label">graus</div>
+        </div>
+        <div class="big-card time full">
+          <div class="label">Hora</div>
+          <div class="value" id="big-time">--:--:--</div>
+        </div>
+      </div>
+      <div class="gps-line">
+        <span class="gps-dot" id="gps-indicator"></span>
+        <span id="gps-status">Buscant GPS…</span>
+      </div>
+    </div>
+
+    <div id="editor" class="screen">
+      <div class="editor-section">
+        <h3>Roadbook actual</h3>
+        <div class="form-row">
+          <label>Nom del roadbook</label>
+          <input type="text" id="rb-name" placeholder="Ex: Ruta del desert">
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="btn-save-rb">Desar roadbook</button>
+          <button class="btn" id="btn-new-rb">Nou</button>
+          <button class="btn" id="btn-export-rb">Exportar JSON</button>
+          <button class="btn" id="btn-import-rb">Importar JSON</button>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3>Afegir nota / tulipa</h3>
+        <div class="form-row">
+          <label>Quilòmetre (parcial des de l’anterior)</label>
+          <input type="number" id="note-km" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-row">
+          <label>CAP / Rumbo (opcional)</label>
+          <input type="number" id="note-cap" placeholder="Ex: 245">
+        </div>
+        <div class="form-row">
+          <label>Descripció / nota</label>
+          <textarea id="note-text" placeholder="Ex: Gir a la dreta, pista de terra, perill roques"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="btn-add-note">Afegir nota</button>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3>Notes del roadbook</h3>
+        <div class="notes-list" id="notes-list">
+          <div class="empty"><p>No hi ha notes encara</p></div>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3>Carregar PDF (per a la lectura)</h3>
+        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">
+          Pots carregar un PDF de roadbook existent per llegir-lo a la pestanya Roadbook.
+        </p>
+        <button class="btn primary" id="btn-load-pdf-editor">Seleccionar PDF</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 4: DES DE GPX ===== -->
+    <div id="gpx" class="screen">
+      <div style="overflow:auto; padding:14px; -webkit-overflow-scrolling:touch; flex:1;">
+        <div class="editor-section">
+          <h3>Crear roadbook des d’una ruta GPX</h3>
+          <p style="font-size:14px; color:var(--muted); margin-bottom:14px; line-height:1.45;">
+            Carrega un fitxer <strong>GPX</strong> d’una ruta que hagis gravat (OsmAnd, Garmin, Strava, Google Fit, etc.).
+            L’app calcularà distàncies i rumbos i generarà notes automàticament.
+          </p>
+          <button class="btn primary" id="btn-load-gpx" style="width:100%; margin-bottom:12px;">Seleccionar fitxer GPX</button>
+          <input type="file" id="gpx-input" accept=".gpx,application/gpx+xml,application/xml" style="display:none">
+        </div>
+
+        <div class="editor-section">
+          <h3>Opcions de generació</h3>
+          <div class="form-row">
+            <label>Interval mínim entre notes (metres)</label>
+            <input type="number" id="gpx-interval" value="200" min="50" max="2000" step="50">
+          </div>
+          <div class="form-row">
+            <label>Canvi de rumb mínim per crear nota (graus)</label>
+            <input type="number" id="gpx-turn" value="25" min="10" max="90" step="5">
+          </div>
+          <div class="form-row">
+            <label>Nom del roadbook generat</label>
+            <input type="text" id="gpx-name" placeholder="Ex: Ruta del coll">
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" id="btn-generate-gpx" disabled>Generar roadbook</button>
+          </div>
+        </div>
+
+        <div class="editor-section">
+          <h3>Informació de la ruta</h3>
+          <div id="gpx-info" style="font-size:14px; color:var(--muted); line-height:1.6;">
+            Cap fitxer GPX carregat encara.
+          </div>
+        </div>
+
+        <div class="editor-section">
+          <h3>Notes generades (previsualització)</h3>
+          <div class="notes-list" id="gpx-preview">
+            <div class="empty"><p>Encara no s’ha generat res</p></div>
+          </div>
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn primary" id="btn-use-gpx" disabled>Utilitzar aquestes notes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <input type="file" id="pdf-input" accept="application/pdf">
+  <input type="file" id="import-input" accept=".json,application/json">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    const state = {
+      odoTotal: 0,
+      odoPartial: 0,
+      lastLat: null,
+      lastLon: null,
+      speed: 0,
+      heading: null,
+      gpsOk: false,
+      currentPdf: null,
+      currentPage: 1,
+      zoom: 1.3,
+      roadbook: { name: "Nou roadbook", notes: [] }
+    };
+
+    const $ = id => document.getElementById(id);
+    const statusEl = $("status");
+
+    function showStatus(msg, ms = 2200) {
+      statusEl.textContent = msg;
+      statusEl.style.display = "block";
+      clearTimeout(showStatus._t);
+      showStatus._t = setTimeout(() => statusEl.style.display = "none", ms);
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        tab.classList.add("active");
+        $(tab.dataset.screen).classList.add("active");
+        if (tab.dataset.screen === "roadbook") updateNotesOverlay();
+      });
+    });
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      $("big-time").textContent = `${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371000;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function updateOdoDisplay() {
+      const t = state.odoTotal.toFixed(2);
+      const p = state.odoPartial.toFixed(2);
+      $("odo-total").textContent = t;
+      $("odo-partial").textContent = p;
+      $("big-odo-total").textContent = t;
+      $("big-odo-partial").textContent = p;
+    }
+
+    function adjustOdo(delta) {
+      state.odoTotal = Math.max(0, +(state.odoTotal + delta).toFixed(3));
+      state.odoPartial = Math.max(0, +(state.odoPartial + delta).toFixed(3));
+      updateOdoDisplay();
+      saveSettings();
+    }
+
+    document.querySelectorAll("[data-adj]").forEach(btn => {
+      btn.addEventListener("click", () => adjustOdo(parseFloat(btn.dataset.adj)));
+    });
+
+    function resetPartial() {
+      state.odoPartial = 0;
+      updateOdoDisplay();
+      saveSettings();
+      showStatus("Parcial reiniciat");
+    }
+    $("odo-reset").addEventListener("click", resetPartial);
+    $("big-odo-reset").addEventListener("click", resetPartial);
+
+    function startGPS() {
+      if (!navigator.geolocation) {
+        $("gps-status").textContent = "GPS no disponible";
+        return;
+      }
+      navigator.geolocation.watchPosition(
+        pos => {
+          const { latitude, longitude, speed, heading } = pos.coords;
+          state.gpsOk = true;
+          $("gps-indicator").classList.add("ok");
+          $("gps-status").textContent = "GPS actiu";
+
+          if (speed != null && !isNaN(speed)) {
+            state.speed = Math.max(0, speed * 3.6);
+          }
+          $("speed").textContent = Math.round(state.speed);
+          $("big-speed").textContent = Math.round(state.speed);
+
+          if (heading != null && !isNaN(heading)) {
+            state.heading = Math.round(heading);
+            $("cap").textContent = state.heading;
+            $("big-cap").textContent = state.heading;
+          }
+
+          if (state.lastLat != null) {
+            const distM = haversine(state.lastLat, state.lastLon, latitude, longitude);
+            if (distM > 1.5 && distM < 250) {
+              const distKm = distM / 1000;
+              state.odoTotal += distKm;
+              state.odoPartial += distKm;
+              updateOdoDisplay();
+              saveSettings();
+            }
+          }
+          state.lastLat = latitude;
+          state.lastLon = longitude;
+        },
+        err => {
+          state.gpsOk = false;
+          $("gps-indicator").classList.remove("ok");
+          $("gps-status").textContent = "Sense senyal GPS";
+        },
+        { enableHighAccuracy: true, maximumAge: 800, timeout: 12000 }
+      );
+    }
+
+    window.addEventListener("deviceorientationabsolute", e => {
+      if (e.alpha != null && (state.heading == null || !state.gpsOk)) {
+        let h = Math.round(e.alpha);
+        state.heading = (360 - h) % 360;
+        $("cap").textContent = state.heading;
+        $("big-cap").textContent = state.heading;
+      }
+    }, true);
+    window.addEventListener("deviceorientation", e => {
+      if (e.webkitCompassHeading != null) {
+        state.heading = Math.round(e.webkitCompassHeading);
+        $("cap").textContent = state.heading;
+        $("big-cap").textContent = state.heading;
+      }
+    }, true);
+
+    if (typeof pdfjsLib !== "undefined") {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
+    async function loadPdf(file) {
+      if (typeof pdfjsLib === "undefined") {
+        showStatus("PDF.js no carregat. Cal internet la primera vegada.");
+        return;
+      }
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        state.currentPdf = pdf;
+        state.currentPage = 1;
+        $("pdf-empty").style.display = "none";
+        await renderPage(1);
+        showStatus(`PDF carregat: ${pdf.numPages} pàgines`);
+      } catch (err) {
+        showStatus("Error en carregar el PDF");
+        console.error(err);
+      }
+    }
+
+    async function renderPage(num) {
+      if (!state.currentPdf) return;
+      const page = await state.currentPdf.getPage(num);
+      const scale = state.zoom;
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const container = $("pdf-canvas-container");
+      container.innerHTML = "";
+      container.appendChild(canvas);
+      state.currentPage = num;
+    }
+
+    $("btn-load-pdf").addEventListener("click", () => $("pdf-input").click());
+    $("btn-load-pdf-editor").addEventListener("click", () => $("pdf-input").click());
+    $("pdf-input").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) loadPdf(file);
+    });
+
+    $("btn-prev").addEventListener("click", () => {
+      if (state.currentPdf && state.currentPage > 1) renderPage(state.currentPage - 1);
+    });
+    $("btn-next").addEventListener("click", () => {
+      if (state.currentPdf && state.currentPage < state.currentPdf.numPages) renderPage(state.currentPage + 1);
+    });
+    $("btn-zoom-in").addEventListener("click", () => {
+      state.zoom = Math.min(3.2, state.zoom + 0.25);
+      if (state.currentPdf) renderPage(state.currentPage);
+    });
+    $("btn-zoom-out").addEventListener("click", () => {
+      state.zoom = Math.max(0.5, state.zoom - 0.25);
+      if (state.currentPdf) renderPage(state.currentPage);
+    });
+
+    $("btn-fullscreen").addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
+      } else {
+        document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+      }
+    });
+
+    function updateNotesOverlay() {
+      const overlay = $("notes-overlay");
+      const list = $("notes-overlay-list");
+      if (state.roadbook.notes.length === 0) {
+        overlay.classList.remove("visible");
+        return;
+      }
+      overlay.classList.add("visible");
+      list.innerHTML = state.roadbook.notes.map(n => `
+        <div class="note-chip">
+          <span class="km">${n.km.toFixed(2)}</span>
+          ${n.cap != null ? `<span class="cap">${n.cap}°</span>` : ""}
+          <span>${n.text || ""}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderNotes() {
+      const list = $("notes-list");
+      if (state.roadbook.notes.length === 0) {
+        list.innerHTML = '<div class="empty"><p>No hi ha notes encara</p></div>';
+        updateNotesOverlay();
+        return;
+      }
+      list.innerHTML = state.roadbook.notes.map((n, i) => `
+        <div class="note-item">
+          <div class="km">${n.km.toFixed(2)}</div>
+          <div class="content">
+            ${n.cap != null ? `<strong>CAP ${n.cap}°</strong><br>` : ""}
+            ${n.text || ""}
+          </div>
+          <div class="actions">
+            <button class="note-btn del" data-del="${i}">✕</button>
+          </div>
+        </div>
+      `).join("");
+      list.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.roadbook.notes.splice(parseInt(btn.dataset.del), 1);
+          renderNotes();
+          saveRoadbook();
+        });
+      });
+      updateNotesOverlay();
+    }
+
+    $("btn-add-note").addEventListener("click", () => {
+      const km = parseFloat($("note-km").value) || 0;
+      const cap = $("note-cap").value ? parseInt($("note-cap").value) : null;
+      const text = $("note-text").value.trim();
+      if (!text && cap == null) {
+        showStatus("Escriu una nota o CAP");
+        return;
+      }
+      state.roadbook.notes.push({ km, cap, text });
+      state.roadbook.notes.sort((a, b) => a.km - b.km);
+      $("note-km").value = "";
+      $("note-cap").value = "";
+      $("note-text").value = "";
+      renderNotes();
+      saveRoadbook();
+      showStatus("Nota afegida");
+    });
+
+    $("btn-save-rb").addEventListener("click", () => {
+      state.roadbook.name = $("rb-name").value || "Sense nom";
+      saveRoadbook();
+      showStatus("Roadbook desat al telèfon");
+    });
+
+    $("btn-new-rb").addEventListener("click", () => {
+      if (confirm("Vols crear un roadbook nou? Es perdran els canvis no desats.")) {
+        state.roadbook = { name: "Nou roadbook", notes: [] };
+        $("rb-name").value = state.roadbook.name;
+        renderNotes();
+        showStatus("Nou roadbook");
+      }
+    });
+
+    $("btn-export-rb").addEventListener("click", () => {
+      const data = JSON.stringify(state.roadbook, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (state.roadbook.name || "roadbook") + ".json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus("Exportat");
+    });
+
+    $("btn-import-rb").addEventListener("click", () => $("import-input").click());
+    $("import-input").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          state.roadbook = data;
+          $("rb-name").value = data.name || "";
+          renderNotes();
+          saveRoadbook();
+          showStatus("Roadbook importat");
+        } catch (err) {
+          showStatus("Error en importar");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // ========== GPX → ROADBOOK ==========
+    let gpxPoints = [];
+    let gpxGeneratedNotes = [];
+
+    function bearing(lat1, lon1, lat2, lon2) {
+      const toRad = d => d * Math.PI / 180;
+      const toDeg = r => r * 180 / Math.PI;
+      const dLon = toRad(lon2 - lon1);
+      const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+                Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+      return (toDeg(Math.atan2(y, x)) + 360) % 360;
+    }
+
+    function parseGPX(text) {
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+      const trkpts = xml.querySelectorAll("trkpt");
+      const pts = [];
+      trkpts.forEach(pt => {
+        const lat = parseFloat(pt.getAttribute("lat"));
+        const lon = parseFloat(pt.getAttribute("lon"));
+        if (!isNaN(lat) && !isNaN(lon)) pts.push({ lat, lon });
+      });
+      // Also support rtept (routes)
+      if (pts.length === 0) {
+        xml.querySelectorAll("rtept").forEach(pt => {
+          const lat = parseFloat(pt.getAttribute("lat"));
+          const lon = parseFloat(pt.getAttribute("lon"));
+          if (!isNaN(lat) && !isNaN(lon)) pts.push({ lat, lon });
+        });
+      }
+      return pts;
+    }
+
+    function generateNotesFromGPX(points, intervalM, turnDeg) {
+      if (points.length < 2) return [];
+      const notes = [];
+      let cumKm = 0;
+      let lastNoteKm = 0;
+      let lastBearing = null;
+
+      // Start note
+      notes.push({
+        km: 0,
+        cap: Math.round(bearing(points[0].lat, points[0].lon, points[1].lat, points[1].lon)),
+        text: "INICI"
+      });
+
+      for (let i = 1; i < points.length; i++) {
+        const distM = haversine(points[i-1].lat, points[i-1].lon, points[i].lat, points[i].lon);
+        cumKm += distM / 1000;
+        const brg = bearing(points[i-1].lat, points[i-1].lon, points[i].lat, points[i].lon);
+
+        let isTurn = false;
+        if (lastBearing != null) {
+          let diff = Math.abs(brg - lastBearing);
+          if (diff > 180) diff = 360 - diff;
+          if (diff >= turnDeg) isTurn = true;
+        }
+
+        const distSinceLast = (cumKm - lastNoteKm) * 1000;
+        if (isTurn || distSinceLast >= intervalM) {
+          const partialKm = cumKm - lastNoteKm;
+          notes.push({
+            km: +partialKm.toFixed(2),
+            cap: Math.round(brg),
+            text: isTurn ? "Canvi de rumb" : "Punt de pas"
+          });
+          lastNoteKm = cumKm;
+        }
+        lastBearing = brg;
+      }
+
+      // End note
+      const totalPartial = cumKm - lastNoteKm;
+      if (totalPartial > 0.02) {
+        notes.push({
+          km: +totalPartial.toFixed(2),
+          cap: lastBearing != null ? Math.round(lastBearing) : null,
+          text: "FINAL"
+        });
+      } else if (notes.length > 0) {
+        notes[notes.length - 1].text = (notes[notes.length - 1].text || "") + " · FINAL";
+      }
+
+      return notes;
+    }
+
+    $("btn-load-gpx").addEventListener("click", () => $("gpx-input").click());
+    $("gpx-input").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          gpxPoints = parseGPX(ev.target.result);
+          if (gpxPoints.length < 2) {
+            showStatus("El GPX no té prou punts");
+            $("gpx-info").textContent = "Fitxer sense track vàlid.";
+            $("btn-generate-gpx").disabled = true;
+            return;
+          }
+          // Calculate total distance
+          let totalM = 0;
+          for (let i = 1; i < gpxPoints.length; i++) {
+            totalM += haversine(gpxPoints[i-1].lat, gpxPoints[i-1].lon, gpxPoints[i].lat, gpxPoints[i].lon);
+          }
+          $("gpx-info").innerHTML = `
+            <strong>${file.name}</strong><br>
+            Punts: ${gpxPoints.length}<br>
+            Distància aproximada: ${(totalM/1000).toFixed(2)} km
+          `;
+          $("btn-generate-gpx").disabled = false;
+          if (!$("gpx-name").value) {
+            $("gpx-name").value = file.name.replace(/\.gpx$/i, "");
+          }
+          showStatus("GPX carregat correctament");
+        } catch (err) {
+          showStatus("Error en llegir el GPX");
+          console.error(err);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    $("btn-generate-gpx").addEventListener("click", () => {
+      if (gpxPoints.length < 2) return;
+      const interval = parseInt($("gpx-interval").value) || 200;
+      const turn = parseInt($("gpx-turn").value) || 25;
+      gpxGeneratedNotes = generateNotesFromGPX(gpxPoints, interval, turn);
+
+      const preview = $("gpx-preview");
+      if (gpxGeneratedNotes.length === 0) {
+        preview.innerHTML = '<div class="empty"><p>No s’han generat notes</p></div>';
+        $("btn-use-gpx").disabled = true;
+        return;
+      }
+      preview.innerHTML = gpxGeneratedNotes.map(n => `
+        <div class="note-item">
+          <div class="km">${n.km.toFixed(2)}</div>
+          <div class="content">
+            ${n.cap != null ? `<strong>CAP ${n.cap}°</strong><br>` : ""}
+            ${n.text || ""}
+          </div>
+        </div>
+      `).join("");
+      $("btn-use-gpx").disabled = false;
+      showStatus(`${gpxGeneratedNotes.length} notes generades`);
+    });
+
+    $("btn-use-gpx").addEventListener("click", () => {
+      if (gpxGeneratedNotes.length === 0) return;
+      state.roadbook = {
+        name: $("gpx-name").value || "Roadbook des de GPX",
+        notes: gpxGeneratedNotes.slice()
+      };
+      $("rb-name").value = state.roadbook.name;
+      renderNotes();
+      saveRoadbook();
+      showStatus("Roadbook creat! Ves a la pestanya Editor o Roadbook");
+      // Switch to editor tab
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.querySelector('[data-screen="editor"]').classList.add("active");
+      $("editor").classList.add("active");
+    });
+
+    function saveSettings() {
+      localStorage.setItem("txc_odoTotal", state.odoTotal);
+      localStorage.setItem("txc_odoPartial", state.odoPartial);
+    }
+    function saveRoadbook() {
+      localStorage.setItem("txc_roadbook", JSON.stringify(state.roadbook));
+    }
+    function loadSettings() {
+      const t = localStorage.getItem("txc_odoTotal");
+      const p = localStorage.getItem("txc_odoPartial");
+      if (t) state.odoTotal = parseFloat(t);
+      if (p) state.odoPartial = parseFloat(p);
+      updateOdoDisplay();
+      const rb = localStorage.getItem("txc_roadbook");
+      if (rb) {
+        try {
+          state.roadbook = JSON.parse(rb);
+          $("rb-name").value = state.roadbook.name || "";
+          renderNotes();
+        } catch(e) {}
+      }
+    }
+
+    loadSettings();
+    startGPS();
+    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission().catch(() => {});
+    }
+    if ("wakeLock" in navigator) {
+      navigator.wakeLock.request("screen").catch(() => {});
+    }
+    showStatus("Terra X Correr llest · GPS iniciant…", 2800);
+  </script>
+</body>
+</html>
