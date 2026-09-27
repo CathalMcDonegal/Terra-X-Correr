@@ -75,12 +75,30 @@
     .screen.active { display: flex; }
     .instruments {
       display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr;
+      grid-template-columns: 1.6fr 1fr;
       gap: 6px;
       padding: 8px;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+    }
+    .inst.combo {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 6px;
+    }
+    .inst.combo .combo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 4px;
+      flex: 1;
+    }
+    .inst.combo .combo-block {
+      text-align: center;
+      flex: 1;
     }
     .inst {
       background: var(--card);
@@ -198,10 +216,16 @@
       min-height: 100%;
     }
     #pdf-canvas-container canvas {
+      width: 100%;
       max-width: 100%;
+      height: auto;
       box-shadow: 0 4px 16px rgba(0,0,0,0.6);
       margin-bottom: 8px;
       border-radius: 4px;
+    }
+    #roadbook-view {
+      flex: 1 1 auto;
+      min-height: 0;
     }
     #notes-overlay {
       display: none;
@@ -523,16 +547,20 @@
             <button class="odo-btn danger" id="odo-reset-total" title="Reset total">Rt</button>
           </div>
         </div>
-        <div class="inst speed">
-          <div class="label">Velocitat</div>
-          <div class="value" id="speed">0</div>
-          <div class="label" style="margin-top:4px">km/h</div>
-        </div>
-        <div class="inst cap">
-          <div class="label">Direcció</div>
-          <div class="dir-arrow" id="dir-arrow">↑</div>
-          <div class="dir-cardinal" id="dir-cardinal">--</div>
-          <div class="dir-deg"><span id="cap">---</span>°</div>
+        <div class="inst combo">
+          <div class="combo-row">
+            <div class="combo-block">
+              <div class="label">Velocitat</div>
+              <div class="value" id="speed" style="color:#40c4ff;font-size:32px;">0</div>
+              <div class="label">km/h</div>
+            </div>
+            <div class="combo-block">
+              <div class="label">Direcció</div>
+              <div class="dir-arrow" id="dir-arrow">↑</div>
+              <div class="dir-cardinal" id="dir-cardinal">--</div>
+              <div class="dir-deg"><span id="cap">---</span>°</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -600,9 +628,6 @@
         <div class="big-card time full">
           <div class="label">Hora</div>
           <div class="value" id="big-time">--:--:--</div>
-          <div class="label" style="margin-top:10px">Temperatura</div>
-          <div class="value" style="font-size:28px;color:#ffab40;" id="big-temp">--</div>
-          <div class="label">°C (no disponible al navegador)</div>
         </div>
       </div>
       <div class="gps-line">
@@ -987,11 +1012,11 @@
       }
     });
     $("btn-zoom-in").addEventListener("click", () => {
-      state.zoom = Math.min(3.2, state.zoom + 0.25);
+      state.zoom = Math.min(8, state.zoom + 0.3);
       if (state.currentPdf) renderPage(state.currentPage);
     });
     $("btn-zoom-out").addEventListener("click", () => {
-      state.zoom = Math.max(0.5, state.zoom - 0.25);
+      state.zoom = Math.max(0.25, state.zoom - 0.3);
       if (state.currentPdf) renderPage(state.currentPage);
     });
 
