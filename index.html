@@ -111,24 +111,72 @@
     }
     .inst.speed .value { color: #40c4ff; }
     .inst.cap .value { color: var(--accent2); }
+    .dir-arrow {
+      font-size: 28px;
+      line-height: 1;
+      color: var(--accent2);
+      display: inline-block;
+      transition: transform 0.25s ease;
+      transform-origin: center center;
+    }
+    .dir-cardinal {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
+    .dir-deg {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .big-dir-arrow {
+      font-size: 52px;
+      line-height: 1;
+      color: var(--accent2);
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+    .big-dir-cardinal {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent2);
+      margin-top: 4px;
+    }
+    .big-dir-deg {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
     .odo-controls {
       display: flex;
       gap: 6px;
       margin-top: 6px;
       justify-content: center;
+      flex-wrap: wrap;
     }
     .odo-btn {
       background: #252525;
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 18px;
+      padding: 8px 12px;
+      font-size: 16px;
       font-weight: 800;
-      min-width: 48px;
-      min-height: 42px;
+      min-width: 44px;
+      min-height: 40px;
     }
     .odo-btn:active { background: var(--accent); color: #000; }
+    .odo-btn.danger, .big-odo-btn.danger {
+      border: 2px solid var(--danger);
+      color: #ff8a80;
+      background: #2a1212;
+    }
+    .odo-btn.danger:active, .big-odo-btn.danger:active {
+      background: var(--danger);
+      color: #fff;
+    }
     #roadbook-main {
       flex: 1;
       display: flex;
@@ -262,24 +310,38 @@
       font-weight: 600;
     }
     .big-odo-controls {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .big-odo-controls .resets {
+      grid-column: 1 / -1;
       display: flex;
       gap: 10px;
       justify-content: center;
-      margin-top: 14px;
-      flex-wrap: wrap;
+      margin-top: 4px;
     }
     .big-odo-btn {
       background: #252525;
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 12px;
-      padding: 14px 18px;
-      font-size: 18px;
+      padding: 14px 10px;
+      font-size: 17px;
       font-weight: 800;
-      min-width: 70px;
       min-height: 52px;
     }
     .big-odo-btn:active { background: var(--accent); color: #000; }
+    .big-odo-btn.danger {
+      flex: 1;
+      border: 2px solid var(--danger);
+      color: #ff8a80;
+      background: #2a1212;
+    }
     .gps-line {
       margin-top: 12px;
       text-align: center;
@@ -424,7 +486,8 @@
           <div class="odo-controls">
             <button class="odo-btn" data-adj="-0.1">−</button>
             <button class="odo-btn" data-adj="0.1">+</button>
-            <button class="odo-btn" id="odo-reset" title="Reset parcial">R</button>
+            <button class="odo-btn danger" id="odo-reset" title="Reset parcial">Rp</button>
+            <button class="odo-btn danger" id="odo-reset-total" title="Reset total">Rt</button>
           </div>
         </div>
         <div class="inst speed">
@@ -433,9 +496,10 @@
           <div class="label" style="margin-top:4px">km/h</div>
         </div>
         <div class="inst cap">
-          <div class="label">CAP</div>
-          <div class="value" id="cap">---</div>
-          <div class="label" style="margin-top:4px">°</div>
+          <div class="label">Direcció</div>
+          <div class="dir-arrow" id="dir-arrow">↑</div>
+          <div class="dir-cardinal" id="dir-cardinal">--</div>
+          <div class="dir-deg"><span id="cap">---</span>°</div>
         </div>
       </div>
 
@@ -477,7 +541,10 @@
             <button class="big-odo-btn" data-adj="-0.1">−0.1</button>
             <button class="big-odo-btn" data-adj="0.1">+0.1</button>
             <button class="big-odo-btn" data-adj="1">+1</button>
-            <button class="big-odo-btn" id="big-odo-reset">Reset parcial</button>
+            <div class="resets">
+              <button class="big-odo-btn danger" id="big-odo-reset">Reset parcial</button>
+              <button class="big-odo-btn danger" id="big-odo-reset-total">Reset total</button>
+            </div>
           </div>
         </div>
         <div class="big-card speed">
@@ -486,13 +553,17 @@
           <div class="label">km/h</div>
         </div>
         <div class="big-card cap">
-          <div class="label">CAP / Rumbo</div>
-          <div class="value" id="big-cap">---</div>
-          <div class="label">graus</div>
+          <div class="label">Direcció</div>
+          <div class="big-dir-arrow" id="big-dir-arrow">↑</div>
+          <div class="big-dir-cardinal" id="big-dir-cardinal">--</div>
+          <div class="big-dir-deg"><span id="big-cap">---</span>°</div>
         </div>
         <div class="big-card time full">
           <div class="label">Hora</div>
           <div class="value" id="big-time">--:--:--</div>
+          <div class="label" style="margin-top:10px">Temperatura</div>
+          <div class="value" style="font-size:28px;color:#ffab40;" id="big-temp">--</div>
+          <div class="label">°C (no disponible al navegador)</div>
         </div>
       </div>
       <div class="gps-line">
@@ -688,8 +759,45 @@
       saveSettings();
       showStatus("Parcial reiniciat");
     }
+    function resetTotal() {
+      state.odoTotal = 0;
+      state.odoPartial = 0;
+      updateOdoDisplay();
+      saveSettings();
+      showStatus("Odòmetre total reiniciat");
+    }
     $("odo-reset").addEventListener("click", resetPartial);
     $("big-odo-reset").addEventListener("click", resetPartial);
+    $("odo-reset-total").addEventListener("click", resetTotal);
+    $("big-odo-reset-total").addEventListener("click", resetTotal);
+
+    function headingToCardinal(deg) {
+      if (deg == null || isNaN(deg)) return "--";
+      const dirs = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+      // 8 directions, 45° each. N centered at 0.
+      const idx = Math.round(((deg % 360) / 45)) % 8;
+      return dirs[idx];
+    }
+
+    function updateDirection(deg) {
+      if (deg == null || isNaN(deg)) {
+        $("cap").textContent = "---";
+        $("big-cap").textContent = "---";
+        $("dir-cardinal").textContent = "--";
+        $("big-dir-cardinal").textContent = "--";
+        return;
+      }
+      const d = Math.round(deg) % 360;
+      $("cap").textContent = d;
+      $("big-cap").textContent = d;
+      $("dir-cardinal").textContent = headingToCardinal(d);
+      $("big-dir-cardinal").textContent = headingToCardinal(d);
+      // Arrow points in direction of travel (0° = North = up)
+      const arrow = $("dir-arrow");
+      const bigArrow = $("big-dir-arrow");
+      if (arrow) arrow.style.transform = "rotate(" + d + "deg)";
+      if (bigArrow) bigArrow.style.transform = "rotate(" + d + "deg)";
+    }
 
     function startGPS() {
       if (!navigator.geolocation) {
@@ -711,8 +819,7 @@
 
           if (heading != null && !isNaN(heading)) {
             state.heading = Math.round(heading);
-            $("cap").textContent = state.heading;
-            $("big-cap").textContent = state.heading;
+            updateDirection(state.heading);
           }
 
           if (state.lastLat != null) {
@@ -741,15 +848,13 @@
       if (e.alpha != null && (state.heading == null || !state.gpsOk)) {
         let h = Math.round(e.alpha);
         state.heading = (360 - h) % 360;
-        $("cap").textContent = state.heading;
-        $("big-cap").textContent = state.heading;
+        updateDirection(state.heading);
       }
     }, true);
     window.addEventListener("deviceorientation", e => {
       if (e.webkitCompassHeading != null) {
         state.heading = Math.round(e.webkitCompassHeading);
-        $("cap").textContent = state.heading;
-        $("big-cap").textContent = state.heading;
+        updateDirection(state.heading);
       }
     }, true);
 
