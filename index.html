@@ -104,15 +104,15 @@
     }
     .inst.odo .value { color: var(--accent); }
     .inst.odo .partial {
-      font-size: 15px;
+      font-size: 14px;
       color: #81c784;
       margin-top: 2px;
       font-weight: 600;
     }
-    .inst.speed .value { color: #40c4ff; }
+    .inst.speed .value { color: #40c4ff; font-size: 34px; }
     .inst.cap .value { color: var(--accent2); }
     .dir-arrow {
-      font-size: 28px;
+      font-size: 36px;
       line-height: 1;
       color: var(--accent2);
       display: inline-block;
@@ -120,14 +120,14 @@
       transform-origin: center center;
     }
     .dir-cardinal {
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
       color: var(--accent2);
       margin-top: 2px;
       letter-spacing: 0.5px;
     }
     .dir-deg {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       margin-top: 1px;
     }
@@ -161,11 +161,11 @@
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 16px;
+      padding: 7px 8px;
+      font-size: 14px;
       font-weight: 800;
-      min-width: 44px;
-      min-height: 40px;
+      min-width: 40px;
+      min-height: 38px;
     }
     .odo-btn:active { background: var(--accent); color: #000; }
     .odo-btn.danger, .big-odo-btn.danger {
@@ -242,40 +242,57 @@
     }
     .rb-toolbar {
       display: flex;
+      flex-direction: column;
       gap: 8px;
-      padding: 10px 8px;
+      padding: 10px 10px 12px;
       background: var(--panel);
       border-top: 1px solid var(--border);
       flex-shrink: 0;
+    }
+    .rb-row {
+      display: flex;
+      gap: 8px;
       justify-content: center;
-      flex-wrap: wrap;
+      align-items: center;
     }
     .rb-btn {
       background: #252525;
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 12px;
-      padding: 16px 18px;
+      padding: 14px 16px;
       font-size: 18px;
       font-weight: 800;
-      min-height: 56px;
-      min-width: 56px;
+      min-height: 54px;
+      min-width: 54px;
+      flex: 1;
+      max-width: 90px;
     }
     .rb-btn:active { filter: brightness(1.15); transform: scale(0.97); }
-    .rb-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+    .rb-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); max-width: none; }
     .rb-btn.prev-btn {
       background: #3d2a12;
       border: 2px solid var(--accent2);
       color: #ffb74d;
-      min-width: 72px;
-      font-size: 22px;
+      font-size: 24px;
+      max-width: none;
+      flex: 1.2;
     }
     .rb-btn.next-btn {
       background: #123d22;
       border: 2px solid var(--accent);
       color: #69f0ae;
-      min-width: 72px;
-      font-size: 22px;
+      font-size: 24px;
+      max-width: none;
+      flex: 1.2;
+    }
+    .rb-btn.zoom-btn {
+      max-width: 70px;
+      flex: 0.8;
+    }
+    .rb-btn.wide {
+      max-width: none;
+      flex: 1;
     }
     #instruments {
       justify-content: center;
@@ -325,7 +342,7 @@
     }
     .big-odo-controls {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       margin-top: 14px;
       max-width: 360px;
@@ -498,8 +515,10 @@
           <div class="value" id="odo-total">0.00</div>
           <div class="partial">Parcial: <span id="odo-partial">0.00</span></div>
           <div class="odo-controls">
-            <button class="odo-btn" data-adj="-0.1">−</button>
-            <button class="odo-btn" data-adj="0.1">+</button>
+            <button class="odo-btn" data-adj="-0.1" title="-0.1">−</button>
+            <button class="odo-btn" data-adj="-0.01" title="-0.01">−−</button>
+            <button class="odo-btn" data-adj="0.01" title="+0.01">++</button>
+            <button class="odo-btn" data-adj="0.1" title="+0.1">+</button>
             <button class="odo-btn danger" id="odo-reset" title="Reset parcial">Rp</button>
             <button class="odo-btn danger" id="odo-reset-total" title="Reset total">Rt</button>
           </div>
@@ -535,12 +554,16 @@
       </div>
 
       <div class="rb-toolbar">
-        <button class="rb-btn" id="btn-load-pdf">PDF</button>
-        <button class="rb-btn prev-btn" id="btn-prev">▲</button>
-        <button class="rb-btn next-btn" id="btn-next">▼</button>
-        <button class="rb-btn" id="btn-zoom-out">−</button>
-        <button class="rb-btn" id="btn-zoom-in">+</button>
-        <button class="rb-btn primary" id="btn-fullscreen">Pantalla</button>
+        <div class="rb-row">
+          <button class="rb-btn prev-btn" id="btn-prev">▲</button>
+          <button class="rb-btn zoom-btn" id="btn-zoom-out">−</button>
+          <button class="rb-btn zoom-btn" id="btn-zoom-in">+</button>
+          <button class="rb-btn next-btn" id="btn-next">▼</button>
+        </div>
+        <div class="rb-row">
+          <button class="rb-btn wide" id="btn-load-pdf">PDF</button>
+          <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
+        </div>
       </div>
     </div>
 
@@ -553,6 +576,8 @@
           <div class="big-odo-controls">
             <button class="big-odo-btn" data-adj="-1">−1</button>
             <button class="big-odo-btn" data-adj="-0.1">−0.1</button>
+            <button class="big-odo-btn" data-adj="-0.01">−0.01</button>
+            <button class="big-odo-btn" data-adj="0.01">+0.01</button>
             <button class="big-odo-btn" data-adj="0.1">+0.1</button>
             <button class="big-odo-btn" data-adj="1">+1</button>
             <div class="resets">
