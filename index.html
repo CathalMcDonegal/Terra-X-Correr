@@ -254,15 +254,29 @@
       background: #252525;
       border: 1px solid var(--border);
       color: var(--text);
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 15px;
-      font-weight: 700;
-      min-height: 48px;
-      min-width: 48px;
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-size: 18px;
+      font-weight: 800;
+      min-height: 56px;
+      min-width: 56px;
     }
-    .rb-btn:active { background: var(--accent); color: #000; }
+    .rb-btn:active { filter: brightness(1.15); transform: scale(0.97); }
     .rb-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+    .rb-btn.prev-btn {
+      background: #3d2a12;
+      border: 2px solid var(--accent2);
+      color: #ffb74d;
+      min-width: 72px;
+      font-size: 22px;
+    }
+    .rb-btn.next-btn {
+      background: #123d22;
+      border: 2px solid var(--accent);
+      color: #69f0ae;
+      min-width: 72px;
+      font-size: 22px;
+    }
     #instruments {
       justify-content: center;
       align-items: center;
@@ -521,12 +535,12 @@
       </div>
 
       <div class="rb-toolbar">
-        <button class="rb-btn" id="btn-load-pdf">Carregar PDF</button>
-        <button class="rb-btn" id="btn-prev">▲</button>
-        <button class="rb-btn" id="btn-next">▼</button>
+        <button class="rb-btn" id="btn-load-pdf">PDF</button>
+        <button class="rb-btn prev-btn" id="btn-prev">▲</button>
+        <button class="rb-btn next-btn" id="btn-next">▼</button>
         <button class="rb-btn" id="btn-zoom-out">−</button>
         <button class="rb-btn" id="btn-zoom-in">+</button>
-        <button class="rb-btn primary" id="btn-fullscreen">Pantalla completa</button>
+        <button class="rb-btn primary" id="btn-fullscreen">Pantalla</button>
       </div>
     </div>
 
@@ -904,11 +918,48 @@
       if (file) loadPdf(file);
     });
 
+    function scrollRoadbook(direction) {
+      const view = $("roadbook-view");
+      if (!view) return;
+      const amount = Math.max(120, Math.floor(view.clientHeight * 0.35));
+      view.scrollBy({ top: direction * amount, behavior: "smooth" });
+    }
+
     $("btn-prev").addEventListener("click", () => {
-      if (state.currentPdf && state.currentPage > 1) renderPage(state.currentPage - 1);
+      if (!state.currentPdf) {
+        showStatus("Primer carrega un PDF");
+        return;
+      }
+      // Always scroll up a bit
+      scrollRoadbook(-1);
+      // If multi-page and near top, go previous page
+      const view = $("roadbook-view");
+      if (state.currentPage > 1 && view && view.scrollTop < 40) {
+        renderPage(state.currentPage - 1).then(() => {
+          // jump to bottom of previous page
+          setTimeout(() => {
+            const v = $("roadbook-view");
+            if (v) v.scrollTop = v.scrollHeight;
+          }, 50);
+        });
+      }
     });
     $("btn-next").addEventListener("click", () => {
-      if (state.currentPdf && state.currentPage < state.currentPdf.numPages) renderPage(state.currentPage + 1);
+      if (!state.currentPdf) {
+        showStatus("Primer carrega un PDF");
+        return;
+      }
+      const view = $("roadbook-view");
+      const nearBottom = view && (view.scrollTop + view.clientHeight >= view.scrollHeight - 40);
+      scrollRoadbook(1);
+      if (nearBottom && state.currentPage < state.currentPdf.numPages) {
+        renderPage(state.currentPage + 1).then(() => {
+          setTimeout(() => {
+            const v = $("roadbook-view");
+            if (v) v.scrollTop = 0;
+          }, 50);
+        });
+      }
     });
     $("btn-zoom-in").addEventListener("click", () => {
       state.zoom = Math.min(3.2, state.zoom + 0.25);
