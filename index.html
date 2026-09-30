@@ -667,6 +667,19 @@
         </div>
 
         <div class="editor-section">
+          <h3>2b. Mando Bluetooth ARN Ral·li</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            1. Emparella el mando amb el mòbil (Bluetooth → ARN REMOTE / PRO / LITE)<br>
+            2. Posar el mando en <strong>mode Roadbook</strong> (LED <strong>vermell</strong>):
+               botó 1 + palanca amunt fins que el LED sigui vermell<br>
+            3. Deixa l’app <strong>Terra X Correr</strong> oberta a pantalla completa<br>
+            4. <strong>Palanca amunt</strong> = retrocedir roadbook<br>
+            <strong>Palanca avall</strong> = avançar roadbook<br><br>
+            Si la palanca va al revés: al mando, botó 1 + palanca avall per invertir-la.
+          </p>
+        </div>
+
+        <div class="editor-section">
           <h3>3. Odòmetre</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
             L’odòmetre suma quilòmetres amb el GPS.<br>
@@ -1001,6 +1014,91 @@
       await renderPage(state.currentPage);
       showStatus("Zoom " + Math.round(state.zoom * 100) + "%");
     });
+
+    // --- Mando Bluetooth ARN Ral·li / HID (mode Roadbook) ---
+    // En mode Roadbook (LED vermell): palanca amunt/avall envia tecles HID
+    function handleRoadbookNav(direction) {
+      // direction: -1 = pujar/retrocedir, +1 = baixar/avançar
+      if (!state.currentPdf) {
+        showStatus("Primer carrega un PDF");
+        return;
+      }
+      if (direction < 0) {
+        $("btn-prev").click();
+      } else {
+        $("btn-next").click();
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      // Evitar si s'està escrivint en un input
+      const tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+      const key = e.key;
+      const code = e.code;
+
+      // Avançar roadbook (palanca avall / next)
+      const nextKeys = [
+        "ArrowDown", "PageDown", " ", "Space",
+        "MediaTrackNext", "MediaPlayPause",
+        "VolumeDown", "NumpadSubtract", "Minus"
+      ];
+      // Retrocedir roadbook (palanca amunt / prev)
+      const prevKeys = [
+        "ArrowUp", "PageUp",
+        "MediaTrackPrevious",
+        "VolumeUp", "NumpadAdd", "Equal", "Plus"
+      ];
+
+      if (nextKeys.includes(key) || nextKeys.includes(code) || key === "Spacebar") {
+        e.preventDefault();
+        handleRoadbookNav(1);
+        return;
+      }
+      if (prevKeys.includes(key) || prevKeys.includes(code)) {
+        e.preventDefault();
+        handleRoadbookNav(-1);
+        return;
+      }
+      // També tecles digitals que alguns firmwares envien
+      if (key === "n" || key === "N" || key === "j" || key === "J") {
+        e.preventDefault();
+        handleRoadbookNav(1);
+      }
+      if (key === "b" || key === "B" || key === "k" || key === "K") {
+        e.preventDefault();
+        handleRoadbookNav(-1);
+      }
+    }, true);
+
+    // Gamepad / alguns mandos HID com a joystick
+    let lastPadNav = 0;
+    function pollGamepad() {
+      const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const now = Date.now();
+      for (const pad of pads) {
+        if (!pad) continue;
+        // Eixos verticals o botons amunt/avall
+        const axisY = pad.axes[1] || 0;
+        const up = pad.buttons[12] && pad.buttons[12].pressed;
+        const down = pad.buttons[13] && pad.buttons[13].pressed;
+        if (now - lastPadNav > 200) {
+          if (up || axisY < -0.5) {
+            handleRoadbookNav(-1);
+            lastPadNav = now;
+          } else if (down || axisY > 0.5) {
+            handleRoadbookNav(1);
+            lastPadNav = now;
+          }
+        }
+      }
+      requestAnimationFrame(pollGamepad);
+    }
+    if (navigator.getGamepads) {
+      window.addEventListener("gamepadconnected", () => showStatus("Mando connectat"));
+      requestAnimationFrame(pollGamepad);
+    }
 
     $("btn-fullscreen").addEventListener("click", () => {
       if (!document.fullscreenElement) {
