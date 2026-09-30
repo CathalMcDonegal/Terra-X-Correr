@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-09-30-3">
+  <meta name="app-version" content="2026-09-30-4">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -229,6 +229,14 @@
       padding: 0;
       display: block;
       box-sizing: border-box;
+    }
+    #pdf-canvas-container img {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      display: block;
+      margin: 0 auto;
+      background: #fff;
     }
     #pdf-canvas-container canvas {
       display: block;
@@ -851,6 +859,16 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
+    // Fallback si cdnjs falla
+    window.addEventListener("error", function(e) {
+      if (e.target && e.target.src && e.target.src.indexOf("pdf.min.js") >= 0) {
+        var s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
+        document.head.appendChild(s);
+      }
+    }, true);
+  </script>
+  <script>
     const state = {
       odoTotal: 0,
       odoPartial: 0,
@@ -1041,14 +1059,20 @@
       }
     }, true);
 
-    // PDF.js
-    if (typeof pdfjsLib !== "undefined") {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    // ========== PDF ==========
+    function setupPdfJs() {
+      if (typeof pdfjsLib === "undefined") return false;
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      } catch (e) {}
+      return true;
     }
+    setupPdfJs();
 
     function openPdfDB() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open("txc_pdf_db", 2);
+        const req = indexedDB.open("txc_pdf_db", 3);
         req.onupgradeneeded = () => {
           const db = req.result;
           if (!db.objectStoreNames.contains("files")) db.createObjectStore("files");
@@ -1067,7 +1091,7 @@
           tx.onerror = () => reject(tx.error);
         });
         localStorage.setItem("txc_has_pdf", "1");
-      } catch (e) { console.warn("savePdf", e); }
+      } catch (e) { console.warn(e); }
     }
     async function clearPdfFromDB() {
       try {
@@ -1094,9 +1118,34 @@
           <p style="margin-top:14px">Usa el botó PDF per carregar un roadbook</p>
         </div>`;
     }
+
+    async function loadPdfArrayBuffer(arrayBuffer, fromRestore) {
+      if (!setupPdfJs()) {
+        showStatus("PDF.js no disponible. Obre amb internet un moment.");
+        return;
+      }
+      // TypedArray còpia segura
+      const data = new Uint8Array(arrayBuffer);
+      const pdf = await pdfjsLib.getDocument({
+        data: data,
+        verbosity: 0
+      }).promise;
+      state.currentPdf = pdf;
+      if (!fromRestore) {
+        state.currentPage = 1;
+        state.zoom = 1;
+      } else {
+        const sp = parseInt(localStorage.getItem("txc_pdf_page") || "1", 10);
+        const sz = parseFloat(localStorage.getItem("txc_pdf_zoom") || "1");
+        state.currentPage = Math.min(Math.max(1, sp || 1), pdf.numPages);
+        state.zoom = (!isNaN(sz) && sz >= 0.4 && sz <= 4) ? sz : 1;
+      }
+      await renderPage(state.currentPage);
+      showStatus((fromRestore ? "Restaurat: " : "PDF: ") + pdf.numPages + " pàgines");
+    }
+
     async function loadPdfFromDB() {
       if (!localStorage.getItem("txc_has_pdf")) return;
-      if (typeof pdfjsLib === "undefined") return;
       try {
         const db = await openPdfDB();
         const data = await new Promise((resolve) => {
@@ -1105,85 +1154,83 @@
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => resolve(null);
         });
-        if (!data) { localStorage.removeItem("txc_has_pdf"); return; }
-        const pdf = await pdfjsLib.getDocument({ data: data }).promise;
-        state.currentPdf = pdf;
-        const savedPage = parseInt(localStorage.getItem("txc_pdf_page") || "1", 10);
-        const savedZoom = parseFloat(localStorage.getItem("txc_pdf_zoom") || "1");
-        state.currentPage = Math.min(Math.max(1, savedPage || 1), pdf.numPages);
-        if (!isNaN(savedZoom) && savedZoom >= 0.3 && savedZoom <= 5) state.zoom = savedZoom;
-        else state.zoom = 1;
-        await renderPage(state.currentPage);
-        showStatus("Roadbook restaurat", 2000);
+        if (!data) {
+          localStorage.removeItem("txc_has_pdf");
+          return;
+        }
+        await loadPdfArrayBuffer(data, true);
       } catch (e) {
-        console.warn("restore PDF failed", e);
+        console.warn("restore fail", e);
         localStorage.removeItem("txc_has_pdf");
         showPdfEmpty();
       }
     }
+
     async function loadPdf(file) {
-      if (typeof pdfjsLib === "undefined") {
-        showStatus("Cal internet per carregar la llibreria PDF la 1a vegada");
-        return;
-      }
       try {
         showStatus("Carregant PDF…");
         const arrayBuffer = await file.arrayBuffer();
-        const forDb = arrayBuffer.slice(0);
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        state.currentPdf = pdf;
-        state.currentPage = 1;
-        state.zoom = 1;
-        await savePdfToDB(forDb);
-        await renderPage(1);
-        showStatus("PDF: " + pdf.numPages + " pàgines · desat");
+        await savePdfToDB(arrayBuffer.slice(0));
+        await loadPdfArrayBuffer(arrayBuffer, false);
       } catch (err) {
         console.error(err);
-        showStatus("Error al carregar el PDF");
+        showStatus("Error: " + (err && err.message ? err.message : "PDF no vàlid"));
         showPdfEmpty();
       }
     }
+
     async function renderPage(num) {
       if (!state.currentPdf) return;
+      const container = $("pdf-canvas-container");
+      if (!container) return;
       try {
         const page = await state.currentPdf.getPage(num);
-        const container = $("pdf-canvas-container");
-        if (!container) return;
         const view = $("roadbook-view");
-        // Amplada real de la zona del roadbook
-        let availW = window.innerWidth - 8;
-        if (view && view.clientWidth > 50) availW = view.clientWidth - 8;
-        availW = Math.max(260, availW);
+        let availW = window.innerWidth - 6;
+        if (view && view.clientWidth > 80) availW = view.clientWidth - 6;
+        availW = Math.max(280, Math.floor(availW));
 
-        const base = page.getViewport({ scale: 1 });
-        // zoom 1 = plena amplada del mòbil
-        let scale = (availW / base.width) * (state.zoom || 1);
-        // Límit de seguretat (evitar canvàs enormes que fallen en blanc)
-        const maxCssW = availW * 3;
-        if (base.width * scale > maxCssW) scale = maxCssW / base.width;
+        const baseVp = page.getViewport({ scale: 1 });
+        // Escala CSS: plena amplada * zoom usuari
+        const cssScale = (availW / baseVp.width) * (state.zoom || 1);
+        // Render a 1.5–2x per nitidesa
+        const renderScale = cssScale * Math.min(window.devicePixelRatio || 1.5, 2);
+        const viewport = page.getViewport({ scale: renderScale });
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const viewport = page.getViewport({ scale: scale * dpr });
         const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d", { alpha: false });
         canvas.width = Math.floor(viewport.width);
         canvas.height = Math.floor(viewport.height);
-        const cssW = Math.floor(viewport.width / dpr);
-        const cssH = Math.floor(viewport.height / dpr);
-        canvas.style.width = cssW + "px";
-        canvas.style.height = cssH + "px";
-        canvas.style.display = "block";
-        canvas.style.margin = "0 auto";
-        canvas.style.background = "#fff";
-
-        // Fons blanc abans de pintar
-        ctx.fillStyle = "#ffffff";
+        const ctx = canvas.getContext("2d", { alpha: false });
+        ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        const task = page.render({ canvasContext: ctx, viewport });
+        await task.promise;
+
+        // Mostrar com IMG a amplada 100% (més fiable als mòbils Android)
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.93);
+        const img = document.createElement("img");
+        img.alt = "Roadbook pàgina " + num;
+        img.src = dataUrl;
+        img.style.width = "100%";
+        img.style.maxWidth = "100%";
+        img.style.height = "auto";
+        img.style.display = "block";
+        img.style.margin = "0 auto";
+        img.style.background = "#fff";
+        img.onload = () => {
+          // ok
+        };
+        img.onerror = () => {
+          // Fallback: inserir el canvas directament
+          container.innerHTML = "";
+          canvas.style.width = "100%";
+          canvas.style.height = "auto";
+          container.appendChild(canvas);
+        };
 
         container.innerHTML = "";
-        container.appendChild(canvas);
+        container.appendChild(img);
         state.currentPage = num;
         try {
           localStorage.setItem("txc_pdf_page", String(num));
@@ -1191,7 +1238,7 @@
         } catch (e) {}
       } catch (err) {
         console.error("renderPage", err);
-        showStatus("Error en mostrar el PDF");
+        showStatus("Error mostrant pàgina " + num);
       }
     }
 

@@ -1,4 +1,4 @@
-const CACHE = "txc-v3";
+const CACHE = "txc-v4";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.jpg", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (e) => {
