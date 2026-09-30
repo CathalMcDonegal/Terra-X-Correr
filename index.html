@@ -9,14 +9,16 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-09-30-2">
+  <meta name="app-version" content="2026-09-30-3">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Terra X Correr</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/jpeg" href="logo.jpg">
-  <link rel="apple-touch-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
   <link rel="apple-touch-icon" sizes="192x192" href="logo.jpg">
   <link rel="apple-touch-icon" sizes="512x512" href="logo.jpg">
   <style>
@@ -542,6 +544,50 @@
       color: var(--muted);
     }
     .empty p { margin-top: 10px; font-size: 15px; }
+
+    #install-banner {
+      display: none;
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: 14px;
+      z-index: 9999;
+      background: #1a1a1a;
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      flex-direction: column;
+      gap: 12px;
+    }
+    #install-banner.show { display: flex; }
+    #install-banner p {
+      font-size: 15px;
+      line-height: 1.4;
+      color: var(--text);
+      margin: 0;
+    }
+    #install-banner .install-actions {
+      display: flex;
+      gap: 10px;
+    }
+    #install-banner button {
+      flex: 1;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 12px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    #btn-do-install {
+      background: var(--accent);
+      color: #000;
+    }
+    #btn-dismiss-install {
+      background: #333;
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -792,6 +838,13 @@
         </div>
       </div>
     </div>
+    <div id="install-banner">
+    <p>📲 Instal·la <strong>Terra X Correr</strong> a la pantalla d’inici per usar-la com una app.</p>
+    <div class="install-actions">
+      <button type="button" id="btn-do-install">Instal·lar</button>
+      <button type="button" id="btn-dismiss-install">Ara no</button>
+    </div>
+  </div>
   <div id="status"></div>
   <input type="file" id="pdf-input" accept="application/pdf">
   <input type="file" id="import-input" accept=".json,application/json">
@@ -1475,6 +1528,75 @@
         fetchWeather(state.lastLat, state.lastLon);
       }
     }, 15000);
+
+
+    // --- Instal·lació PWA ---
+    let deferredInstallPrompt = null;
+    const installBanner = $("install-banner");
+
+    function showInstallBanner() {
+      if (!installBanner) return;
+      // No mostrar si ja està instal·lada (standalone)
+      if (window.matchMedia("(display-mode: standalone)").matches) return;
+      if (window.navigator.standalone === true) return;
+      installBanner.classList.add("show");
+    }
+    function hideInstallBanner() {
+      if (installBanner) installBanner.classList.remove("show");
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      showInstallBanner();
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      hideInstallBanner();
+      showStatus("App instal·lada!", 2500);
+    });
+
+    const btnInstall = $("btn-do-install");
+    const btnDismiss = $("btn-dismiss-install");
+    if (btnInstall) {
+      btnInstall.addEventListener("click", async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          hideInstallBanner();
+          if (choice.outcome === "accepted") showStatus("Instal·lant…");
+        } else {
+          // Fallback: instruccions manuals
+          hideInstallBanner();
+          showStatus("Chrome → ⋮ → Afegeix a la pantalla d’inici", 4000);
+        }
+      });
+    }
+    if (btnDismiss) {
+      btnDismiss.addEventListener("click", () => {
+        hideInstallBanner();
+        try { sessionStorage.setItem("txc_install_dismissed", "1"); } catch(e) {}
+      });
+    }
+
+    // Si no arriba beforeinstallprompt, després de 2s mostra instruccions (només si no instal·lada)
+    setTimeout(() => {
+      if (window.matchMedia("(display-mode: standalone)").matches) return;
+      if (sessionStorage.getItem("txc_install_dismissed")) return;
+      if (!deferredInstallPrompt) {
+        // Mostrar banner amb instrucció manual
+        showInstallBanner();
+      }
+    }, 2500);
+
+    // Registrar Service Worker (necessari per instal·lar a Chrome)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").then(() => {
+        console.log("SW registrat");
+      }).catch((err) => console.warn("SW error", err));
+    }
 
     showStatus("Terra X Correr llest · GPS iniciant…", 2800);
   </script>
