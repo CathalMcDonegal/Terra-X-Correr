@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-09-30-6">
+  <meta name="app-version" content="2026-09-30-7">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -869,17 +869,7 @@
   <input type="file" id="pdf-input" accept="application/pdf">
   <input type="file" id="import-input" accept=".json,application/json">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    // Fallback si cdnjs falla
-    window.addEventListener("error", function(e) {
-      if (e.target && e.target.src && e.target.src.indexOf("pdf.min.js") >= 0) {
-        var s = document.createElement("script");
-        s.src = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
-        document.head.appendChild(s);
-      }
-    }, true);
-  </script>
+  <script src="pdf.min.js"></script>
   <script>
     const state = {
       odoTotal: 0,
@@ -1128,23 +1118,28 @@
     function ensurePdfJs() {
       return new Promise((resolve, reject) => {
         if (typeof pdfjsLib !== "undefined") {
-          pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          try {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("pdf.worker.min.js", window.location.href).href;
+          } catch (e) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
+          }
           resolve(pdfjsLib);
           return;
         }
-        // Esperar un moment si el script encara carrega
         let n = 0;
         const t = setInterval(() => {
           n++;
           if (typeof pdfjsLib !== "undefined") {
             clearInterval(t);
-            pdfjsLib.GlobalWorkerOptions.workerSrc =
-              "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            try {
+              pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("pdf.worker.min.js", window.location.href).href;
+            } catch (e) {
+              pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
+            }
             resolve(pdfjsLib);
-          } else if (n > 40) {
+          } else if (n > 50) {
             clearInterval(t);
-            reject(new Error("pdf.js no carregat — cal internet la 1a vegada"));
+            reject(new Error("pdf.js no carregat. Puja també pdf.min.js al GitHub."));
           }
         }, 100);
       });
@@ -1153,7 +1148,12 @@
     async function openPdfDocument(arrayBuffer) {
       const lib = await ensurePdfJs();
       const data = new Uint8Array(arrayBuffer);
-      return lib.getDocument({ data: data, verbosity: 0 }).promise;
+      showStatus("Obrint document…");
+      const task = lib.getDocument({ data: data, verbosity: 0 });
+      task.onProgress = function(p) {
+        if (p && p.total) showStatus("Llegint PDF " + Math.round(100 * p.loaded / p.total) + "%");
+      };
+      return task.promise;
     }
 
     // Dibuixa TOTES les pàgines una sota l'altra (ideal per roadbook)
@@ -1185,11 +1185,14 @@
         const canvas = document.createElement("canvas");
         canvas.width = Math.floor(viewport.width);
         canvas.height = Math.floor(viewport.height);
-        canvas.style.width = "100%";
-        canvas.style.height = "auto";
+        const cssW = Math.floor(viewport.width / dpr);
+        const cssH = Math.floor(viewport.height / dpr);
+        canvas.style.width = cssW + "px";
+        canvas.style.height = cssH + "px";
         canvas.style.display = "block";
         canvas.style.margin = "0 auto 2px auto";
         canvas.style.background = "#fff";
+        canvas.style.maxWidth = "100%";
 
         const ctx = canvas.getContext("2d", { alpha: false });
         ctx.fillStyle = "#ffffff";
