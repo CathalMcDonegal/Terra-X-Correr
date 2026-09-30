@@ -51,9 +51,9 @@
     }
     .tab {
       flex: 1;
-      padding: 12px 4px;
+      padding: 10px 2px;
       text-align: center;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--muted);
       background: none;
@@ -218,10 +218,11 @@
     #pdf-canvas-container {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
-      width: 100%;
-      padding: 4px 0;
-      display: flex;
-      justify-content: center;
+      width: 100% !important;
+      max-width: 100%;
+      padding: 0;
+      display: block;
+      box-sizing: border-box;
     }
     #pdf-canvas-container canvas {
       display: block;
@@ -534,7 +535,8 @@
   <div id="app">
     <div class="tabs">
       <button class="tab active" data-screen="roadbook">Roadbook</button>
-      <button class="tab" data-screen="instruments">Instruments</button>
+      <button class="tab" data-screen="navegacio">Navegació</button>
+      <button class="tab" data-screen="instruments">Instrumentació</button>
       <button class="tab" data-screen="manual">Manual</button>
     </div>
 
@@ -599,6 +601,52 @@
           <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
           <button class="rb-btn wide" id="btn-reset-all-bar" style="border:2px solid var(--danger);color:#ff8a80;background:#2a1212;max-width:none;flex:0.7;">Reset</button>
         </div>
+      </div>
+    </div>
+
+    <div id="navegacio" class="screen">
+      <div class="big-grid">
+        <div class="big-card odo full">
+          <div class="label">Odòmetre Total</div>
+          <div class="value" id="nav-odo-total">0.00</div>
+          <div class="big-partial">Parcial: <span id="nav-odo-partial">0.00</span> km</div>
+          <div class="big-odo-controls">
+            <div class="resets" style="grid-column:1/-1;">
+              <button class="big-odo-btn danger" id="nav-odo-reset">Reset parcial</button>
+              <button class="big-odo-btn danger" id="nav-odo-reset-total">Reset total</button>
+            </div>
+          </div>
+        </div>
+        <div class="big-card speed">
+          <div class="label">Velocitat</div>
+          <div class="value" id="nav-speed">0</div>
+          <div class="label">km/h</div>
+        </div>
+        <div class="big-card cap">
+          <div class="label">Direcció</div>
+          <div class="big-dir-arrow" id="nav-dir-arrow">↑</div>
+          <div class="big-dir-cardinal" id="nav-dir-cardinal">--</div>
+          <div class="big-dir-deg"><span id="nav-cap">---</span>°</div>
+        </div>
+        <div class="big-card time full">
+          <div class="label">Hora</div>
+          <div class="value" id="nav-time">--:--:--</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:14px;">
+            <div style="text-align:center;">
+              <div class="label">Temperatura</div>
+              <div class="value" id="nav-temp" style="font-size:32px;color:#ffab40;">--°</div>
+            </div>
+            <div style="text-align:center;">
+              <div class="label">Temps</div>
+              <div id="nav-weather-icon" style="font-size:42px;line-height:1;">☁️</div>
+              <div class="label" id="nav-weather-text" style="margin-top:4px;">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gps-line">
+        <span class="gps-dot" id="nav-gps-indicator"></span>
+        <span id="nav-gps-status">Buscant GPS…</span>
       </div>
     </div>
 
@@ -777,6 +825,7 @@
       const m = String(now.getMinutes()).padStart(2, "0");
       const s = String(now.getSeconds()).padStart(2, "0");
       $("big-time").textContent = `${h}:${m}:${s}`;
+      const nt = $("nav-time"); if (nt) nt.textContent = `${h}:${m}:${s}`;
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -793,10 +842,13 @@
     function updateOdoDisplay() {
       const t = state.odoTotal.toFixed(2);
       const p = state.odoPartial.toFixed(2);
-      $("odo-total").textContent = t;
-      $("odo-partial").textContent = p;
-      $("big-odo-total").textContent = t;
-      $("big-odo-partial").textContent = p;
+      const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+      set("odo-total", t);
+      set("odo-partial", p);
+      set("big-odo-total", t);
+      set("big-odo-partial", p);
+      set("nav-odo-total", t);
+      set("nav-odo-partial", p);
     }
 
     function adjustOdo(delta) {
@@ -827,6 +879,10 @@
     $("big-odo-reset").addEventListener("click", resetPartial);
     $("odo-reset-total").addEventListener("click", resetTotal);
     $("big-odo-reset-total").addEventListener("click", resetTotal);
+    const navRp = $("nav-odo-reset");
+    const navRt = $("nav-odo-reset-total");
+    if (navRp) navRp.addEventListener("click", resetPartial);
+    if (navRt) navRt.addEventListener("click", resetTotal);
 
     function headingToCardinal(deg) {
       if (deg == null || isNaN(deg)) return "--";
@@ -837,28 +893,24 @@
     }
 
     function updateDirection(deg) {
+      const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+      const rot = (id, d) => { const el = $(id); if (el) el.style.transform = "rotate(" + d + "deg)"; };
       if (deg == null || isNaN(deg)) {
-        $("cap").textContent = "---";
-        $("big-cap").textContent = "---";
-        $("dir-cardinal").textContent = "--";
-        $("big-dir-cardinal").textContent = "--";
+        set("cap", "---"); set("big-cap", "---"); set("nav-cap", "---");
+        set("dir-cardinal", "--"); set("big-dir-cardinal", "--"); set("nav-dir-cardinal", "--");
         return;
       }
       const d = Math.round(deg) % 360;
-      $("cap").textContent = d;
-      $("big-cap").textContent = d;
-      $("dir-cardinal").textContent = headingToCardinal(d);
-      $("big-dir-cardinal").textContent = headingToCardinal(d);
-      // Arrow points in direction of travel (0° = North = up)
-      const arrow = $("dir-arrow");
-      const bigArrow = $("big-dir-arrow");
-      if (arrow) arrow.style.transform = "rotate(" + d + "deg)";
-      if (bigArrow) bigArrow.style.transform = "rotate(" + d + "deg)";
+      const card = headingToCardinal(d);
+      set("cap", d); set("big-cap", d); set("nav-cap", d);
+      set("dir-cardinal", card); set("big-dir-cardinal", card); set("nav-dir-cardinal", card);
+      rot("dir-arrow", d); rot("big-dir-arrow", d); rot("nav-dir-arrow", d);
     }
 
     function startGPS() {
       if (!navigator.geolocation) {
         $("gps-status").textContent = "GPS no disponible";
+        const ngs = $("nav-gps-status"); if (ngs) ngs.textContent = "GPS no disponible";
         return;
       }
       navigator.geolocation.watchPosition(
@@ -873,6 +925,7 @@
           }
           $("speed").textContent = Math.round(state.speed);
           $("big-speed").textContent = Math.round(state.speed);
+            const ns = $("nav-speed"); if (ns) ns.textContent = Math.round(state.speed);
 
           if (heading != null && !isNaN(heading)) {
             state.heading = Math.round(heading);
@@ -891,11 +944,14 @@
           }
           state.lastLat = latitude;
           state.lastLon = longitude;
+          if (typeof fetchWeather === "function") fetchWeather(latitude, longitude);
         },
         err => {
           state.gpsOk = false;
           $("gps-indicator").classList.remove("ok");
           $("gps-status").textContent = "Sense senyal GPS";
+          const ngi = $("nav-gps-indicator"); if (ngi) ngi.classList.remove("ok");
+          const ngs = $("nav-gps-status"); if (ngs) ngs.textContent = "Sense senyal GPS";
         },
         { enableHighAccuracy: true, maximumAge: 800, timeout: 12000 }
       );
@@ -919,6 +975,69 @@
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     }
 
+    function openPdfDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open("txc_pdf_db", 1);
+        req.onupgradeneeded = () => {
+          if (!req.result.objectStoreNames.contains("files")) req.result.createObjectStore("files");
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    async function savePdfToDB(arrayBuffer) {
+      try {
+        const db = await openPdfDB();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction("files", "readwrite");
+          tx.objectStore("files").put(arrayBuffer, "current");
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+        localStorage.setItem("txc_has_pdf", "1");
+      } catch (e) { console.warn("No s'ha pogut desar el PDF", e); }
+    }
+    async function clearPdfFromDB() {
+      try {
+        const db = await openPdfDB();
+        await new Promise((resolve) => {
+          const tx = db.transaction("files", "readwrite");
+          tx.objectStore("files").delete("current");
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => resolve();
+        });
+        localStorage.removeItem("txc_has_pdf");
+        localStorage.removeItem("txc_pdf_page");
+        localStorage.removeItem("txc_pdf_zoom");
+      } catch (e) {}
+    }
+    async function loadPdfFromDB() {
+      if (!localStorage.getItem("txc_has_pdf")) return;
+      if (typeof pdfjsLib === "undefined") return;
+      try {
+        const db = await openPdfDB();
+        const data = await new Promise((resolve) => {
+          const tx = db.transaction("files", "readonly");
+          const req = tx.objectStore("files").get("current");
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        });
+        if (!data) return;
+        const pdf = await pdfjsLib.getDocument({ data }).promise;
+        state.currentPdf = pdf;
+        const savedPage = parseInt(localStorage.getItem("txc_pdf_page") || "1", 10);
+        const savedZoom = parseFloat(localStorage.getItem("txc_pdf_zoom") || "1");
+        state.currentPage = Math.min(Math.max(1, savedPage), pdf.numPages);
+        if (!isNaN(savedZoom) && savedZoom > 0) state.zoom = savedZoom;
+        const empty = $("pdf-empty");
+        if (empty) empty.style.display = "none";
+        // Esperar layout
+        setTimeout(() => renderPage(state.currentPage), 100);
+        showStatus("Roadbook restaurat", 2000);
+      } catch (e) {
+        console.warn("No s'ha pogut restaurar el PDF", e);
+      }
+    }
     async function loadPdf(file) {
       if (typeof pdfjsLib === "undefined") {
         showStatus("PDF.js no carregat. Cal internet la primera vegada.");
@@ -926,12 +1045,16 @@
       }
       try {
         const arrayBuffer = await file.arrayBuffer();
+        const copy = arrayBuffer.slice(0);
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         state.currentPdf = pdf;
         state.currentPage = 1;
-        $("pdf-empty").style.display = "none";
+        state.zoom = 1.0;
+        const empty = $("pdf-empty");
+        if (empty) empty.style.display = "none";
+        await savePdfToDB(copy);
         await renderPage(1);
-        showStatus(`PDF carregat: ${pdf.numPages} pàgines`);
+        showStatus(`PDF carregat: ${pdf.numPages} pàgines · desat al telèfon`);
       } catch (err) {
         showStatus("Error en carregar el PDF");
         console.error(err);
@@ -943,20 +1066,31 @@
       const page = await state.currentPdf.getPage(num);
       const view = $("roadbook-view");
       const container = $("pdf-canvas-container");
-      // Amplada disponible (tot l'espai del roadbook, menys un marge petit)
-      const availW = Math.max(200, (view ? view.clientWidth : window.innerWidth) - 8);
+      // Forçar amplada de pantalla (els roadbooks estrets han d'omplir el mòbil)
+      let availW = window.innerWidth - 4;
+      if (view && view.clientWidth > 100) availW = view.clientWidth - 4;
+      if (container && container.clientWidth > 100) availW = Math.max(availW, container.clientWidth - 4);
+      availW = Math.max(280, availW);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
       const base = page.getViewport({ scale: 1 });
-      // zoom 1 = ocupar tota l'amplada; >1 = més gran (scroll horitzontal si cal)
-      const scale = (availW / base.width) * state.zoom;
-      const viewport = page.getViewport({ scale });
+      const cssScale = (availW / base.width) * state.zoom;
+      const viewport = page.getViewport({ scale: cssScale * dpr });
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      canvas.height = viewport.height;
       canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const cssW = Math.round(viewport.width / dpr);
+      const cssH = Math.round(viewport.height / dpr);
+      canvas.style.width = cssW + "px";
+      canvas.style.height = cssH + "px";
       await page.render({ canvasContext: ctx, viewport }).promise;
       container.innerHTML = "";
       container.appendChild(canvas);
       state.currentPage = num;
+      try {
+        localStorage.setItem("txc_pdf_page", String(num));
+        localStorage.setItem("txc_pdf_zoom", String(state.zoom));
+      } catch(e) {}
     }
 
     $("btn-load-pdf").addEventListener("click", () => $("pdf-input").click());
@@ -1176,6 +1310,7 @@
       localStorage.removeItem("txc_odoTotal");
       localStorage.removeItem("txc_odoPartial");
       localStorage.removeItem("txc_roadbook");
+      clearPdfFromDB();
       const pdfInput = $("pdf-input");
       if (pdfInput) pdfInput.value = "";
       showStatus("Tot reiniciat");
@@ -1208,6 +1343,46 @@
       }
     }
 
+    // --- Temps (Open-Meteo, sense API key) ---
+    function weatherCodeToIcon(code) {
+      if (code == null) return { icon: "☁️", text: "—" };
+      if (code === 0) return { icon: "☀️", text: "Sol" };
+      if (code <= 3) return { icon: "⛅", text: "Poc ennuvolat" };
+      if (code <= 48) return { icon: "☁️", text: "Ennuvolat" };
+      if (code <= 57) return { icon: "🌦️", text: "Ruixat" };
+      if (code <= 67) return { icon: "🌧️", text: "Pluja" };
+      if (code <= 77) return { icon: "🌨️", text: "Neu" };
+      if (code <= 82) return { icon: "🌦️", text: "Ruixats" };
+      if (code <= 86) return { icon: "🌨️", text: "Neu" };
+      if (code >= 95) return { icon: "⛈️", text: "Tempesta" };
+      return { icon: "☁️", text: "—" };
+    }
+    let lastWeatherFetch = 0;
+    async function fetchWeather(lat, lon) {
+      const now = Date.now();
+      if (now - lastWeatherFetch < 10 * 60 * 1000) return; // cada 10 min
+      lastWeatherFetch = now;
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.current) return;
+        const temp = Math.round(data.current.temperature_2m);
+        const w = weatherCodeToIcon(data.current.weather_code);
+        const te = $("nav-temp");
+        if (te) te.textContent = temp + "°";
+        const ic = $("nav-weather-icon");
+        if (ic) ic.textContent = w.icon;
+        const wt = $("nav-weather-text");
+        if (wt) wt.textContent = w.text;
+      } catch (e) {
+        console.warn("Temps no disponible", e);
+      }
+    }
+
+    // Cridar weather quan hi ha GPS
+    const _origStartGPS = typeof startGPS === "function" ? null : null;
+
     loadSettings();
     let resizeTimer;
     window.addEventListener("resize", () => {
@@ -1217,12 +1392,41 @@
       }, 250);
     });
     startGPS();
+    // Restaurar PDF desat
+    setTimeout(() => loadPdfFromDB(), 400);
+
     if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
       DeviceOrientationEvent.requestPermission().catch(() => {});
     }
-    if ("wakeLock" in navigator) {
-      navigator.wakeLock.request("screen").catch(() => {});
+
+    // --- Pantalla sempre encesa (Wake Lock) ---
+    let wakeLock = null;
+    async function requestWakeLock() {
+      if (!("wakeLock" in navigator)) return;
+      try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        wakeLock.addEventListener("release", () => { wakeLock = null; });
+      } catch (e) {}
     }
+    requestWakeLock();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        requestWakeLock();
+        if (state.currentPdf) setTimeout(() => renderPage(state.currentPage), 200);
+      }
+    });
+    // Re-demanar wake lock periòdicament (alguns mòbils el tallen)
+    setInterval(() => {
+      if (document.visibilityState === "visible" && !wakeLock) requestWakeLock();
+    }, 30000);
+
+    // Actualitzar temps quan tenim coordenades (des del GPS)
+    setInterval(() => {
+      if (state.lastLat != null && state.lastLon != null) {
+        fetchWeather(state.lastLat, state.lastLon);
+      }
+    }, 15000);
+
     showStatus("Terra X Correr llest · GPS iniciant…", 2800);
   </script>
 </body>
