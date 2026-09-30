@@ -218,13 +218,17 @@
     #pdf-canvas-container {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
+      width: 100%;
+      padding: 4px 0;
+      display: flex;
+      justify-content: center;
     }
     #pdf-canvas-container canvas {
       display: block;
       margin: 0 auto 8px auto;
       box-shadow: 0 4px 16px rgba(0,0,0,0.6);
       border-radius: 4px;
-      /* NO width:100% — així el zoom de PDF.js funciona */
+      max-width: none; /* permet zoom > 100% */
     }
     #roadbook-view {
       flex: 1 1 auto;
@@ -674,7 +678,9 @@
                botó 1 + palanca amunt fins que el LED sigui vermell<br>
             3. Deixa l’app <strong>Terra X Correr</strong> oberta a pantalla completa<br>
             4. <strong>Palanca amunt</strong> = retrocedir roadbook<br>
-            <strong>Palanca avall</strong> = avançar roadbook<br><br>
+            <strong>Palanca avall</strong> = avançar roadbook<br>
+            5. <strong>Botó 2</strong> = +0,01 km (com ++)<br>
+            <strong>Botó 3</strong> = −0,01 km (com −−)<br><br>
             Si la palanca va al revés: al mando, botó 1 + palanca avall per invertir-la.
           </p>
         </div>
@@ -741,7 +747,7 @@
       gpsOk: false,
       currentPdf: null,
       currentPage: 1,
-      zoom: 1.3,
+      zoom: 1.0,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -935,14 +941,19 @@
     async function renderPage(num) {
       if (!state.currentPdf) return;
       const page = await state.currentPdf.getPage(num);
-      const scale = state.zoom;
+      const view = $("roadbook-view");
+      const container = $("pdf-canvas-container");
+      // Amplada disponible (tot l'espai del roadbook, menys un marge petit)
+      const availW = Math.max(200, (view ? view.clientWidth : window.innerWidth) - 8);
+      const base = page.getViewport({ scale: 1 });
+      // zoom 1 = ocupar tota l'amplada; >1 = més gran (scroll horitzontal si cal)
+      const scale = (availW / base.width) * state.zoom;
       const viewport = page.getViewport({ scale });
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       canvas.height = viewport.height;
       canvas.width = viewport.width;
       await page.render({ canvasContext: ctx, viewport }).promise;
-      const container = $("pdf-canvas-container");
       container.innerHTML = "";
       container.appendChild(canvas);
       state.currentPage = num;
@@ -1030,26 +1041,24 @@
       }
     }
 
+    function adjustOdoPartial(delta) {
+      state.odoPartial = Math.max(0, +(state.odoPartial + delta).toFixed(2));
+      state.odoTotal = Math.max(0, +(state.odoTotal + delta).toFixed(2));
+      updateOdoDisplay();
+      saveSettings();
+      showStatus((delta > 0 ? "+" : "") + delta.toFixed(2) + " km");
+    }
+
     document.addEventListener("keydown", (e) => {
-      // Evitar si s'està escrivint en un input
       const tag = (e.target && e.target.tagName) || "";
       if (tag === "INPUT" || tag === "TEXTAREA") return;
 
       const key = e.key;
       const code = e.code;
 
-      // Avançar roadbook (palanca avall / next)
-      const nextKeys = [
-        "ArrowDown", "PageDown", " ", "Space",
-        "MediaTrackNext", "MediaPlayPause",
-        "VolumeDown", "NumpadSubtract", "Minus"
-      ];
-      // Retrocedir roadbook (palanca amunt / prev)
-      const prevKeys = [
-        "ArrowUp", "PageUp",
-        "MediaTrackPrevious",
-        "VolumeUp", "NumpadAdd", "Equal", "Plus"
-      ];
+      // Palanca ARN: pujar/baixar roadbook
+      const nextKeys = ["ArrowDown", "PageDown", " ", "Space", "MediaTrackNext"];
+      const prevKeys = ["ArrowUp", "PageUp", "MediaTrackPrevious"];
 
       if (nextKeys.includes(key) || nextKeys.includes(code) || key === "Spacebar") {
         e.preventDefault();
@@ -1061,7 +1070,23 @@
         handleRoadbookNav(-1);
         return;
       }
-      // També tecles digitals que alguns firmwares envien
+
+      // Botons 2 i 3 ARN (trip +/−) → mateix que ++ i -- (0,01 km)
+      // VolumeUp/Down, +/−, Numpad, mitjans
+      const plusKeys = ["VolumeUp", "NumpadAdd", "Equal", "Plus", "+", "Insert", "MediaPlayPause"];
+      const minusKeys = ["VolumeDown", "NumpadSubtract", "Minus", "-", "Delete"];
+
+      if (plusKeys.includes(key) || plusKeys.includes(code)) {
+        e.preventDefault();
+        adjustOdoPartial(0.01);
+        return;
+      }
+      if (minusKeys.includes(key) || minusKeys.includes(code)) {
+        e.preventDefault();
+        adjustOdoPartial(-0.01);
+        return;
+      }
+
       if (key === "n" || key === "N" || key === "j" || key === "J") {
         e.preventDefault();
         handleRoadbookNav(1);
@@ -1132,7 +1157,7 @@
       state.odoPartial = 0;
       state.currentPdf = null;
       state.currentPage = 1;
-      state.zoom = 1.3;
+      state.zoom = 1.0;
       state.roadbook = { name: "Nou roadbook", notes: [] };
       state.lastLat = null;
       state.lastLon = null;
@@ -1184,6 +1209,13 @@
     }
 
     loadSettings();
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (state.currentPdf) renderPage(state.currentPage);
+      }, 250);
+    });
     startGPS();
     if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
       DeviceOrientationEvent.requestPermission().catch(() => {});
