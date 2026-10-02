@@ -716,6 +716,7 @@
           <div class="rh"><div class="rh-label">CAP</div><div class="rh-value cap" id="rally-cap">---</div></div>
           <div class="rh"><div class="rh-label">Vel</div><div class="rh-value speed" id="rally-speed">0</div></div>
           <div class="rh"><div class="rh-label">Pàgina</div><div class="rh-value page" id="rally-page">— / —</div></div>
+          <div class="rh"><div class="rh-label">GPX</div><div class="rh-value page" id="rally-gpx">—</div></div>
         </div>
         <div id="notes-overlay">
           <h4>Notes del roadbook</h4>
@@ -732,6 +733,7 @@
         </div>
         <div class="rb-row">
           <button class="rb-btn wide" id="btn-load-pdf">PDF</button>
+          <button class="rb-btn wide" id="btn-load-gpx">GPX</button>
           <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
           <button class="rb-btn wide" id="rally-enter" style="background:#173d26;border-color:#00e676;color:#69f0ae;">RALLY</button>
           <button class="rb-btn wide" id="rally-exit" style="background:#3d2a12;border-color:#ff9100;color:#ffb74d;">Sortir</button>
@@ -933,6 +935,7 @@
   <div id="status"></div>
   <input type="file" id="pdf-input" accept="application/pdf">
   <input type="file" id="import-input" accept=".json,application/json">
+  <input type="file" id="gpx-input" accept=".gpx,application/gpx+xml,text/xml">
 
   <script src="pdf.min.js"></script>
   <script>
@@ -958,6 +961,11 @@
       pdfScrollTop: 0,
       compassActive: false,
       rallyMode: false,
+      gpxTrack: [],
+      gpxName: "",
+      gpxDistanceKm: 0,
+      gpxCurrentKm: null,
+      gpxLastMatch: 0,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -996,6 +1004,49 @@
     setInterval(updateClock, 1000);
     updateClock();
 
+    function parseGpxText(text, fallbackName) {
+      const xml = new DOMParser().parseFromString(text, "application/xml");
+      if (xml.querySelector("parsererror")) throw new Error("GPX invàlid");
+      const nodes = Array.from(xml.querySelectorAll("trkpt, rtept, wpt"));
+      if (nodes.length < 2) throw new Error("El GPX no conté prou punts");
+      const raw = nodes.map(n => ({
+        lat: parseFloat(n.getAttribute("lat")),
+        lon: parseFloat(n.getAttribute("lon"))
+      })).filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon));
+      if (raw.length < 2) throw new Error("No hi ha coordenades vàlides");
+      const maxPoints = 1800;
+      const step = Math.max(1, Math.ceil(raw.length / maxPoints));
+      const points = raw.filter((_, i) => i % step === 0 || i === raw.length - 1);
+      let total = 0;
+      for (let i=1;i<points.length;i++) total += haversine(points[i-1].lat,points[i-1].lon,points[i].lat,points[i].lon);
+      return { name: fallbackName || "Ruta GPX", points, distanceKm: total/1000 };
+    }
+    function saveGpx() {
+      try { localStorage.setItem("txc_gpx", JSON.stringify({name:state.gpxName,points:state.gpxTrack,distanceKm:state.gpxDistanceKm})); } catch(e) { console.warn(e); }
+    }
+    function loadGpx() {
+      try {
+        const data=JSON.parse(localStorage.getItem("txc_gpx")||"null");
+        if (data && Array.isArray(data.points) && data.points.length>1) { state.gpxName=data.name||"Ruta GPX"; state.gpxTrack=data.points; state.gpxDistanceKm=Number(data.distanceKm)||0; }
+      } catch(e) {}
+    }
+    function clearGpx() {
+      state.gpxTrack=[]; state.gpxName=""; state.gpxDistanceKm=0; state.gpxCurrentKm=null; state.gpxLastMatch=0;
+      localStorage.removeItem("txc_gpx"); updateRallyUI();
+    }
+    function updateGpxPosition(lat, lon) {
+      if (!state.gpxTrack.length || Date.now()-state.gpxLastMatch<1500) return;
+      let best=Infinity, bestKm=0, acc=0;
+      for(let i=0;i<state.gpxTrack.length;i++) {
+        if(i>0) acc += haversine(state.gpxTrack[i-1].lat,state.gpxTrack[i-1].lon,state.gpxTrack[i].lat,state.gpxTrack[i].lon)/1000;
+        const d=haversine(lat,lon,state.gpxTrack[i].lat,state.gpxTrack[i].lon);
+        if(d<best){best=d;bestKm=acc;}
+      }
+      state.gpxCurrentKm = best <= 500 ? bestKm : null;
+      state.gpxLastMatch = Date.now();
+      updateRallyUI();
+    }
+
     function haversine(lat1, lon1, lat2, lon2) {
       const R = 6371000;
       const toRad = d => d * Math.PI / 180;
@@ -1021,6 +1072,8 @@
       if (cap) cap.textContent = state.heading == null ? "---" : String(Math.round(state.heading)).padStart(3,"0");
       if (speed) speed.textContent = String(Math.round(state.speed || 0));
       if (page) page.textContent = state.currentPdf ? (state.currentPage + " / " + state.currentPdf.numPages) : "— / —";
+      const gpx = $("rally-gpx");
+      if (gpx) gpx.textContent = state.gpxCurrentKm != null ? state.gpxCurrentKm.toFixed(2) : (state.gpxTrack.length ? "—" : "");
     }
     function setRallyMode(active) {
       state.rallyMode = !!active;
@@ -1182,6 +1235,7 @@
           }
         }
         state.lastLat=latitude; state.lastLon=longitude; state.lastGpsTimestamp=pos.timestamp;
+        updateGpxPosition(latitude, longitude);
         if(typeof fetchWeather==="function") fetchWeather(latitude,longitude);
       },err=>{
         state.gpsOk=false; setGpsStatus(err&&err.code===1?"Permís GPS denegat":"Sense senyal GPS",false);
@@ -1452,6 +1506,18 @@
       }
     }
 
+    $("btn-load-gpx").addEventListener("click", () => $("gpx-input").click());
+    $("gpx-input").addEventListener("change", async e => {
+      const file=e.target.files[0];
+      if(!file) return;
+      try {
+        const data=parseGpxText(await file.text(), file.name.replace(/\\.gpx$/i,""));
+        state.gpxName=data.name; state.gpxTrack=data.points; state.gpxDistanceKm=data.distanceKm; state.gpxCurrentKm=null; state.gpxLastMatch=0;
+        saveGpx(); updateRallyUI(); showStatus("GPX carregat · "+data.points.length+" punts · "+data.distanceKm.toFixed(1)+" km");
+      } catch(err) { showStatus("GPX: "+(err.message||"fitxer invàlid")); }
+      e.target.value="";
+    });
+
     $("rally-enter").addEventListener("click", () => setRallyMode(true));
     $("rally-exit").addEventListener("click", () => setRallyMode(false));
 
@@ -1699,6 +1765,7 @@
       state.pdfScrollTop = 0;
       state.compassActive = false;
       state.rallyMode = false;
+      clearGpx();
       updateCompassButton();
       updateRallyUI();
       localStorage.removeItem("txc_rally_mode");
@@ -1795,6 +1862,7 @@
     const _origStartGPS = typeof startGPS === "function" ? null : null;
 
     loadSettings();
+    loadGpx();
     loadRallyMode();
     let resizeTimer;
     window.addEventListener("resize", () => {
