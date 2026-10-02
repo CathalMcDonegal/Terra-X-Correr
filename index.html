@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-13">
+  <meta name="app-version" content="2026-10-02-14">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -286,7 +286,7 @@
       border: 1px solid #444;
       border-radius: 10px;
       padding: 5px 7px;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 5px;
       pointer-events: none;
     }
@@ -717,6 +717,7 @@
           <div class="rh"><div class="rh-label">Vel</div><div class="rh-value speed" id="rally-speed">0</div></div>
           <div class="rh"><div class="rh-label">Pàgina</div><div class="rh-value page" id="rally-page">— / —</div></div>
           <div class="rh"><div class="rh-label">GPX</div><div class="rh-value page" id="rally-gpx">—</div></div>
+          <div class="rh"><div class="rh-label">PROPER</div><div class="rh-value page" id="rally-next-poi">—</div></div>
         </div>
         <div id="notes-overlay">
           <h4>Notes del roadbook</h4>
@@ -966,6 +967,9 @@
       gpxDistanceKm: 0,
       gpxCurrentKm: null,
       gpxLastMatch: 0,
+      gpxPointsOfInterest: [],
+      gpxActivePoi: null,
+      gpxLastPoiId: null,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -1011,7 +1015,9 @@
       if (nodes.length < 2) throw new Error("El GPX no conté prou punts");
       const raw = nodes.map(n => ({
         lat: parseFloat(n.getAttribute("lat")),
-        lon: parseFloat(n.getAttribute("lon"))
+        lon: parseFloat(n.getAttribute("lon")),
+        name: (n.querySelector("name")?.textContent || "").trim(),
+        type: n.tagName.toLowerCase()
       })).filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon));
       if (raw.length < 2) throw new Error("No hi ha coordenades vàlides");
       const maxPoints = 1800;
@@ -1019,21 +1025,54 @@
       const points = raw.filter((_, i) => i % step === 0 || i === raw.length - 1);
       let total = 0;
       for (let i=1;i<points.length;i++) total += haversine(points[i-1].lat,points[i-1].lon,points[i].lat,points[i].lon);
-      return { name: fallbackName || "Ruta GPX", points, distanceKm: total/1000 };
+
+      const pois = [];
+      const addPoi = (p, km, kind, label) => pois.push({id: pois.length+1, km, lat:p.lat, lon:p.lon, kind, label});
+      let acc=0;
+      for(let i=1;i<points.length-1;i++) {
+        const prev=points[i-1], p=points[i], next=points[i+1];
+        acc += haversine(prev.lat,prev.lon,p.lat,p.lon)/1000;
+        const a1=Math.atan2(Math.sin((p.lon-prev.lon)*Math.PI/180)*Math.cos(p.lat*Math.PI/180),Math.cos(prev.lat*Math.PI/180)*Math.sin(p.lat*Math.PI/180)-Math.sin(prev.lat*Math.PI/180)*Math.cos(p.lat*Math.PI/180)*Math.cos((p.lon-prev.lon)*Math.PI/180))*180/Math.PI;
+        const a2=Math.atan2(Math.sin((next.lon-p.lon)*Math.PI/180)*Math.cos(next.lat*Math.PI/180),Math.cos(p.lat*Math.PI/180)*Math.sin(next.lat*Math.PI/180)-Math.sin(p.lat*Math.PI/180)*Math.cos(next.lat*Math.PI/180)*Math.cos((next.lon-p.lon)*Math.PI/180))*180/Math.PI;
+        let turn=Math.abs(((a2-a1+540)%360)-180);
+        if(turn>=45) addPoi(p,acc,"gir","Gir "+Math.round(turn)+"°");
+      }
+      acc=0;
+      for(let i=0;i<raw.length;i++) {
+        if(i>0) acc+=haversine(raw[i-1].lat,raw[i-1].lon,raw[i].lat,raw[i].lon)/1000;
+        if(raw[i].name) addPoi(raw[i],acc,"wpt",raw[i].name);
+      }
+      pois.sort((a,b)=>a.km-b.km);
+      const filtered=[];
+      for(const p of pois) {
+        const last=filtered[filtered.length-1];
+        if(!last || p.km-last.km>=0.08 || p.kind==="wpt") filtered.push(p);
+      }
+      return { name: fallbackName || "Ruta GPX", points, distanceKm: total/1000, pois: filtered.slice(0,250) };
     }
     function saveGpx() {
-      try { localStorage.setItem("txc_gpx", JSON.stringify({name:state.gpxName,points:state.gpxTrack,distanceKm:state.gpxDistanceKm})); } catch(e) { console.warn(e); }
+      try { localStorage.setItem("txc_gpx", JSON.stringify({name:state.gpxName,points:state.gpxTrack,distanceKm:state.gpxDistanceKm,pois:state.gpxPointsOfInterest})); } catch(e) { console.warn(e); }
     }
     function loadGpx() {
       try {
         const data=JSON.parse(localStorage.getItem("txc_gpx")||"null");
-        if (data && Array.isArray(data.points) && data.points.length>1) { state.gpxName=data.name||"Ruta GPX"; state.gpxTrack=data.points; state.gpxDistanceKm=Number(data.distanceKm)||0; }
+        if (data && Array.isArray(data.points) && data.points.length>1) { state.gpxName=data.name||"Ruta GPX"; state.gpxTrack=data.points; state.gpxDistanceKm=Number(data.distanceKm)||0; state.gpxPointsOfInterest=Array.isArray(data.pois)?data.pois:[]; }
       } catch(e) {}
     }
     function clearGpx() {
       state.gpxTrack=[]; state.gpxName=""; state.gpxDistanceKm=0; state.gpxCurrentKm=null; state.gpxLastMatch=0;
       localStorage.removeItem("txc_gpx"); updateRallyUI();
     }
+    function updateGpxPoiContext() {
+      const next=$("rally-next-poi");
+      if(!next) return;
+      if(!state.gpxCurrentKm==null || !state.gpxPointsOfInterest.length){ next.textContent="—"; return; }
+      const upcoming=state.gpxPointsOfInterest.filter(p=>p.km>=state.gpxCurrentKm-0.03)[0];
+      if(!upcoming){ next.textContent="FI"; return; }
+      const delta=Math.max(0,upcoming.km-state.gpxCurrentKm);
+      next.textContent=(delta<0.1?Math.round(delta*1000)+"m":delta.toFixed(1)+"km");
+    }
+
     function updateGpxPosition(lat, lon) {
       if (!state.gpxTrack.length || Date.now()-state.gpxLastMatch<1500) return;
       let best=Infinity, bestKm=0, acc=0;
@@ -1044,7 +1083,14 @@
       }
       state.gpxCurrentKm = best <= 500 ? bestKm : null;
       state.gpxLastMatch = Date.now();
-      updateRallyUI();
+      if(state.gpxCurrentKm != null && state.gpxPointsOfInterest.length){
+        const candidate=state.gpxPointsOfInterest.find(p=>p.km>=state.gpxCurrentKm-0.03);
+        if(candidate && state.gpxLastPoiId!==candidate.id && candidate.km-state.gpxCurrentKm<=0.15){
+          state.gpxActivePoi=candidate; state.gpxLastPoiId=candidate.id;
+          showStatus("GPX · "+candidate.label+" · "+Math.max(0,Math.round((candidate.km-state.gpxCurrentKm)*1000))+" m",3500);
+        }
+      }
+      updateGpxPoiContext(); updateRallyUI();
     }
 
     function haversine(lat1, lon1, lat2, lon2) {
@@ -1074,6 +1120,7 @@
       if (page) page.textContent = state.currentPdf ? (state.currentPage + " / " + state.currentPdf.numPages) : "— / —";
       const gpx = $("rally-gpx");
       if (gpx) gpx.textContent = state.gpxCurrentKm != null ? state.gpxCurrentKm.toFixed(2) : (state.gpxTrack.length ? "—" : "");
+      updateGpxPoiContext();
     }
     function setRallyMode(active) {
       state.rallyMode = !!active;
@@ -1512,8 +1559,8 @@
       if(!file) return;
       try {
         const data=parseGpxText(await file.text(), file.name.replace(/\\.gpx$/i,""));
-        state.gpxName=data.name; state.gpxTrack=data.points; state.gpxDistanceKm=data.distanceKm; state.gpxCurrentKm=null; state.gpxLastMatch=0;
-        saveGpx(); updateRallyUI(); showStatus("GPX carregat · "+data.points.length+" punts · "+data.distanceKm.toFixed(1)+" km");
+        state.gpxName=data.name; state.gpxTrack=data.points; state.gpxDistanceKm=data.distanceKm; state.gpxPointsOfInterest=data.pois||[]; state.gpxCurrentKm=null; state.gpxLastPoiId=null; state.gpxLastMatch=0;
+        saveGpx(); updateRallyUI(); showStatus("GPX carregat · "+data.points.length+" punts · "+data.distanceKm.toFixed(1)+" km · "+state.gpxPointsOfInterest.length+" punts importants");
       } catch(err) { showStatus("GPX: "+(err.message||"fitxer invàlid")); }
       e.target.value="";
     });
