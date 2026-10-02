@@ -261,6 +261,43 @@
       flex: 1 1 auto;
       min-height: 0;
     }
+    #app.rally-mode .tabs { display: none; }
+    #app.rally-mode #roadbook { display: flex; }
+    #app.rally-mode #rb-instruments { padding: 4px; gap: 4px; }
+    #app.rally-mode #rb-instruments .inst { border-radius: 7px; padding: 4px; }
+    #app.rally-mode #rb-instruments .inst .value { font-size: 21px; }
+    #app.rally-mode #rb-instruments .inst.speed .value { font-size: 25px !important; }
+    #app.rally-mode .odo-controls { display: none; }
+    #app.rally-mode .rb-toolbar { padding: 5px; gap: 4px; }
+    #app.rally-mode .rb-btn { min-height: 48px; padding: 10px 8px; }
+    #app.rally-mode #btn-load-pdf,
+    #app.rally-mode #btn-reset-all-bar { display: none; }
+    #app.rally-mode #btn-fullscreen { flex: 0 0 100px; }
+    #app.rally-mode #rally-exit { display: block; }
+    #rally-exit { display: none; }
+    .rally-hud {
+      display: none;
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      bottom: 6px;
+      z-index: 50;
+      background: rgba(0,0,0,.88);
+      border: 1px solid #444;
+      border-radius: 10px;
+      padding: 5px 7px;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 5px;
+      pointer-events: none;
+    }
+    #app.rally-mode .rally-hud { display: grid; }
+    .rally-hud .rh { text-align: center; min-width: 0; }
+    .rally-hud .rh-label { font-size: 9px; color: #999; text-transform: uppercase; }
+    .rally-hud .rh-value { font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .rally-hud .rh-value.odo { color: var(--accent); }
+    .rally-hud .rh-value.cap { color: var(--accent2); }
+    .rally-hud .rh-value.speed { color: #40c4ff; }
+    .rally-hud .rh-value.page { color: #fff; }
     #notes-overlay {
       display: none;
       background: rgba(10,10,10,0.92);
@@ -674,6 +711,12 @@
             </div>
           </div>
         </div>
+        <div class="rally-hud" aria-hidden="true">
+          <div class="rh"><div class="rh-label">Odo</div><div class="rh-value odo" id="rally-odo">0.00</div></div>
+          <div class="rh"><div class="rh-label">CAP</div><div class="rh-value cap" id="rally-cap">---</div></div>
+          <div class="rh"><div class="rh-label">Vel</div><div class="rh-value speed" id="rally-speed">0</div></div>
+          <div class="rh"><div class="rh-label">Pàgina</div><div class="rh-value page" id="rally-page">— / —</div></div>
+        </div>
         <div id="notes-overlay">
           <h4>Notes del roadbook</h4>
           <div id="notes-overlay-list"></div>
@@ -690,6 +733,8 @@
         <div class="rb-row">
           <button class="rb-btn wide" id="btn-load-pdf">PDF</button>
           <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
+          <button class="rb-btn wide" id="rally-enter" style="background:#173d26;border-color:#00e676;color:#69f0ae;">RALLY</button>
+          <button class="rb-btn wide" id="rally-exit" style="background:#3d2a12;border-color:#ff9100;color:#ffb74d;">Sortir</button>
           <button class="rb-btn wide" id="btn-reset-all-bar" style="border:2px solid var(--danger);color:#ff8a80;background:#2a1212;max-width:none;flex:0.7;">Reset</button>
         </div>
       </div>
@@ -912,6 +957,7 @@
       saveTimer: null,
       pdfScrollTop: 0,
       compassActive: false,
+      rallyMode: false,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -957,6 +1003,34 @@
       const dLon = toRad(lon2 - lon1);
       const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function updateRallyUI() {
+      const app = $("app");
+      if (!app) return;
+      app.classList.toggle("rally-mode", state.rallyMode);
+      const enter = $("rally-enter");
+      const exit = $("rally-exit");
+      if (enter) enter.style.display = state.rallyMode ? "none" : "";
+      if (exit) exit.style.display = state.rallyMode ? "block" : "none";
+      const odo = $("rally-odo");
+      const cap = $("rally-cap");
+      const speed = $("rally-speed");
+      const page = $("rally-page");
+      if (odo) odo.textContent = state.odoTotal.toFixed(2);
+      if (cap) cap.textContent = state.heading == null ? "---" : String(Math.round(state.heading)).padStart(3,"0");
+      if (speed) speed.textContent = String(Math.round(state.speed || 0));
+      if (page) page.textContent = state.currentPdf ? (state.currentPage + " / " + state.currentPdf.numPages) : "— / —";
+    }
+    function setRallyMode(active) {
+      state.rallyMode = !!active;
+      try { localStorage.setItem("txc_rally_mode", state.rallyMode ? "1" : "0"); } catch(e) {}
+      updateRallyUI();
+      if (state.rallyMode) showStatus("Mode RALLY · roadbook + instruments");
+    }
+    function loadRallyMode() {
+      try { state.rallyMode = localStorage.getItem("txc_rally_mode") === "1"; } catch(e) { state.rallyMode = false; }
+      updateRallyUI();
     }
 
     function updateOdoDisplay() {
@@ -1310,6 +1384,8 @@
       renderNearbyPdfSlots(0);
       showStatus("Roadbook llest · "+num+" pàgines");
       state.pdfScrollTop=savedScroll;
+      updateCurrentPdfPageFromScroll();
+      updateRallyUI();
       try{
         localStorage.setItem("txc_pdf_zoom",String(state.zoom));
         localStorage.setItem("txc_pdf_scroll",String(Math.max(0,savedScroll)));
@@ -1376,6 +1452,9 @@
       }
     }
 
+    $("rally-enter").addEventListener("click", () => setRallyMode(true));
+    $("rally-exit").addEventListener("click", () => setRallyMode(false));
+
     $("btn-load-pdf").addEventListener("click", () => $("pdf-input").click());
     $("pdf-input").addEventListener("change", e => {
       const file = e.target.files[0];
@@ -1427,10 +1506,28 @@
     });
 
     const roadbookView = $("roadbook-view");
+    function updateCurrentPdfPageFromScroll() {
+      const view = $("roadbook-view");
+      if (!view || !state.pdfSlots || !state.pdfSlots.length) return;
+      const probe = view.scrollTop + Math.max(40, view.clientHeight * 0.28);
+      let best = 0;
+      for (let i = 0; i < state.pdfSlots.length; i++) {
+        const el = state.pdfSlots[i].element;
+        if (el.offsetTop <= probe) best = i;
+        else break;
+      }
+      const nextPage = best + 1;
+      if (nextPage !== state.currentPage) {
+        state.currentPage = nextPage;
+        updateRallyUI();
+      }
+    }
+
     if (roadbookView) {
       let scrollSaveTimer = null;
       roadbookView.addEventListener("scroll", () => {
         state.pdfScrollTop = roadbookView.scrollTop;
+        updateCurrentPdfPageFromScroll();
         clearTimeout(scrollSaveTimer);
         scrollSaveTimer = setTimeout(() => {
           try { localStorage.setItem("txc_pdf_scroll", String(state.pdfScrollTop)); } catch (e) {}
@@ -1577,7 +1674,10 @@
       state.gpsAccuracy = null;
       state.pdfScrollTop = 0;
       state.compassActive = false;
+      state.rallyMode = false;
       updateCompassButton();
+      updateRallyUI();
+      localStorage.removeItem("txc_rally_mode");
       updateOdoDisplay();
       updateNotesOverlay();
       const container = $("pdf-canvas-container");
@@ -1671,6 +1771,7 @@
     const _origStartGPS = typeof startGPS === "function" ? null : null;
 
     loadSettings();
+    loadRallyMode();
     let resizeTimer;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
