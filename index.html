@@ -1196,7 +1196,7 @@
         availW=Math.max(280,Math.floor(availW));
         const h=Math.max(120,Math.round(availW*base.height/base.width*(state.zoom||1)));
         const el=document.createElement("div"); el.className="pdf-page-slot"; el.dataset.page=String(i);
-        el.style.cssText="width:100%;display:flex;align-items:center;justify-content:center;background:#fff;margin:0 auto 2px;overflow:hidden;min-height:"+h+"px;height:"+h+"px";
+        el.style.cssText="width:100%;display:flex;align-items:center;justify-content:center;background:#fff;margin:0 auto 2px;overflow:visible;min-height:"+h+"px;height:"+h+"px";
         el.innerHTML='<div style="color:#777;font-size:13px;padding:20px;">Pàgina '+i+'</div>'; container.appendChild(el);
         state.pdfSlots.push({pageNumber:i,element:el,rendered:false,rendering:false});
       }
@@ -1302,7 +1302,7 @@
         return;
       }
       state.zoom = Math.min(10, +(state.zoom + 0.25).toFixed(2));
-      await renderPage(state.currentPage);
+      await renderAllPages();
       showStatus("Zoom " + Math.round(state.zoom * 100) + "%");
     });
     $("btn-zoom-out").addEventListener("click", async () => {
