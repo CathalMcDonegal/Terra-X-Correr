@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-27">
+  <meta name="app-version" content="2026-10-02-28">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -646,7 +646,7 @@
       max-width: 90%;
       text-align: center;
     }
-    #pdf-input { display: none; }
+    input[type="file"].file-picker { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     .empty {
       text-align: center;
       padding: 48px 20px;
@@ -822,7 +822,7 @@
           <button class="rb-btn next-btn" id="btn-next">▼</button>
         </div>
         <div class="rb-row">
-          <button class="rb-btn wide" id="btn-load-pdf">PDF</button>
+          <label class="rb-btn wide file-btn" id="btn-load-pdf" for="pdf-input">PDF</label>
           <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
           <button class="rb-btn wide" id="rally-enter" style="display:none">RALLY</button><button class="rb-btn wide" id="rally-exit" style="background:#3d2a12;border-color:#ff9100;color:#ffb74d;">Sortir</button>
           </div>
@@ -1032,8 +1032,8 @@
     </div>
   </div>
   <div id="rally-ready" role="dialog" aria-modal="true"><div class="ready-card"><h3>Comprovació abans de sortir</h3><div id="ready-list"></div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="rb-btn" id="ready-close">Tancar</button></div></div></div><div id="status"></div>
-  <input type="file" id="pdf-input" accept="application/pdf">
-  <input type="file" id="gpx-input" accept=".gpx,application/gpx+xml,text/xml">
+  <input type="file" id="pdf-input" class="file-picker" accept="application/pdf">
+  <input type="file" id="gpx-input" class="file-picker" accept=".gpx,application/gpx+xml,text/xml">
 
   <script src="pdf.min.js"></script>
   <script>
@@ -1047,6 +1047,7 @@
       gpsOk: false,
       gpsAccuracy: null,
       lastGpsTimestamp: null,
+      lastGpsHeadingAt: 0,
       routeActive: false,
       lastGpsFixQuality: "none",
       currentPdf: null,
@@ -1344,7 +1345,7 @@
         if(speed!=null&&!isNaN(speed)) state.speed=Math.max(0,speed*3.6);
         $("speed").textContent=Math.round(state.speed); $("big-speed").textContent=Math.round(state.speed);
         const ns=$("nav-speed"); if(ns) ns.textContent=Math.round(state.speed);
-        if(heading!=null&&!isNaN(heading)&&(speed==null||speed>1.4)){ state.heading=Math.round(heading); updateDirection(state.heading); }
+        if(heading!=null&&!isNaN(heading)&&(speed==null||speed>1.4)){ state.heading=Math.round(heading); state.lastGpsHeadingAt=Date.now(); updateDirection(state.heading); }
         if(state.lastLat!=null&&state.lastGpsTimestamp!=null){
           const distM=haversine(state.lastLat,state.lastLon,latitude,longitude);
           const dt=Math.max(.1,(pos.timestamp-state.lastGpsTimestamp)/1000);
@@ -1406,15 +1407,21 @@
       updateCompassButton();
     }
     window.addEventListener("deviceorientationabsolute", e => {
-      if (!state.compassActive || e.alpha == null || state.gpsOk) return;
-      let h = Math.round(e.alpha);
-      state.heading = (360 - h) % 360;
+      if (!state.compassActive || e.alpha == null) return;
+      if (Date.now() - state.lastGpsHeadingAt < 2500) return;
+      state.heading = (360 - Math.round(e.alpha) + 360) % 360;
       updateDirection(state.heading);
     }, true);
     window.addEventListener("deviceorientation", e => {
-      if (!state.compassActive || e.webkitCompassHeading == null || state.gpsOk) return;
-      state.heading = Math.round(e.webkitCompassHeading);
-      updateDirection(state.heading);
+      if (!state.compassActive) return;
+      if (Date.now() - state.lastGpsHeadingAt < 2500) return;
+      if (e.webkitCompassHeading != null) {
+        state.heading = Math.round(e.webkitCompassHeading);
+        updateDirection(state.heading);
+      } else if (e.alpha != null) {
+        state.heading = (360 - Math.round(e.alpha) + 360) % 360;
+        updateDirection(state.heading);
+      }
     }, true);
 
     const compassBtn = $("btn-compass");
@@ -1422,6 +1429,7 @@
     updateCompassButton();
     window.addEventListener("deviceorientation", autoEnableCompass, {once:true});
     window.addEventListener("deviceorientationabsolute", autoEnableCompass, {once:true});
+    document.addEventListener("pointerdown", () => { if (!state.compassActive) activateCompass(); }, {once:true, passive:true});
 
     // ========== PDF amb pdf.js (canvas, funciona a Android) ==========
     state.pdfArrayBuffer = null;
@@ -1642,7 +1650,6 @@
       }
     }
 
-    $("btn-load-gpx").addEventListener("click", () => $("gpx-input").click());
     $("gpx-input").addEventListener("change", async e => {
       const file=e.target.files[0];
       if(!file) return;
@@ -1657,13 +1664,6 @@
     $("rally-enter").addEventListener("click", () => setRallyMode(true));
     $("rally-exit").addEventListener("click", () => setRallyMode(false));
 
-    const pdfPicker = $("pdf-input");
-    const pdfButton = $("btn-load-pdf");
-    if (pdfButton && pdfPicker) {
-      pdfButton.addEventListener("click", () => {
-        try { pdfPicker.click(); } catch (e) { showStatus("No s'ha pogut obrir el selector PDF"); }
-      });
-    }
     $("pdf-input").addEventListener("change", e => {
       const file = e.target.files[0];
       if (file) loadPdf(file);
@@ -1985,9 +1985,10 @@
       if (now - lastWeatherFetch < 10 * 60 * 1000) return; // cada 10 min
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=auto`;
-        const res = await fetch(url);
+        const res = await fetch(url, {cache:"no-store"});
+        if (!res.ok) throw new Error("HTTP "+res.status);
         const data = await res.json();
-        if (!data.current) return;
+        if (!data.current) throw new Error("Resposta meteorològica buida");
         lastWeatherFetch = now;
         const temp = Math.round(Number(data.current.temperature_2m));
         const w = weatherCodeToIcon(data.current.weather_code);
