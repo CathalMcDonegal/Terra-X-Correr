@@ -1,8 +1,13 @@
-const CACHE = "txc-v21";
+const CACHE = "txc-v22";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.jpg", "./icon-192.png", "./icon-512.png", "./pdf.min.js", "./pdf.worker.min.js"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS).catch(() => {})).then(() => self.skipWaiting()));
+  // La nova versió queda esperant fins que l'usuari prem "Actualitzar".
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS).catch(() => {})));
+});
+
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (e) => {
