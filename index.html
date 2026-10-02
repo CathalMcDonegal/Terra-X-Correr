@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-9">
+  <meta name="app-version" content="2026-10-02-10">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -701,6 +701,12 @@
           <div class="label">Odòmetre Total</div>
           <div class="value" id="nav-odo-total">0.00</div>
           <div class="big-partial">Parcial: <span id="nav-odo-partial">0.00</span> km</div>
+          <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:10px;">
+            <span id="route-state" style="font-weight:800;color:#aaa;">ETAPA ATURADA</span>
+          </div>
+          <div style="display:flex;justify-content:center;gap:10px;margin-top:10px;">
+            <button class="big-odo-btn" id="route-toggle">Iniciar etapa</button>
+          </div>
           <div class="big-odo-controls">
             <div class="resets" style="grid-column:1/-1;">
               <button class="big-odo-btn danger" id="nav-odo-reset">Reset parcial</button>
@@ -895,6 +901,8 @@
       gpsOk: false,
       gpsAccuracy: null,
       lastGpsTimestamp: null,
+      routeActive: false,
+      lastGpsFixQuality: "none",
       currentPdf: null,
       currentPage: 1,
       zoom: 1.0,
@@ -973,6 +981,37 @@
     document.querySelectorAll("[data-adj]").forEach(btn => {
       btn.addEventListener("click", () => adjustOdo(parseFloat(btn.dataset.adj)));
     });
+
+    function updateRouteUI() {
+      const label=$("route-state"), btn=$("route-toggle");
+      if(label) {
+        label.textContent=state.routeActive?"ETAPA ACTIVA":"ETAPA ATURADA";
+        label.style.color=state.routeActive?"var(--accent)":"#aaa";
+      }
+      if(btn) {
+        btn.textContent=state.routeActive?"Aturar etapa":"Iniciar etapa";
+        btn.classList.toggle("danger",state.routeActive);
+      }
+    }
+    function toggleRoute() {
+      state.routeActive=!state.routeActive;
+      if(state.routeActive) {
+        state.lastLat=null;
+        state.lastLon=null;
+        state.lastGpsTimestamp=null;
+        showStatus("Etapa iniciada · esperant una fix GPS nova");
+      } else {
+        showStatus("Etapa aturada");
+      }
+      localStorage.setItem("txc_routeActive",state.routeActive?"1":"0");
+      updateRouteUI();
+    }
+    const routeToggle=$("route-toggle");
+    if(routeToggle) routeToggle.addEventListener("click",toggleRoute);
+    function loadRouteState() {
+      state.routeActive=localStorage.getItem("txc_routeActive")==="1";
+      updateRouteUI();
+    }
 
     function resetPartial() {
       state.odoPartial = 0;
@@ -1053,10 +1092,19 @@
           const distM=haversine(state.lastLat,state.lastLon,latitude,longitude);
           const dt=Math.max(.1,(pos.timestamp-state.lastGpsTimestamp)/1000);
           const impliedKmh=(distM/dt)*3.6;
-          const moving=state.speed>=2, minMoveM=moving?2:4, maxDistanceM=Math.max(300,Math.min(1200,state.speed*12+250));
-          if(distM>=minMoveM&&distM<=maxDistanceM&&impliedKmh<=180){
+          const moving=state.speed>=2;
+          const maxGapSec=moving?12:30;
+          const minMoveM=moving?2:4;
+          const maxDistanceM=Math.max(250,Math.min(900,state.speed*10+220));
+          const quality=(accuracy!=null&&accuracy<=25)?"good":(accuracy!=null&&accuracy<=60)?"fair":"poor";
+          state.lastGpsFixQuality=quality;
+          const validGap=dt<=maxGapSec;
+          if(state.routeActive && validGap && distM>=minMoveM&&distM<=maxDistanceM&&impliedKmh<=180){
             const distKm=distM/1000;
-            state.odoTotal+=distKm; state.odoPartial+=distKm; updateOdoDisplay(); saveSettingsDebounced();
+            state.odoTotal+=distKm;
+            state.odoPartial+=distKm;
+            updateOdoDisplay();
+            saveSettingsDebounced();
           }
         }
         state.lastLat=latitude; state.lastLon=longitude; state.lastGpsTimestamp=pos.timestamp;
@@ -1544,6 +1592,9 @@
       }
       localStorage.removeItem("txc_odoTotal");
       localStorage.removeItem("txc_odoPartial");
+      localStorage.removeItem("txc_routeActive");
+      state.routeActive=false;
+      updateRouteUI();
       localStorage.removeItem("txc_roadbook");
       clearPdfFromDB();
       const pdfInput = $("pdf-input");
@@ -1569,6 +1620,7 @@
       if (t) state.odoTotal = parseFloat(t);
       if (p) state.odoPartial = parseFloat(p);
       updateOdoDisplay();
+      loadRouteState();
       const rb = localStorage.getItem("txc_roadbook");
       if (rb) {
         try {
