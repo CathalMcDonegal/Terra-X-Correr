@@ -1587,12 +1587,18 @@
 
       if (plusKeys.includes(key) || plusKeys.includes(code)) {
         e.preventDefault();
-        adjustOdoPartial(0.01);
+        if (!rallyPadAction("plus")) adjustOdoPartial(0.01);
         return;
       }
       if (minusKeys.includes(key) || minusKeys.includes(code)) {
         e.preventDefault();
-        adjustOdoPartial(-0.01);
+        if (!rallyPadAction("minus")) adjustOdoPartial(-0.01);
+        return;
+      }
+
+      if (key === "r" || key === "R") {
+        e.preventDefault();
+        rallyPadAction("stage");
         return;
       }
 
@@ -1608,6 +1614,16 @@
 
     // Gamepad / alguns mandos HID com a joystick
     let lastPadNav = 0;
+    let lastPadAction = 0;
+    function rallyPadAction(action) {
+      if (!state.rallyMode) return false;
+      if (action === "next") { handleRoadbookNav(1); return true; }
+      if (action === "prev") { handleRoadbookNav(-1); return true; }
+      if (action === "plus") { adjustOdoPartial(0.01); return true; }
+      if (action === "minus") { adjustOdoPartial(-0.01); return true; }
+      if (action === "stage") { toggleRoute(); return true; }
+      return false;
+    }
     function pollGamepad() {
       const pads = navigator.getGamepads ? navigator.getGamepads() : [];
       const now = Date.now();
@@ -1617,14 +1633,22 @@
         const axisY = pad.axes[1] || 0;
         const up = pad.buttons[12] && pad.buttons[12].pressed;
         const down = pad.buttons[13] && pad.buttons[13].pressed;
-        if (now - lastPadNav > 200) {
+        const plus = pad.buttons[0] && pad.buttons[0].pressed;
+        const minus = pad.buttons[1] && pad.buttons[1].pressed;
+        const stage = pad.buttons[9] && pad.buttons[9].pressed;
+        if (now - lastPadNav > 220) {
           if (up || axisY < -0.5) {
-            handleRoadbookNav(-1);
+            if (!rallyPadAction("prev")) handleRoadbookNav(-1);
             lastPadNav = now;
           } else if (down || axisY > 0.5) {
-            handleRoadbookNav(1);
+            if (!rallyPadAction("next")) handleRoadbookNav(1);
             lastPadNav = now;
           }
+        }
+        if (state.rallyMode && now - lastPadAction > 350) {
+          if (plus) { rallyPadAction("plus"); lastPadAction = now; }
+          else if (minus) { rallyPadAction("minus"); lastPadAction = now; }
+          else if (stage) { rallyPadAction("stage"); lastPadAction = now; }
         }
       }
       requestAnimationFrame(pollGamepad);
