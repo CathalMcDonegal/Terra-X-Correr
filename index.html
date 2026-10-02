@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-09-30-7">
+  <meta name="app-version" content="2026-10-02-8">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -879,9 +879,15 @@
       speed: 0,
       heading: null,
       gpsOk: false,
+      gpsAccuracy: null,
+      lastGpsTimestamp: null,
       currentPdf: null,
       currentPage: 1,
       zoom: 1.0,
+      pdfSlots: [],
+      pdfObserver: null,
+      pdfRenderVersion: 0,
+      saveTimer: null,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -997,54 +1003,51 @@
       rot("dir-arrow", d); rot("big-dir-arrow", d); rot("nav-dir-arrow", d);
     }
 
-    function startGPS() {
-      if (!navigator.geolocation) {
-        $("gps-status").textContent = "GPS no disponible";
-        const ngs = $("nav-gps-status"); if (ngs) ngs.textContent = "GPS no disponible";
-        return;
+    function setGpsStatus(text, ok) {
+      ["gps-status","nav-gps-status"].forEach(id => { const el=$(id); if(el) el.textContent=text; });
+      ["gps-indicator","nav-gps-indicator"].forEach(id => { const el=$(id); if(el) ok ? el.classList.add("ok") : el.classList.remove("ok"); });
+    }
+    function saveSettingsDebounced() {
+      clearTimeout(state.saveTimer);
+      state.saveTimer = setTimeout(() => saveSettings(), 750);
+    }
+    function isUsableGpsSample(pos) {
+      const c=pos.coords;
+      if(!Number.isFinite(c.latitude)||!Number.isFinite(c.longitude)) return false;
+      if(Number.isFinite(c.accuracy)&&c.accuracy>80) return false;
+      if(state.lastLat!=null&&state.lastGpsTimestamp!=null){
+        const dt=Math.max(.1,(pos.timestamp-state.lastGpsTimestamp)/1000);
+        const distM=haversine(state.lastLat,state.lastLon,c.latitude,c.longitude);
+        if(distM>500 && (distM/dt)*3.6>180) return false;
       }
-      navigator.geolocation.watchPosition(
-        pos => {
-          const { latitude, longitude, speed, heading } = pos.coords;
-          state.gpsOk = true;
-          $("gps-indicator").classList.add("ok");
-          $("gps-status").textContent = "GPS actiu";
-
-          if (speed != null && !isNaN(speed)) {
-            state.speed = Math.max(0, speed * 3.6);
+      return true;
+    }
+    function startGPS() {
+      if(!navigator.geolocation){ setGpsStatus("GPS no disponible",false); return; }
+      navigator.geolocation.watchPosition(pos=>{
+        if(!isUsableGpsSample(pos)){ setGpsStatus("GPS imprecís",false); return; }
+        const {latitude,longitude,speed,heading,accuracy}=pos.coords;
+        state.gpsOk=true; state.gpsAccuracy=Number.isFinite(accuracy)?accuracy:null;
+        setGpsStatus(state.gpsAccuracy!=null?"GPS actiu · ±"+Math.round(state.gpsAccuracy)+" m":"GPS actiu",true);
+        if(speed!=null&&!isNaN(speed)) state.speed=Math.max(0,speed*3.6);
+        $("speed").textContent=Math.round(state.speed); $("big-speed").textContent=Math.round(state.speed);
+        const ns=$("nav-speed"); if(ns) ns.textContent=Math.round(state.speed);
+        if(heading!=null&&!isNaN(heading)&&(speed==null||speed>1.4)){ state.heading=Math.round(heading); updateDirection(state.heading); }
+        if(state.lastLat!=null&&state.lastGpsTimestamp!=null){
+          const distM=haversine(state.lastLat,state.lastLon,latitude,longitude);
+          const dt=Math.max(.1,(pos.timestamp-state.lastGpsTimestamp)/1000);
+          const impliedKmh=(distM/dt)*3.6;
+          const moving=state.speed>=2, minMoveM=moving?2:4, maxDistanceM=Math.max(300,Math.min(1200,state.speed*12+250));
+          if(distM>=minMoveM&&distM<=maxDistanceM&&impliedKmh<=180){
+            const distKm=distM/1000;
+            state.odoTotal+=distKm; state.odoPartial+=distKm; updateOdoDisplay(); saveSettingsDebounced();
           }
-          $("speed").textContent = Math.round(state.speed);
-          $("big-speed").textContent = Math.round(state.speed);
-            const ns = $("nav-speed"); if (ns) ns.textContent = Math.round(state.speed);
-
-          if (heading != null && !isNaN(heading)) {
-            state.heading = Math.round(heading);
-            updateDirection(state.heading);
-          }
-
-          if (state.lastLat != null) {
-            const distM = haversine(state.lastLat, state.lastLon, latitude, longitude);
-            if (distM > 1.5 && distM < 250) {
-              const distKm = distM / 1000;
-              state.odoTotal += distKm;
-              state.odoPartial += distKm;
-              updateOdoDisplay();
-              saveSettings();
-            }
-          }
-          state.lastLat = latitude;
-          state.lastLon = longitude;
-          if (typeof fetchWeather === "function") fetchWeather(latitude, longitude);
-        },
-        err => {
-          state.gpsOk = false;
-          $("gps-indicator").classList.remove("ok");
-          $("gps-status").textContent = "Sense senyal GPS";
-          const ngi = $("nav-gps-indicator"); if (ngi) ngi.classList.remove("ok");
-          const ngs = $("nav-gps-status"); if (ngs) ngs.textContent = "Sense senyal GPS";
-        },
-        { enableHighAccuracy: true, maximumAge: 800, timeout: 12000 }
-      );
+        }
+        state.lastLat=latitude; state.lastLon=longitude; state.lastGpsTimestamp=pos.timestamp;
+        if(typeof fetchWeather==="function") fetchWeather(latitude,longitude);
+      },err=>{
+        state.gpsOk=false; setGpsStatus(err&&err.code===1?"Permís GPS denegat":"Sense senyal GPS",false);
+      },{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
     }
 
     window.addEventListener("deviceorientationabsolute", e => {
@@ -1156,70 +1159,62 @@
       return task.promise;
     }
 
-    // Dibuixa TOTES les pàgines una sota l'altra (ideal per roadbook)
-    async function renderAllPages() {
-      if (!state.currentPdf) return;
-      const container = $("pdf-canvas-container");
-      const view = $("roadbook-view");
-      if (!container) return;
-
-      const token = ++state.renderToken;
-      let availW = window.innerWidth - 8;
-      if (view && view.clientWidth > 100) availW = view.clientWidth - 8;
-      availW = Math.max(280, Math.floor(availW));
-      const zoom = state.zoom || 1;
-
-      container.innerHTML = '<div id="pdf-loading" style="color:#888;text-align:center;padding:24px;">Carregant pàgines…</div>';
-      const num = state.currentPdf.numPages;
-
-      for (let i = 1; i <= num; i++) {
-        if (token !== state.renderToken) return;
-        const page = await state.currentPdf.getPage(i);
-        if (token !== state.renderToken) return;
-
-        const base = page.getViewport({ scale: 1 });
-        const scale = (availW / base.width) * zoom;
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const viewport = page.getViewport({ scale: scale * dpr });
-
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
-        const cssW = Math.floor(viewport.width / dpr);
-        const cssH = Math.floor(viewport.height / dpr);
-        canvas.style.width = cssW + "px";
-        canvas.style.height = cssH + "px";
-        canvas.style.display = "block";
-        canvas.style.margin = "0 auto 2px auto";
-        canvas.style.background = "#fff";
-        canvas.style.maxWidth = "100%";
-
-        const ctx = canvas.getContext("2d", { alpha: false });
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        if (token !== state.renderToken) return;
-
-        const loading = $("pdf-loading");
-        if (loading) loading.remove();
-        container.appendChild(canvas);
-
-        const ld = document.createElement("div");
-        ld.id = "pdf-loading";
-        ld.style.cssText = "color:#666;text-align:center;padding:8px;font-size:13px;";
-        if (i < num) {
-          ld.textContent = "Pàgina " + i + " / " + num + "…";
-          container.appendChild(ld);
-        }
-      }
-      const loading2 = $("pdf-loading");
-      if (loading2) loading2.remove();
-      try { localStorage.setItem("txc_pdf_zoom", String(state.zoom)); } catch (e) {}
+    // Visor PDF lazy: només rasteritza la pàgina visible i les adjacents.
+    async function renderPdfSlot(slot) {
+      if(!state.currentPdf||!slot||slot.rendering||slot.rendered) return;
+      slot.rendering=true;
+      try {
+        const page=await state.currentPdf.getPage(slot.pageNumber);
+        const view=$("roadbook-view"); let availW=window.innerWidth-8;
+        if(view&&view.clientWidth>100) availW=view.clientWidth-8;
+        availW=Math.max(280,Math.floor(availW));
+        const base=page.getViewport({scale:1}), scale=(availW/base.width)*(state.zoom||1);
+        const dpr=Math.min(window.devicePixelRatio||1,2), viewport=page.getViewport({scale:scale*dpr});
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.floor(viewport.width); canvas.height=Math.floor(viewport.height);
+        canvas.style.width=Math.floor(viewport.width/dpr)+"px"; canvas.style.height=Math.floor(viewport.height/dpr)+"px";
+        canvas.style.display="block"; canvas.style.margin="0 auto"; canvas.style.background="#fff"; canvas.style.maxWidth="none";
+        const ctx=canvas.getContext("2d",{alpha:false}); ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        await page.render({canvasContext:ctx,viewport}).promise;
+        slot.element.replaceChildren(canvas); slot.element.style.height=canvas.style.height; slot.rendered=true;
+      } catch(e){ console.warn("Error renderitzant pàgina",slot.pageNumber,e); }
+      finally{ slot.rendering=false; }
     }
-
-    // Compat: alguns botons criden renderPage(num)
-    async function renderPage(num) {
-      await renderAllPages();
+    function renderNearbyPdfSlots(index){
+      for(let i=Math.max(0,index-1);i<=Math.min(state.pdfSlots.length-1,index+1);i++) renderPdfSlot(state.pdfSlots[i]);
+    }
+    async function renderAllPages(){
+      if(!state.currentPdf) return;
+      const container=$("pdf-canvas-container"); if(!container) return;
+      if(state.pdfObserver) state.pdfObserver.disconnect();
+      container.innerHTML=""; state.pdfSlots=[]; const num=state.currentPdf.numPages;
+      showStatus("Preparant roadbook…");
+      for(let i=1;i<=num;i++){
+        const page=await state.currentPdf.getPage(i), base=page.getViewport({scale:1});
+        const view=$("roadbook-view"); let availW=window.innerWidth-8;
+        if(view&&view.clientWidth>100) availW=view.clientWidth-8;
+        availW=Math.max(280,Math.floor(availW));
+        const h=Math.max(120,Math.round(availW*base.height/base.width*(state.zoom||1)));
+        const el=document.createElement("div"); el.className="pdf-page-slot"; el.dataset.page=String(i);
+        el.style.cssText="width:100%;display:flex;align-items:center;justify-content:center;background:#fff;margin:0 auto 2px;overflow:visible;min-height:"+h+"px;height:"+h+"px";
+        el.innerHTML='<div style="color:#777;font-size:13px;padding:20px;">Pàgina '+i+'</div>'; container.appendChild(el);
+        state.pdfSlots.push({pageNumber:i,element:el,rendered:false,rendering:false});
+      }
+      if("IntersectionObserver" in window){
+        state.pdfObserver=new IntersectionObserver(entries=>{
+          for(const entry of entries) if(entry.isIntersecting){ const i=Number(entry.target.dataset.page)-1; renderNearbyPdfSlots(i); }
+        },{root:$("roadbook-view"),rootMargin:"100% 0px"});
+        state.pdfSlots.forEach(slot=>state.pdfObserver.observe(slot.element));
+      }
+      renderNearbyPdfSlots(0);
+      showStatus("Roadbook llest · "+num+" pàgines");
+      try{localStorage.setItem("txc_pdf_zoom",String(state.zoom));}catch(e){}
+    }
+    async function renderPage(num){
+      if(!state.currentPdf) return;
+      const index=Math.max(0,Math.min(state.pdfSlots.length-1,(num||1)-1));
+      state.pdfSlots.forEach(slot=>{slot.rendered=false;slot.element.replaceChildren();});
+      renderNearbyPdfSlots(index);
     }
 
     async function loadPdfFromBuffer(arrayBuffer, restored) {
@@ -1307,7 +1302,7 @@
         return;
       }
       state.zoom = Math.min(10, +(state.zoom + 0.25).toFixed(2));
-      await renderPage(state.currentPage);
+      await renderAllPages();
       showStatus("Zoom " + Math.round(state.zoom * 100) + "%");
     });
     $("btn-zoom-out").addEventListener("click", async () => {
@@ -1455,6 +1450,8 @@
       state.roadbook = { name: "Nou roadbook", notes: [] };
       state.lastLat = null;
       state.lastLon = null;
+      state.lastGpsTimestamp = null;
+      state.gpsAccuracy = null;
       updateOdoDisplay();
       updateNotesOverlay();
       const container = $("pdf-canvas-container");
@@ -1555,9 +1552,7 @@
     // Restaurar PDF desat
     setTimeout(() => loadPdfFromDB(), 400);
 
-    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-      DeviceOrientationEvent.requestPermission().catch(() => {});
-    }
+    // iOS compass permission is requested only from an explicit user gesture.
 
     // --- Pantalla sempre encesa (Wake Lock) ---
     let wakeLock = null;
