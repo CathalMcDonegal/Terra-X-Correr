@@ -2151,7 +2151,8 @@
       navigator.serviceWorker.register("./sw.js").then((registration) => {
         console.log("SW registrat");
         const checkWaiting = () => {
-          if (registration.waiting) {
+          // A la primera instal·lació no hi ha una versió anterior que actualitzar.
+          if (registration.waiting && navigator.serviceWorker.controller) {
             try {
               if (sessionStorage.getItem("txc_update_dismissed") === "1") return;
             } catch(e) {}
