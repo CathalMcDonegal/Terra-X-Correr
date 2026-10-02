@@ -646,7 +646,7 @@
       max-width: 90%;
       text-align: center;
     }
-    #pdf-input, #import-input { display: none; }
+    #pdf-input { display: none; }
     .empty {
       text-align: center;
       padding: 48px 20px;
@@ -777,7 +777,7 @@
               <div class="label">km/h</div>
             </div>
             <div class="combo-block">
-              <div class="label">Direcció</div>
+              <div class="label">🧭 Brúixola</div>
               <div class="dir-arrow" id="dir-arrow">↑</div>
               <div class="dir-cardinal" id="dir-cardinal">--</div>
               <div class="dir-deg"><span id="cap">---</span>°</div>
@@ -853,17 +853,17 @@
         </div>
 
         <div class="big-card time full">
-          <div class="label">Sortida</div>
+          <div class="label">Hora</div>
           <div class="value" id="nav-time">--:--:--</div>
         </div>
 
         <div class="big-card full nav-weather">
           <div>
-            <div class="label">Temperatura</div>
+            <div class="label">🌡️ Temperatura</div>
             <div class="value"> <span id="nav-temp">--</span>°</div>
           </div>
           <div>
-            <div class="label">Temps</div>
+            <div class="label">🌦️ Temps</div>
             <div id="nav-weather-icon">☁️</div>
             <div class="label" id="nav-weather-text">—</div>
           </div>
@@ -1031,7 +1031,6 @@
   </div>
   <div id="rally-ready" role="dialog" aria-modal="true"><div class="ready-card"><h3>Comprovació abans de sortir</h3><div id="ready-list"></div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="rb-btn" id="ready-close">Tancar</button></div></div></div><div id="status"></div>
   <input type="file" id="pdf-input" accept="application/pdf">
-  <input type="file" id="import-input" accept=".json,application/json">
   <input type="file" id="gpx-input" accept=".gpx,application/gpx+xml,text/xml">
 
   <script src="pdf.min.js"></script>
