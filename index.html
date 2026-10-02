@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-18">
+  <meta name="app-version" content="2026-10-02-19">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -654,6 +654,14 @@
     }
     .empty p { margin-top: 10px; font-size: 15px; }
 
+    #app-watermark {
+      position: fixed; left: 50%; bottom: 7px; transform: translateX(-50%);
+      z-index: 9998; pointer-events: none; user-select: none;
+      color: rgba(255,255,255,.22); font-size: 10px; font-weight: 900;
+      letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,.8);
+      white-space: nowrap;
+    }
+    #app.rally-mode #app-watermark { color: rgba(255,255,255,.28); bottom: 2px; }
     #install-banner {
       display: none;
       position: fixed;
@@ -701,6 +709,7 @@
 </head>
 <body>
   <div id="app">
+    <div id="app-watermark" aria-hidden="true">TIP 18675</div>
     <div class="tabs">
       <button class="tab active" data-screen="roadbook">Roadbook</button>
       <button class="tab" data-screen="navegacio">Navegació</button>
@@ -890,108 +899,88 @@
       <div style="overflow:auto; padding:16px; -webkit-overflow-scrolling:touch; flex:1;">
         <div class="editor-section">
           <h3>Manual d’instruccions</h3>
-          <p style="font-size:14px; color:var(--muted); line-height:1.55; margin-bottom:12px;">
-            Guia ràpida de <strong>Terra X Correr</strong> per llegir roadbooks a moto.
+          <p style="font-size:14px; color:var(--muted); line-height:1.55;">
+            Guia completa de <strong>Terra X Correr</strong>: roadbook, RALLY, navegació, instrumentació,
+            GPS, odòmetre, GPX, comandaments i funcionament offline.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>1. Carregar un roadbook</h3>
+          <h3>1. Roadbook</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            A la pestanya <strong>Roadbook</strong>, toca el botó <strong>PDF</strong> i tria el fitxer PDF del teu roadbook.
-            Cal internet la primera vegada (per carregar la llibreria PDF). Després funciona offline.
+            A <strong>Roadbook</strong>, toca <strong>PDF</strong> i tria el fitxer. El PDF queda guardat al dispositiu.
+            <strong>▲</strong> = retrocedir · <strong>▼</strong> = avançar · <strong>− / +</strong> = zoom ·
+            <strong>Pantalla</strong> = pantalla completa. La posició de lectura també es conserva.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>2. Navegar el roadbook</h3>
+          <h3>2. Mode RALLY</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            <strong>▲</strong> (taronja) = retrocedir / pujar<br>
-            <strong>▼</strong> (verd) = avançar / baixar<br>
-            <strong>− / +</strong> = fer el roadbook més petit o més gran (zoom)<br>
-            <strong>Pantalla</strong> = pantalla completa
+            <strong>RALLY</strong> converteix el Roadbook en una pantalla de conducció compacta i prioritza
+            el roadbook, l’odòmetre, CAP, velocitat, pàgina i informació GPX. <strong>Sortir</strong> torna al mode normal.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>2b. Mando Bluetooth ARN Ral·li</h3>
+          <h3>3. GPX i punts importants</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            1. Emparella el mando amb el mòbil (Bluetooth → ARN REMOTE / PRO / LITE)<br>
-            2. Posar el mando en <strong>mode Roadbook</strong> (LED <strong>vermell</strong>):
-               botó 1 + palanca amunt fins que el LED sigui vermell<br>
-            3. Deixa l’app <strong>Terra X Correr</strong> oberta a pantalla completa<br>
-            4. <strong>Palanca amunt</strong> = retrocedir roadbook<br>
-            <strong>Palanca avall</strong> = avançar roadbook<br>
-            5. <strong>Botó 2</strong> = +0,01 km (com ++)<br>
-            <strong>Botó 3</strong> = −0,01 km (com −−)<br><br>
-            Si la palanca va al revés: al mando, botó 1 + palanca avall per invertir-la.
+            Toca <strong>GPX</strong> per carregar una ruta. L’app calcula la posició sobre el track i pot detectar
+            <strong>punts importants i canvis de direcció</strong>. En RALLY, els propers punts i les alertes apareixen
+            a l’HUD. El GPX complementa, però no substitueix, el roadbook oficial.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>3. Odòmetre</h3>
+          <h3>4. Odòmetre i parcial</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            L’odòmetre suma quilòmetres amb el GPS.<br>
-            <strong>− / −− / ++ / +</strong> = ajustar (−0,1 / −0,01 / +0,01 / +0,1)<br>
-            <strong>Rp</strong> = reset del parcial<br>
-            <strong>Rt</strong> = reset del total (i del parcial)
+            L’odòmetre suma quilòmetres amb el GPS. <strong>− / −− / ++ / +</strong> ajusten −0,1 / −0,01 /
+            +0,01 / +0,1 km. <strong>Rp / Reset parcial</strong> posa el parcial a zero.
+            <strong>Rt / Reset total</strong> posa a zero total i parcial.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>4. Velocitat i direcció</h3>
+          <h3>5. Navegació</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            La <strong>velocitat</strong> surt del GPS (km/h).<br>
-            La <strong>direcció</strong> mostra una fletxa, els punts cardinals (N, NE, E…) i els graus.
-            Dona permís d’ubicació i, si cal, d’orientació del telèfon.
+            <strong>Navegació</strong> està pensada per sortir amb la moto <strong>sense roadbook</strong>.
+            Mostra odòmetre total, km des de l’últim repostatge, velocitat, direcció, hora, temps en ruta,
+            mitjana, màxima i meteorologia. <strong>Iniciar sortida</strong> comença les estadístiques;
+            <strong>Aturar sortida</strong> les atura. <strong>⛽ REPOSTAR</strong> posa a zero només el parcial.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>5. Pestanya Instrumentació</h3>
-          <p style="font-size:14px; color:var(--text); line-height:1.5; margin-bottom:10px;">
-            La pestanya <strong>Instrumentació</strong> està pensada per quan el <strong>roadbook es mostra en un altre aparell</strong>
-            (telèfon, tablet o dispositiu de navegació). En aquest cas, Terra X Correr fa de quadre d’instruments de la moto:
-            no cal carregar cap PDF aquí.
-          </p>
+          <h3>6. Instrumentació</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            Mostra en gran:<br>
-            · <strong>Odòmetre total</strong> = quilòmetres acumulats<br>
-            · <strong>Parcial</strong> = quilòmetres des de l’últim reset/repostatge<br>
-            · <strong>Velocitat</strong> = velocitat actual del GPS<br>
-            · <strong>Direcció / CAP</strong> = fletxa, punt cardinal i graus<br>
-            · <strong>Hora</strong> = hora actual del dispositiu
+            <strong>Instrumentació</strong> està pensada quan el <strong>roadbook es mostra en un altre aparell</strong>
+            (segon mòbil, tablet o dispositiu de navegació). Aquest dispositiu fa de quadre d’instruments:
+            <strong>no cal carregar-hi cap PDF</strong>. Mostra odòmetre total, parcial, velocitat, direcció/CAP i hora.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>5b. Com fer servir Instrumentació en ruta</h3>
+          <h3>7. GPS i brúixola</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            1. Obre <strong>Instrumentació</strong> al mòbil que portes com a quadre d’instruments.<br>
-            2. No cal carregar el roadbook: deixa aquest aparell dedicat als instruments.<br>
-            3. Concedeix el permís d’<strong>ubicació</strong> i espera que el GPS indiqui que està actiu.<br>
-            4. Fes servir els botons de l’odòmetre per corregir-lo si el roadbook o l’organització parteixen d’un quilometratge diferent.<br>
-            5. <strong>Reset parcial</strong> posa el parcial a zero sense tocar el total.<br>
-            6. <strong>Reset total</strong> posa a zero tant el total com el parcial.<br>
-            7. Si necessites més precisió d’orientació a baixa velocitat o aturat, pots activar la <strong>brúixola</strong> des de la pantalla de Navegació.
+            Concedeix el permís d’<strong>ubicació</strong>. L’app filtra fixes GPS poc fiables i mostra l’estat
+            i la precisió. En moviment, el <strong>rumb GPS</strong> té prioritat. La <strong>brúixola</strong>
+            es pot activar des de Navegació; alguns mòbils demanen autorització en prémer-la.
           </p>
         </div>
-
         <div class="editor-section">
-          <h3>6. Reset total de l’app</h3>
-          <p style="font-size:14px; color:var(--text); line-height:1.5; margin-bottom:12px;">
-            El botó <strong>Reset tot</strong> (a la barra inferior) esborra el PDF, posa els odòmetres a zero i deixa l’app com al principi.
-          </p>
-          <button class="btn danger" id="btn-reset-all" style="width:100%;">Reset tot (tornar a zero)</button>
-        </div>
-
-        <div class="editor-section">
-          <h3>Consells per a moto</h3>
+          <h3>8. Comandament Bluetooth / HID</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            · Munti el telèfon en un suport estable<br>
-            · Activa la ubicació precisa<br>
-            · Carrega el PDF abans de sortir (amb cobertura)<br>
-            · Usa pantalla completa per veure millor el roadbook
+            El comandament permet controlar el roadbook sense tocar la pantalla:
+            <strong>amunt</strong> = retrocedir, <strong>avall</strong> = avançar i <strong>+ / −</strong> =
+            ajustar l’odòmetre en passos de 0,01 km. En RALLY també controla les funcions assignades.
+          </p>
+        </div>
+        <div class="editor-section">
+          <h3>9. Pantalla completa i offline</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            Fes servir <strong>Pantalla</strong> per aprofitar tota la pantalla. L’app desa el roadbook i la configuració
+            localment i pot funcionar <strong>sense connexió</strong> després de la primera càrrega dels recursos.
+            El GPS del dispositiu continua sent necessari per a velocitat, rumb i odòmetre.
+          </p>
+        </div>
+        <div class="editor-section">
+          <h3>10. Abans de sortir</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            Comprova GPS, bateria, permisos d’ubicació, roadbook/GPX si els necessites i comandament si en fas servir un.
+            Si uses dos dispositius, decideix quin porta el <strong>roadbook</strong> i quin fa d’<strong>instrumentació</strong>.
           </p>
         </div>
       </div>
