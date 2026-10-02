@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-22">
+  <meta name="app-version" content="2026-10-02-23">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -662,6 +662,16 @@
       white-space: nowrap;
     }
     #app.rally-mode #app-watermark { color: rgba(255,255,255,.28); bottom: 2px; }
+    .rb-toolbar .rb-row { width:100%; }
+    .rb-toolbar .rb-row:first-child { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+    .rb-toolbar .rb-row:first-child .rb-btn { min-width:0; width:100%; min-height:56px; }
+    .rb-toolbar .rb-row:nth-child(2) { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+    .rb-toolbar .rb-row:nth-child(2) .rb-btn { min-width:0; width:100%; min-height:50px; }
+    .nav-trip-time { grid-column:1/-1; }
+    .nav-trip-controls { gap:8px; }
+    .nav-trip-controls .big-odo-btn { flex:1 1 220px; }
+    .nav-zero-total { border-color:var(--danger); color:#ff8a80; background:#2a1212; }
+    .nav-refuel-btn { min-width:0; }
     #update-banner {
       display: none;
       position: fixed;
@@ -806,12 +816,9 @@
         </div>
         <div class="rb-row">
           <button class="rb-btn wide" id="btn-load-pdf">PDF</button>
-          <button class="rb-btn wide" id="btn-load-gpx">GPX</button>
           <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
-          <button class="rb-btn wide" id="rally-enter" style="background:#173d26;border-color:#00e676;color:#69f0ae;">RALLY</button><button class="rb-btn wide" id="btn-preflight">PRE-RUTA</button>
-          <button class="rb-btn wide" id="rally-exit" style="background:#3d2a12;border-color:#ff9100;color:#ffb74d;">Sortir</button>
-          <button class="rb-btn wide" id="btn-reset-all-bar" style="border:2px solid var(--danger);color:#ff8a80;background:#2a1212;max-width:none;flex:0.7;">Reset</button>
-        </div>
+          <button class="rb-btn wide" id="rally-enter" style="background:#173d26;border-color:#00e676;color:#69f0ae;">RALLY</button><button class="rb-btn wide" id="rally-exit" style="background:#3d2a12;border-color:#ff9100;color:#ffb74d;">Sortir</button>
+          </div>
       </div>
     </div>
 
@@ -846,9 +853,7 @@
         </div>
 
         <div class="nav-trip-stats full">
-          <div class="nav-trip-stat"><span>Temps en ruta</span><strong id="nav-stage-time">00:00:00</strong></div>
-          <div class="nav-trip-stat"><span>Mitjana</span><strong id="nav-stage-avg">0.0</strong><small>km/h</small></div>
-          <div class="nav-trip-stat"><span>Màxima</span><strong id="nav-stage-max">0</strong><small>km/h</small></div>
+          <div class="nav-trip-stat nav-trip-time"><span>Temps en ruta</span><strong id="nav-stage-time">00:00:00</strong></div>
         </div>
 
         <div class="big-card full nav-weather">
@@ -864,15 +869,13 @@
         </div>
 
         <div class="nav-trip-controls full">
-          <span id="route-state">SORTIDA ATURADA</span>
-          <button class="big-odo-btn" id="route-toggle">Iniciar sortida</button>
-        </div>
+        <button class="big-odo-btn nav-zero-total" id="nav-odo-reset-total">↺ POSAR TOTAL A 0</button>
+        <button class="big-odo-btn nav-refuel-btn" id="nav-odo-reset">⛽ POSAR PARCIAL A 0</button>
+      </div>
       </div>
       <div class="gps-line">
         <span class="gps-dot" id="nav-gps-indicator"></span>
         <span id="nav-gps-status">Buscant GPS…</span>
-        <br>
-        <button type="button" class="compass-btn" id="btn-compass">Activar brúixola</button>
       </div>
     </div>
 
@@ -1297,6 +1300,8 @@
     $("big-odo-reset-total").addEventListener("click", resetTotal);
     const navRp = $("nav-odo-reset");
     const navRt = $("nav-odo-reset-total");
+    if (navRt) navRt.addEventListener("click", resetTotal);
+const navRt = $("nav-odo-reset-total");
     if (navRp) navRp.addEventListener("click", resetPartial);
     if (navRt) navRt.addEventListener("click", resetTotal);
 
@@ -2020,7 +2025,7 @@
     function updateBatteryUI(){if(state.batteryLevel!=null&&state.batteryLevel<=.2)showStatus("Bateria baixa · "+Math.round(state.batteryLevel*100)+"%",4500);}
     async function initBattery(){if(!navigator.getBattery)return;try{const b=await navigator.getBattery(),sync=()=>{state.batteryLevel=b.level;state.batteryCharging=b.charging;updateBatteryUI();};["levelchange","chargingchange"].forEach(e=>b.addEventListener(e,sync));sync();}catch(e){}}
     function preflight(){const items=[],gps=state.gpsOk&&state.gpsAccuracy!=null&&state.gpsAccuracy<=60;items.push(["GPS",gps?"OK · ±"+Math.round(state.gpsAccuracy)+" m":state.gpsOk?"Actiu · precisió >60 m":"No fix",gps?"ok":state.gpsOk?"warn":"bad"]);items.push(["Roadbook",state.currentPdf?"OK · "+state.currentPdf.numPages+" pàgines":"No carregat",state.currentPdf?"ok":"warn"]);items.push(["GPX",state.gpxTrack.length?state.gpxName+" · "+state.gpxPointsOfInterest.length+" punts importants":"No carregat",state.gpxTrack.length?"ok":"warn"]);const pads=navigator.getGamepads?Array.from(navigator.getGamepads()).filter(Boolean).length:0;items.push(["Comandament",pads?"Detectat · "+pads:"No detectat","warn"]);const bat=state.batteryLevel==null?"No disponible":Math.round(state.batteryLevel*100)+"%"+(state.batteryCharging?" · carregant":"");items.push(["Bateria",bat,state.batteryLevel==null?"warn":state.batteryLevel>.2?"ok":"bad"]);items.push(["Pantalla",document.fullscreenElement?"Pantalla completa":"Mode normal",document.fullscreenElement?"ok":"warn"]);items.push(["Mode",state.rallyMode?"RALLY actiu":"RALLY no actiu",state.rallyMode?"ok":"warn"]);$("ready-list").innerHTML=items.map(x=>"<div class='ready-item'><span>"+x[0]+"</span><strong class='ready-"+x[2]+"'>"+x[1]+"</strong></div>").join("");$("rally-ready").classList.add("visible");}
-    const preflightBtn=$("btn-preflight");if(preflightBtn)preflightBtn.addEventListener("click",preflight);const readyClose=$("ready-close");if(readyClose)readyClose.addEventListener("click",()=>$("rally-ready").classList.remove("visible"));initBattery();
+    const readyClose=$("ready-close");if(readyClose)readyClose.addEventListener("click",()=>$("rally-ready").classList.remove("visible"));initBattery();
 
     // --- Pantalla sempre encesa (Wake Lock) ---
     let wakeLock = null;
