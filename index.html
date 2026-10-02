@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-26">
+  <meta name="app-version" content="2026-10-02-27">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -156,7 +156,7 @@
       margin-top: 1px;
     }
     .big-dir-arrow {
-      font-size: 52px;
+      font-size: 56px;
       line-height: 1;
       color: var(--accent2);
       display: inline-block;
@@ -677,6 +677,8 @@
     .nav-time-card strong { display:block; margin-top:3px; font-size:22px; font-variant-numeric:tabular-nums; }
     .nav-zero-total { border-color:var(--danger); color:#ff8a80; background:#2a1212; }
     .nav-refuel-btn { min-width:0; }
+    .nav-odo-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
+    .nav-odo-actions .big-odo-btn { min-width:0; width:100%; }
     #update-banner {
       display: none;
       position: fixed;
@@ -836,7 +838,7 @@
           <div class="nav-trip-divider"></div>
           <div class="label">Des de l'últim repostatge</div>
           <div class="big-partial"><span id="nav-odo-partial">0.00</span> km</div>
-          <button class="big-odo-btn nav-refuel-btn" id="nav-odo-reset">⛽ REPOSTAR · posar parcial a 0</button>
+          <div class="nav-odo-actions"><button class="big-odo-btn nav-zero-total" id="nav-odo-reset-total">↺ POSAR TOTAL A 0</button><button class="big-odo-btn nav-refuel-btn" id="nav-odo-reset">⛽ POSAR PARCIAL A 0</button></div>
         </div>
 
         <div class="big-card speed">
@@ -847,7 +849,7 @@
 
         <div class="big-card cap">
           <div class="label">Direcció</div>
-          <div class="big-dir-arrow" id="nav-dir-arrow">↑</div>
+          <div class="big-dir-arrow" id="nav-dir-arrow">⬆</div>
           <div class="big-dir-cardinal" id="nav-dir-cardinal">--</div>
           <div class="big-dir-deg"><span id="nav-cap">---</span>°</div>
         </div>
@@ -902,7 +904,7 @@
         </div>
         <div class="big-card cap">
           <div class="label">Direcció</div>
-          <div class="big-dir-arrow" id="big-dir-arrow">↑</div>
+          <div class="big-dir-arrow" id="big-dir-arrow">⬆</div>
           <div class="big-dir-cardinal" id="big-dir-cardinal">--</div>
           <div class="big-dir-deg"><span id="big-cap">---</span>°</div>
         </div>
@@ -1655,7 +1657,13 @@
     $("rally-enter").addEventListener("click", () => setRallyMode(true));
     $("rally-exit").addEventListener("click", () => setRallyMode(false));
 
-    $("btn-load-pdf").addEventListener("click", () => $("pdf-input").click());
+    const pdfPicker = $("pdf-input");
+    const pdfButton = $("btn-load-pdf");
+    if (pdfButton && pdfPicker) {
+      pdfButton.addEventListener("click", () => {
+        try { pdfPicker.click(); } catch (e) { showStatus("No s'ha pogut obrir el selector PDF"); }
+      });
+    }
     $("pdf-input").addEventListener("change", e => {
       const file = e.target.files[0];
       if (file) loadPdf(file);
@@ -1975,16 +1983,16 @@
     async function fetchWeather(lat, lon) {
       const now = Date.now();
       if (now - lastWeatherFetch < 10 * 60 * 1000) return; // cada 10 min
-      lastWeatherFetch = now;
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=auto`;
         const res = await fetch(url);
         const data = await res.json();
         if (!data.current) return;
-        const temp = Math.round(data.current.temperature_2m);
+        lastWeatherFetch = now;
+        const temp = Math.round(Number(data.current.temperature_2m));
         const w = weatherCodeToIcon(data.current.weather_code);
         const te = $("nav-temp");
-        if (te) te.textContent = temp + "°";
+        if (te && Number.isFinite(temp)) te.textContent = temp;
         const ic = $("nav-weather-icon");
         if (ic) ic.textContent = w.icon;
         const wt = $("nav-weather-text");
