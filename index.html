@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-20">
+  <meta name="app-version" content="2026-10-02-21">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -981,8 +981,18 @@
         <div class="editor-section">
           <h3>10. Abans de sortir</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            Comprova GPS, bateria, permisos d’ubicació, roadbook/GPX si els necessites i comandament si en fas servir un.
-            Si uses dos dispositius, decideix quin porta el <strong>roadbook</strong> i quin fa d’<strong>instrumentació</strong>.
+            Fes servir <strong>PRE-RUTA</strong> per revisar GPS, precisió, roadbook, GPX, comandament, bateria, pantalla i mode RALLY.
+            El GPX és opcional: només cal carregar-lo si vols seguiment i detecció automàtica de punts importants.
+          </p>
+        </div>
+        <div class="editor-section">
+          <h3>11. Si alguna cosa falla</h3>
+          <p style="font-size:14px; color:var(--text); line-height:1.5;">
+            <strong>GPS:</strong> espera a tenir una precisió raonable abans d’iniciar la sortida. Si el GPS perd senyal, l’odòmetre deixa d’acumular fins que les fixes tornen a ser vàlides.<br>
+            <strong>GPX:</strong> si el punt de ruta queda fora de 500 m, el seguiment queda en espera fins a recuperar la ruta. En trams paral·lels es manté la continuïtat del tram anterior per reduir salts.<br>
+            <strong>Pantalla:</strong> la PWA intenta recuperar el Wake Lock quan torna a primer pla. Si el sistema talla l’app per estalvi d’energia, torna-la a obrir i comprova el GPS.<br>
+            <strong>Comandament:</strong> comprova que el dispositiu aparegui com a HID/Gamepad i prova’l abans de sortir.<br>
+            <strong>Odòmetre:</strong> el parcial es pot posar a zero després de repostar; el total només s’ha de reiniciar quan realment vulguis començar un comptador nou.
           </p>
         </div>
       </div>
