@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-24">
+  <meta name="app-version" content="2026-10-02-25">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -670,6 +670,11 @@
     .nav-trip-time { grid-column:1/-1; }
     .nav-trip-controls { gap:8px; }
     .nav-trip-controls .big-odo-btn { flex:1 1 220px; }
+    .nav-time-card { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .nav-time-card > div { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:10px 8px; text-align:center; }
+    .nav-mini-icon { display:inline-block; font-size:20px; margin-right:6px; vertical-align:middle; }
+    .nav-time-label { font-size:10px; color:var(--muted); text-transform:uppercase; font-weight:800; }
+    .nav-time-card strong { display:block; margin-top:3px; font-size:22px; font-variant-numeric:tabular-nums; }
     .nav-zero-total { border-color:var(--danger); color:#ff8a80; background:#2a1212; }
     .nav-refuel-btn { min-width:0; }
     #update-banner {
@@ -852,10 +857,6 @@
           <div class="value" id="nav-time">--:--:--</div>
         </div>
 
-        <div class="nav-trip-stats full">
-          <div class="nav-trip-stat nav-trip-time"><span>Temps en ruta</span><strong id="nav-stage-time">00:00:00</strong></div>
-        </div>
-
         <div class="big-card full nav-weather">
           <div>
             <div class="label">Temperatura</div>
@@ -868,11 +869,7 @@
           </div>
         </div>
 
-        <div class="nav-trip-controls full">
-        <button class="big-odo-btn nav-zero-total" id="nav-odo-reset-total">↺ POSAR TOTAL A 0</button>
-        <button class="big-odo-btn nav-refuel-btn" id="nav-odo-reset">⛽ POSAR PARCIAL A 0</button>
-      </div>
-      </div>
+        </div>
       <div class="gps-line">
         <span class="gps-dot" id="nav-gps-indicator"></span>
         <span id="nav-gps-status">Buscant GPS…</span>
@@ -1256,28 +1253,17 @@
       if($("nav-stage-max")) $("nav-stage-max").textContent=Math.round(state.routeMaxSpeed||0);
     }
     function updateRouteUI() {
-      const label=$("route-state"), btn=$("route-toggle");
-      if(label) {
-        label.textContent=state.routeActive?"SORTIDA ACTIVA":"SORTIDA ATURADA";
-        label.style.color=state.routeActive?"var(--accent)":"#aaa";
-      }
-      if(btn) {
-        btn.textContent=state.routeActive?"Aturar sortida":"Iniciar sortida";
-        btn.classList.toggle("danger",state.routeActive);
-      }
+      state.routeActive = true;
       updateNavigationStageUI();
     }
     function toggleRoute() {
-      state.routeActive=!state.routeActive;
-      if(state.routeActive){state.routeStartTime=Date.now();state.routeStartOdo=state.odoTotal;state.routeMaxSpeed=0;state.gpxLastPoiId=null;state.gpxActivePoi=null;
-        state.lastLat=null;
-        state.lastLon=null;
-        state.lastGpsTimestamp=null;
-        showStatus("Sortida iniciada · esperant una fix GPS nova");
-      } else {
-        showStatus("Sortida aturada");
+      state.routeActive = true;
+      if (!state.routeStartTime) {
+        state.routeStartTime = Date.now();
+        state.routeStartOdo = state.odoTotal;
       }
-      localStorage.setItem("txc_routeActive",state.routeActive?"1":"0");localStorage.setItem("txc_routeStartTime",state.routeStartTime||"");localStorage.setItem("txc_routeStartOdo",state.routeStartOdo);localStorage.setItem("txc_routeMaxSpeed",state.routeMaxSpeed);updateRouteUI();
+      saveSettings();
+      updateNavigationStageUI();
     }
     const routeToggle=$("route-toggle");
     if(routeToggle) routeToggle.addEventListener("click",toggleRoute);
