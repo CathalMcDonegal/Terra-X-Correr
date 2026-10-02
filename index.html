@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-8">
+  <meta name="app-version" content="2026-10-02-9">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -456,6 +456,18 @@
       vertical-align: middle;
     }
     .gps-dot.ok { background: var(--accent); }
+    .compass-btn {
+      margin-top: 8px;
+      background: #252525;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      min-height: 42px;
+    }
+    .compass-btn.active { border-color: var(--accent); color: var(--accent); }
     #editor {
       overflow: auto;
       padding: 14px;
@@ -726,6 +738,8 @@
       <div class="gps-line">
         <span class="gps-dot" id="nav-gps-indicator"></span>
         <span id="nav-gps-status">Buscant GPS…</span>
+        <br>
+        <button type="button" class="compass-btn" id="btn-compass">Activar brúixola</button>
       </div>
     </div>
 
@@ -888,6 +902,8 @@
       pdfObserver: null,
       pdfRenderVersion: 0,
       saveTimer: null,
+      pdfScrollTop: 0,
+      compassActive: false,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -1050,19 +1066,50 @@
       },{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
     }
 
-    window.addEventListener("deviceorientationabsolute", e => {
-      if (e.alpha != null && (state.heading == null || !state.gpsOk)) {
-        let h = Math.round(e.alpha);
-        state.heading = (360 - h) % 360;
-        updateDirection(state.heading);
+    function updateCompassButton() {
+      const btn = $("btn-compass");
+      if (!btn) return;
+      btn.textContent = state.compassActive ? "Brúixola activa" : "Activar brúixola";
+      btn.classList.toggle("active", state.compassActive);
+    }
+
+    async function activateCompass() {
+      try {
+        if (typeof DeviceOrientationEvent === "undefined") {
+          showStatus("Aquest dispositiu no ofereix brúixola");
+          return;
+        }
+        if (typeof DeviceOrientationEvent.requestPermission === "function") {
+          const permission = await DeviceOrientationEvent.requestPermission();
+          if (permission !== "granted") {
+            showStatus("Permís de brúixola no concedit");
+            return;
+          }
+        }
+        state.compassActive = true;
+        updateCompassButton();
+        showStatus("Brúixola activa");
+      } catch (e) {
+        console.warn("No s'ha pogut activar la brúixola", e);
+        showStatus("No s'ha pogut activar la brúixola");
       }
+    }
+
+    window.addEventListener("deviceorientationabsolute", e => {
+      if (!state.compassActive || e.alpha == null || state.gpsOk) return;
+      let h = Math.round(e.alpha);
+      state.heading = (360 - h) % 360;
+      updateDirection(state.heading);
     }, true);
     window.addEventListener("deviceorientation", e => {
-      if (e.webkitCompassHeading != null) {
-        state.heading = Math.round(e.webkitCompassHeading);
-        updateDirection(state.heading);
-      }
+      if (!state.compassActive || e.webkitCompassHeading == null || state.gpsOk) return;
+      state.heading = Math.round(e.webkitCompassHeading);
+      updateDirection(state.heading);
     }, true);
+
+    const compassBtn = $("btn-compass");
+    if (compassBtn) compassBtn.addEventListener("click", activateCompass);
+    updateCompassButton();
 
     // ========== PDF amb pdf.js (canvas, funciona a Android) ==========
     state.pdfArrayBuffer = null;
@@ -1095,6 +1142,7 @@
       try {
         localStorage.removeItem("txc_has_pdf");
         localStorage.removeItem("txc_pdf_zoom");
+        localStorage.removeItem("txc_pdf_scroll");
         const db = await openPdfDB();
         await new Promise((resolve) => {
           const tx = db.transaction("files", "readwrite");
@@ -1185,6 +1233,8 @@
     }
     async function renderAllPages(){
       if(!state.currentPdf) return;
+      const view=$("roadbook-view");
+      const savedScroll=Number.isFinite(state.pdfScrollTop)?state.pdfScrollTop:(view?.scrollTop||0);
       const container=$("pdf-canvas-container"); if(!container) return;
       if(state.pdfObserver) state.pdfObserver.disconnect();
       container.innerHTML=""; state.pdfSlots=[]; const num=state.currentPdf.numPages;
@@ -1206,15 +1256,26 @@
         },{root:$("roadbook-view"),rootMargin:"100% 0px"});
         state.pdfSlots.forEach(slot=>state.pdfObserver.observe(slot.element));
       }
+      const restoreScroll=()=>{ if(view) view.scrollTop=savedScroll; };
+      requestAnimationFrame(restoreScroll);
+      setTimeout(restoreScroll,50);
       renderNearbyPdfSlots(0);
       showStatus("Roadbook llest · "+num+" pàgines");
-      try{localStorage.setItem("txc_pdf_zoom",String(state.zoom));}catch(e){}
+      state.pdfScrollTop=savedScroll;
+      try{
+        localStorage.setItem("txc_pdf_zoom",String(state.zoom));
+        localStorage.setItem("txc_pdf_scroll",String(Math.max(0,savedScroll)));
+      }catch(e){}
     }
     async function renderPage(num){
       if(!state.currentPdf) return;
+      const view=$("roadbook-view");
+      const savedScroll=view?view.scrollTop:state.pdfScrollTop;
       const index=Math.max(0,Math.min(state.pdfSlots.length-1,(num||1)-1));
       state.pdfSlots.forEach(slot=>{slot.rendered=false;slot.element.replaceChildren();});
       renderNearbyPdfSlots(index);
+      state.pdfScrollTop=savedScroll;
+      requestAnimationFrame(()=>{ if(view) view.scrollTop=savedScroll; });
     }
 
     async function loadPdfFromBuffer(arrayBuffer, restored) {
@@ -1242,7 +1303,9 @@
           return;
         }
         const z = parseFloat(localStorage.getItem("txc_pdf_zoom") || "1");
-        if (!isNaN(z) && z >= 0.4 && z <= 4) state.zoom = z;
+        if (!isNaN(z) && z >= 0.4 && z <= 10) state.zoom = z;
+        const scroll = parseFloat(localStorage.getItem("txc_pdf_scroll") || "0");
+        if (Number.isFinite(scroll) && scroll >= 0) state.pdfScrollTop = scroll;
         await loadPdfFromBuffer(data, true);
       } catch (e) {
         console.warn(e);
@@ -1314,6 +1377,18 @@
       await renderPage(state.currentPage);
       showStatus("Zoom " + Math.round(state.zoom * 100) + "%");
     });
+
+    const roadbookView = $("roadbook-view");
+    if (roadbookView) {
+      let scrollSaveTimer = null;
+      roadbookView.addEventListener("scroll", () => {
+        state.pdfScrollTop = roadbookView.scrollTop;
+        clearTimeout(scrollSaveTimer);
+        scrollSaveTimer = setTimeout(() => {
+          try { localStorage.setItem("txc_pdf_scroll", String(state.pdfScrollTop)); } catch (e) {}
+        }, 250);
+      }, { passive: true });
+    }
 
     // --- Mando Bluetooth ARN Ral·li / HID (mode Roadbook) ---
     // En mode Roadbook (LED vermell): palanca amunt/avall envia tecles HID
@@ -1452,6 +1527,9 @@
       state.lastLon = null;
       state.lastGpsTimestamp = null;
       state.gpsAccuracy = null;
+      state.pdfScrollTop = 0;
+      state.compassActive = false;
+      updateCompassButton();
       updateOdoDisplay();
       updateNotesOverlay();
       const container = $("pdf-canvas-container");
