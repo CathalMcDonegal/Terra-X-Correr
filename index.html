@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-14">
+  <meta name="app-version" content="2026-10-02-15">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -298,6 +298,31 @@
     .rally-hud .rh-value.cap { color: var(--accent2); }
     .rally-hud .rh-value.speed { color: #40c4ff; }
     .rally-hud .rh-value.page { color: #fff; }
+    #rally-poi-alert {
+      display: none;
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 70;
+      pointer-events: none;
+      text-align: center;
+      background: rgba(0,0,0,.92);
+      border: 3px solid var(--accent2);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.55);
+    }
+    #rally-poi-alert.visible { display: block; }
+    #rally-poi-alert.urgent { border-color: var(--danger); transform: translateY(-50%) scale(1.04); }
+    #rally-poi-alert .poi-kind { font-size: 12px; font-weight: 900; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px; }
+    #rally-poi-alert .poi-label { margin-top: 3px; font-size: clamp(24px, 7vw, 42px); font-weight: 950; line-height: 1.05; }
+    #rally-poi-alert .poi-distance { margin-top: 6px; font-size: clamp(18px, 5vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+    #rally-poi-alert .poi-direction { font-size: 44px; line-height: 1; margin-top: 2px; color: var(--accent2); }
+    @media (min-width: 700px) {
+      #rally-poi-alert { left: 18%; right: 18%; }
+    }
     #notes-overlay {
       display: none;
       background: rgba(10,10,10,0.92);
