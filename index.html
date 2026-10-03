@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-29">
+  <meta name="app-version" content="2026-10-02-30">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -460,6 +460,20 @@
     }
     .big-card.odo .value { color: var(--accent); }
     .big-card.speed .value { color: #40c4ff; }
+    #instruments > .big-grid > .big-card.speed,
+    #instruments > .big-grid > .big-card.cap {
+      min-height: 150px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #instruments > .big-grid > .big-card.speed .value { font-size: 44px; line-height: 1; }
+    #instruments > .big-grid > .big-card.speed .label:last-child { margin-top: 5px; }
+    #instruments > .big-grid > .big-card.cap .big-dir-arrow { font-size: 44px; margin: 2px 0; }
+    #instruments > .big-grid > .big-card.cap .big-dir-cardinal { font-size: 20px; margin-top: 2px; }
+    #instruments > .big-grid > .big-card.cap .big-dir-deg { font-size: 13px; margin-top: 1px; }
     .big-card.cap .value { color: var(--accent2); }
     .big-card.time .value { color: #b0bec5; font-size: 36px; }
     .big-card.full { grid-column: 1 / -1; }
@@ -530,18 +544,33 @@
       min-height: 42px;
     }
     .compass-btn.active { border-color: var(--accent); color: var(--accent); }
-    .nav-trip-main{padding-bottom:16px}
-    .nav-total-unit{color:var(--muted);font-size:13px;margin-top:-2px}
-    .nav-trip-divider{height:1px;background:var(--border);margin:14px 15% 10px}
-    .nav-refuel-btn{margin-top:10px;min-width:240px;border-color:var(--accent2);color:#ffb74d}
-    .nav-trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .nav-trip-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 5px;text-align:center}
-    .nav-trip-stat span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}
-    .nav-trip-stat strong{display:block;font-size:21px;font-variant-numeric:tabular-nums}
-    .nav-trip-stat small{font-size:10px;color:var(--muted)}
-    .nav-weather{display:flex;justify-content:space-around;align-items:center;padding:14px}
-    .nav-weather>div{text-align:center}
-    .nav-weather #nav-weather-icon{font-size:38px;line-height:1.1}
+    .nav-trip-grid{gap:8px;max-width:560px}
+    .nav-trip-main{padding:12px 10px 10px}
+    .nav-trip-main .value{font-size:54px;line-height:1}
+    .nav-total-unit{color:var(--muted);font-size:12px;margin-top:-1px}
+    .nav-trip-divider{height:1px;background:var(--border);margin:8px 14% 7px}
+    .nav-trip-main .label{font-size:12px;margin-bottom:3px}
+    .nav-trip-main .big-partial{font-size:18px;margin-top:2px}
+    .nav-odo-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+    .nav-odo-actions .big-odo-btn{width:100%;min-width:0;height:48px;min-height:48px;padding:5px 7px;border-radius:10px;font-size:12px;line-height:1;white-space:nowrap}
+    .nav-zero-total{border-color:var(--danger);color:#ff8a80;background:#2a1212}
+    .nav-zero-partial{border-color:var(--accent2);color:#ffb74d;background:#2a2112}
+    .nav-trip-grid>.big-card.speed,
+    .nav-trip-grid>.big-card.cap{min-height:190px;padding:10px 7px;border-radius:15px}
+    .nav-trip-grid>.big-card.speed .label,
+    .nav-trip-grid>.big-card.cap .label{font-size:12px;margin-bottom:4px}
+    .nav-trip-grid>.big-card.speed .value{font-size:44px;line-height:1}
+    .nav-trip-grid>.big-card.speed .label:last-child{margin-top:4px}
+    .nav-trip-grid>.big-card.cap .big-dir-arrow{font-size:42px;line-height:1;margin:2px 0}
+    .nav-trip-grid>.big-card.cap .big-dir-cardinal{font-size:20px;margin-top:2px}
+    .nav-trip-grid>.big-card.cap .big-dir-deg{font-size:13px;margin-top:1px}
+    .nav-trip-grid>.big-card.time{min-height:104px;padding:10px 8px}
+    .nav-trip-grid>.big-card.time .value{font-size:34px}
+    .nav-weather{display:flex;justify-content:space-around;align-items:center;padding:8px;min-height:104px}
+    .nav-weather>div{text-align:center;min-width:0}
+    .nav-weather .label{font-size:11px;margin-bottom:2px}
+    .nav-weather .value{font-size:38px}
+    .nav-weather #nav-weather-icon{font-size:34px;line-height:1}
     .nav-trip-controls{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
     #route-state{font-weight:900;color:#aaa}
 
@@ -824,7 +853,6 @@
         <div class="rb-row">
           <label class="rb-btn wide file-btn" id="btn-load-pdf" for="pdf-input">PDF</label>
           <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
-          <button class="rb-btn wide" id="rally-enter" style="display:none">RALLY</button><button class="rb-btn wide" id="rally-exit" style="background:#3d2a12;border-color:#ff9100;color:#ffb74d;">Sortir</button>
           </div>
       </div>
     </div>
@@ -838,7 +866,7 @@
           <div class="nav-trip-divider"></div>
           <div class="label">Des de l'últim repostatge</div>
           <div class="big-partial"><span id="nav-odo-partial">0.00</span> km</div>
-          <div class="nav-odo-actions"><button class="big-odo-btn nav-zero-total" id="nav-odo-reset-total">↺ POSAR TOTAL A 0</button><button class="big-odo-btn nav-refuel-btn" id="nav-odo-reset">⛽ POSAR PARCIAL A 0</button></div>
+          <div class="nav-odo-actions"><button class="big-odo-btn nav-zero-total" id="nav-odo-reset-total">↺ TOTAL A 0</button><button class="big-odo-btn nav-zero-partial" id="nav-odo-reset">⛽ PARCIAL A 0</button></div>
         </div>
 
         <div class="big-card speed">
@@ -854,12 +882,12 @@
           <div class="big-dir-deg"><span id="nav-cap">---</span>°</div>
         </div>
 
-        <div class="big-card time full">
+        <div class="big-card time">
           <div class="label">Hora</div>
           <div class="value" id="nav-time">--:--:--</div>
         </div>
 
-        <div class="big-card full nav-weather">
+        <div class="big-card nav-weather">
           <div>
             <div class="label">🌡️ Temperatura</div>
             <div class="value"> <span id="nav-temp">--</span>°</div>
@@ -1661,8 +1689,10 @@
       e.target.value="";
     });
 
-    $("rally-enter").addEventListener("click", () => setRallyMode(true));
-    $("rally-exit").addEventListener("click", () => setRallyMode(false));
+    const rallyEnterBtn = $("rally-enter");
+    const rallyExitBtn = $("rally-exit");
+    if (rallyEnterBtn) rallyEnterBtn.addEventListener("click", () => setRallyMode(true));
+    if (rallyExitBtn) rallyExitBtn.addEventListener("click", () => setRallyMode(false));
 
     $("pdf-input").addEventListener("change", e => {
       const file = e.target.files[0];
