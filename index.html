@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-03-01">
+  <meta name="app-version" content="2026-10-03-02">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -494,17 +494,17 @@
     .nav-zero-total{border-color:var(--danger);color:#ff8a80;background:#2a1212}
     .nav-zero-partial{border-color:var(--accent2);color:#ffb74d;background:#2a2112}
     .nav-trip-grid>.big-card.speed,
-    .nav-trip-grid>.big-card.cap{min-height:190px;padding:10px 7px;border-radius:15px}
+    .nav-trip-grid>.big-card.cap{min-height:155px;padding:8px 6px;border-radius:15px}
     .nav-trip-grid>.big-card.speed .label,
     .nav-trip-grid>.big-card.cap .label{font-size:12px;margin-bottom:4px}
-    .nav-trip-grid>.big-card.speed .value{font-size:44px;line-height:1}
+    .nav-trip-grid>.big-card.speed .value{font-size:36px;line-height:1}
     .nav-trip-grid>.big-card.speed .label:last-child{margin-top:4px}
-    .nav-trip-grid>.big-card.cap .big-dir-arrow{font-size:42px;line-height:1;margin:2px 0}
-    .nav-trip-grid>.big-card.cap .big-dir-cardinal{font-size:20px;margin-top:2px}
-    .nav-trip-grid>.big-card.cap .big-dir-deg{font-size:13px;margin-top:1px}
-    .nav-trip-grid>.big-card.time{min-height:104px;padding:10px 8px}
-    .nav-trip-grid>.big-card.time .value{font-size:34px}
-    .nav-weather{display:flex;justify-content:space-around;align-items:center;padding:8px;min-height:104px}
+    .nav-trip-grid>.big-card.cap .big-dir-arrow{font-size:34px;line-height:1;margin:1px 0}
+    .nav-trip-grid>.big-card.cap .big-dir-cardinal{font-size:17px;margin-top:1px}
+    .nav-trip-grid>.big-card.cap .big-dir-deg{font-size:12px;margin-top:1px}
+    .nav-trip-grid>.big-card.time{min-height:92px;padding:8px}
+    .nav-trip-grid>.big-card.time .value{font-size:32px}
+    .nav-weather{display:flex;justify-content:space-around;align-items:center;padding:8px;min-height:96px;width:100%}
     .nav-weather>div{text-align:center;min-width:0}
     .nav-weather .label{font-size:11px;margin-bottom:2px}
     .nav-weather .value{font-size:38px}
@@ -804,12 +804,12 @@
           <div class="big-dir-deg"><span id="nav-cap">---</span>°</div>
         </div>
 
-        <div class="big-card time">
+        <div class="big-card time full">
           <div class="label">Hora</div>
           <div class="value" id="nav-time">--:--:--</div>
         </div>
 
-        <div class="big-card nav-weather">
+        <div class="big-card nav-weather full">
           <div>
             <div class="label">🌡️ Temperatura</div>
             <div class="value"> <span id="nav-temp">--</span>°</div>
