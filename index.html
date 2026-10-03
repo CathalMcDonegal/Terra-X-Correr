@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-02-30">
+  <meta name="app-version" content="2026-10-03-01">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -260,68 +260,6 @@
     #roadbook-view {
       flex: 1 1 auto;
       min-height: 0;
-    }
-    #app.rally-mode .tabs { display: none; }
-    #app.rally-mode #roadbook { display: flex; }
-    #app.rally-mode #rb-instruments { padding: 4px; gap: 4px; }
-    #app.rally-mode #rb-instruments .inst { border-radius: 7px; padding: 4px; }
-    #app.rally-mode #rb-instruments .inst .value { font-size: 21px; }
-    #app.rally-mode #rb-instruments .inst.speed .value { font-size: 25px !important; }
-    #app.rally-mode .odo-controls { display: none; }
-    #app.rally-mode .rb-toolbar { padding: 5px; gap: 4px; }
-    #app.rally-mode .rb-btn { min-height: 48px; padding: 10px 8px; }
-    #app.rally-mode #btn-load-pdf,
-    #app.rally-mode #btn-reset-all-bar { display: none; }
-    #app.rally-mode #btn-fullscreen { flex: 0 0 100px; }
-    #app.rally-mode #rally-exit { display: block; }
-    #rally-exit { display: none; }
-    .rally-hud {
-      display: none;
-      position: absolute;
-      left: 6px;
-      right: 6px;
-      bottom: 6px;
-      z-index: 50;
-      background: rgba(0,0,0,.88);
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 5px 7px;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 5px;
-      pointer-events: none;
-    }
-    #app.rally-mode .rally-hud { display: grid; }
-    .rally-hud .rh { text-align: center; min-width: 0; }
-    .rally-hud .rh-label { font-size: 9px; color: #999; text-transform: uppercase; }
-    .rally-hud .rh-value { font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
-    .rally-hud .rh-value.odo { color: var(--accent); }
-    .rally-hud .rh-value.cap { color: var(--accent2); }
-    .rally-hud .rh-value.speed { color: #40c4ff; }
-    .rally-hud .rh-value.page { color: #fff; }
-    #rally-poi-alert {
-      display: none;
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 70;
-      pointer-events: none;
-      text-align: center;
-      background: rgba(0,0,0,.92);
-      border: 3px solid var(--accent2);
-      border-radius: 18px;
-      padding: 14px 16px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.55);
-    }
-    #rally-poi-alert.visible { display: block; }
-    #rally-poi-alert.urgent { border-color: var(--danger); transform: translateY(-50%) scale(1.04); }
-    #rally-poi-alert .poi-kind { font-size: 12px; font-weight: 900; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px; }
-    #rally-poi-alert .poi-label { margin-top: 3px; font-size: clamp(24px, 7vw, 42px); font-weight: 950; line-height: 1.05; }
-    #rally-poi-alert .poi-distance { margin-top: 6px; font-size: clamp(18px, 5vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
-    #rally-poi-alert .poi-direction { font-size: 44px; line-height: 1; margin-top: 2px; color: var(--accent2); }
-    @media (min-width: 700px) {
-      #rally-poi-alert { left: 18%; right: 18%; }
     }
     #notes-overlay {
       display: none;
@@ -690,7 +628,6 @@
       letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,.8);
       white-space: nowrap;
     }
-    #app.rally-mode #app-watermark { color: rgba(255,255,255,.28); bottom: 2px; }
     .rb-toolbar .rb-row { width:100%; }
     .rb-toolbar .rb-row:first-child { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
     .rb-toolbar .rb-row:first-child .rb-btn { min-width:0; width:100%; min-height:56px; }
@@ -771,8 +708,6 @@
       background: #333;
       color: var(--text);
     }
-
-    #rally-ready{position:fixed;inset:0;z-index:9996;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:18px}#rally-ready.visible{display:flex}.ready-card{width:min(520px,96vw);max-height:90vh;overflow:auto;background:#141414;border:1px solid var(--border);border-radius:18px;padding:18px}.ready-card h3{font-size:22px;margin-bottom:12px}.ready-item{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}.ready-ok{color:#69f0ae}.ready-warn{color:#ffb74d}.ready-bad{color:#ff8a80}
   </style>
 </head>
 <body>
@@ -827,19 +762,6 @@
               <p style="margin-top:14px">Usa el botó PDF per carregar un roadbook</p>
             </div>
           </div>
-        </div>
-        <div id="rally-poi-alert" aria-live="assertive"><div class="poi-kind" id="rally-poi-kind">PUNT IMPORTANT</div><div class="poi-direction" id="rally-poi-direction"></div><div class="poi-label" id="rally-poi-label">—</div><div class="poi-distance" id="rally-poi-distance">—</div></div>
-        <div class="rally-hud" aria-hidden="true">
-          <div class="rh"><div class="rh-label">Odo</div><div class="rh-value odo" id="rally-odo">0.00</div></div>
-          <div class="rh"><div class="rh-label">CAP</div><div class="rh-value cap" id="rally-cap">---</div></div>
-          <div class="rh"><div class="rh-label">Vel</div><div class="rh-value speed" id="rally-speed">0</div></div>
-          <div class="rh"><div class="rh-label">Pàgina</div><div class="rh-value page" id="rally-page">— / —</div></div>
-          <div class="rh"><div class="rh-label">GPX</div><div class="rh-value page" id="rally-gpx">—</div></div>
-          <div class="rh"><div class="rh-label">PROPER</div><div class="rh-value page" id="rally-next-poi">—</div></div>
-        </div>
-        <div id="notes-overlay">
-          <h4>Notes del roadbook</h4>
-          <div id="notes-overlay-list"></div>
         </div>
       </div>
 
@@ -952,7 +874,7 @@
         <div class="editor-section">
           <h3>Manual d’instruccions</h3>
           <p style="font-size:14px; color:var(--muted); line-height:1.55;">
-            Guia completa de <strong>Terra X Correr</strong>: roadbook, RALLY, navegació, instrumentació,
+            Guia completa de <strong>Terra X Correr</strong>: roadbook, navegació, instrumentació,
             GPS, odòmetre, GPX, comandaments i funcionament offline.
           </p>
         </div>
@@ -963,24 +885,15 @@
             <strong>▲</strong> = retrocedir · <strong>▼</strong> = avançar · <strong>− / +</strong> = zoom ·
             <strong>Pantalla</strong> = pantalla completa. La posició de lectura també es conserva.
           </p>
-        </div>
-        <div class="editor-section">
-          <h3>2. Mode RALLY</h3>
-          <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            <strong>RALLY</strong> converteix el Roadbook en una pantalla de conducció compacta i prioritza
-            el roadbook, l’odòmetre, CAP, velocitat, pàgina i informació GPX. <strong>Sortir</strong> torna al mode normal.
-          </p>
-        </div>
-        <div class="editor-section">
-          <h3>3. GPX i punts importants</h3>
+        </div><div class="editor-section">
+          <h3>2. GPX i punts importants</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
             Toca <strong>GPX</strong> per carregar una ruta. L’app calcula la posició sobre el track i pot detectar
-            <strong>punts importants i canvis de direcció</strong>. En RALLY, els propers punts i les alertes apareixen
-            a l’HUD. El GPX complementa, però no substitueix, el roadbook oficial.
+            <strong>punts importants i canvis de direcció</strong>. El GPX complementa, però no substitueix, el roadbook oficial.
           </p>
         </div>
         <div class="editor-section">
-          <h3>4. Odòmetre i parcial</h3>
+          <h3>3. Odòmetre i parcial</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
             L’odòmetre suma quilòmetres amb el GPS. <strong>− / −− / ++ / +</strong> ajusten −0,1 / −0,01 /
             +0,01 / +0,1 km. <strong>Rp / Reset parcial</strong> posa el parcial a zero.
@@ -1017,7 +930,7 @@
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
             El comandament permet controlar el roadbook sense tocar la pantalla:
             <strong>amunt</strong> = retrocedir, <strong>avall</strong> = avançar i <strong>+ / −</strong> =
-            ajustar l’odòmetre en passos de 0,01 km. En RALLY també controla les funcions assignades.
+            ajustar l’odòmetre en passos de 0,01 km. En  també controla les funcions assignades.
           </p>
         </div>
         <div class="editor-section">
@@ -1031,7 +944,7 @@
         <div class="editor-section">
           <h3>10. Abans de sortir</h3>
           <p style="font-size:14px; color:var(--text); line-height:1.5;">
-            Fes servir <strong>PRE-RUTA</strong> per revisar GPS, precisió, roadbook, GPX, comandament, bateria, pantalla i mode RALLY.
+            Fes servir <strong>PRE-RUTA</strong> per revisar GPS, precisió, roadbook, GPX, comandament, bateria, pantalla i mode .
             El GPX és opcional: només cal carregar-lo si vols seguiment i detecció automàtica de punts importants.
           </p>
         </div>
@@ -1059,7 +972,7 @@
       <button type="button" id="btn-dismiss-install">Ara no</button>
     </div>
   </div>
-  <div id="rally-ready" role="dialog" aria-modal="true"><div class="ready-card"><h3>Comprovació abans de sortir</h3><div id="ready-list"></div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="rb-btn" id="ready-close">Tancar</button></div></div></div><div id="status"></div>
+  <div id="status"></div>
   <input type="file" id="pdf-input" class="file-picker" accept="application/pdf">
   <input type="file" id="gpx-input" class="file-picker" accept=".gpx,application/gpx+xml,text/xml">
 
@@ -1087,7 +1000,6 @@
       saveTimer: null,
       pdfScrollTop: 0,
       compassActive: false,
-      rallyMode: false,
       gpxTrack: [],
       gpxName: "",
       gpxDistanceKm: 0,
@@ -1166,36 +1078,8 @@
     }
     function clearGpx() {
       state.gpxTrack=[];state.gpxName="";state.gpxDistanceKm=0;state.gpxCurrentKm=null;state.gpxLastMatch=0;state.gpxLastMatchIndex=null;state.gpxLastPoiId=null;state.gpxActivePoi=null;
-      localStorage.removeItem("txc_gpx"); updateRallyUI();
-    }
-    function updateGpxPoiContext() {
-      const nextEl = $("rally-next-poi");
-      const alert = $("rally-poi-alert");
-      if (state.gpxCurrentKm == null || !state.gpxPointsOfInterest.length) {
-        if (nextEl) nextEl.textContent = "—";
-        if (alert) alert.classList.remove("visible","urgent");
-        return;
-      }
-      const next = state.gpxPointsOfInterest.find(p => p.km >= state.gpxCurrentKm);
-      if (!next) {
-        if (nextEl) nextEl.textContent = "FI";
-        if (alert) alert.classList.remove("visible","urgent");
-        return;
-      }
-      const d = Math.max(0, next.km - state.gpxCurrentKm);
-      if (nextEl) nextEl.textContent = d < 0.1 ? Math.round(d * 1000) + " m" : d.toFixed(2) + " km";
-      if (!alert) return;
-      const show = d <= 0.15 && state.rallyMode;
-      alert.classList.toggle("visible", show);
-      alert.classList.toggle("urgent", show && d <= 0.05);
-      if (show) {
-        $("rally-poi-label").textContent = next.label || "PUNT IMPORTANT";
-        $("rally-poi-direction").textContent = next.turnDelta != null ? (next.turnDelta > 0 ? "→" : "←") : "";
-        $("rally-poi-distance").textContent = d < 0.1 ? Math.max(0, Math.round(d * 1000)) + " m" : d.toFixed(2) + " km";
-        $("rally-poi-kind").textContent = next.turnDelta != null ? "GIR" : "PUNT IMPORTANT";
-      }
-    }
-    function updateGpxPosition(lat,lon){
+      localStorage.removeItem("txc_gpx");
+    }function updateGpxPosition(lat,lon){
       if(!state.gpxTrack.length||Date.now()-state.gpxLastMatch<1200)return;
       const t=state.gpxTrack,c=[],start=state.gpxLastMatchIndex==null?0:Math.max(0,state.gpxLastMatchIndex-120),end=state.gpxLastMatchIndex==null?t.length-1:Math.min(t.length-1,state.gpxLastMatchIndex+120);
       const search=(lo,hi)=>{for(let i=lo;i<hi;i++){const p=t[i],q=t[i+1],lat0=lat*Math.PI/180,kx=111320*Math.cos(lat0),ky=110540,bx=(q.lon-p.lon)*kx,by=(q.lat-p.lat)*ky,px=(lon-p.lon)*kx,py=(lat-p.lat)*ky,l2=bx*bx+by*by;let z=l2?(px*bx+py*by)/l2:0;z=Math.max(0,Math.min(1,z));const dx=px-bx*z,dy=py-by*z,seg=haversine(p.lat,p.lon,q.lat,q.lon)/1000;c.push({dist:Math.hypot(dx,dy),km:(p.km||0)+seg*z,index:i});}};
@@ -1203,7 +1087,6 @@
       if(!best||best.dist>500){c.length=0;search(0,t.length-1);c.sort((x,y)=>x.dist-y.dist);best=c[0];}
       state.gpxCurrentKm=best&&best.dist<=500?best.km:null;if(best)state.gpxLastMatchIndex=best.index;state.gpxLastMatch=Date.now();
       if(state.gpxCurrentKm!=null&&state.gpxPointsOfInterest.length){const n=state.gpxPointsOfInterest.find(p=>p.km>=state.gpxCurrentKm-0.03);if(n&&state.gpxLastPoiId!==n.id&&n.km-state.gpxCurrentKm<=0.15){state.gpxActivePoi=n;state.gpxLastPoiId=n.id;showStatus("GPX · "+n.label+" · "+Math.max(0,Math.round((n.km-state.gpxCurrentKm)*1000))+" m",3500);}}
-      updateGpxPoiContext();updateRallyUI();
     }
 
     function haversine(lat1, lon1, lat2, lon2) {
@@ -1213,40 +1096,11 @@
       const dLon = toRad(lon2 - lon1);
       const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function updateRallyUI() {
-      const app = $("app");
-      if (!app) return;
-      app.classList.toggle("rally-mode", state.rallyMode);
-      const enter = $("rally-enter");
-      const exit = $("rally-exit");
-      if (enter) enter.style.display = state.rallyMode ? "none" : "";
-      if (exit) exit.style.display = state.rallyMode ? "block" : "none";
-      const odo = $("rally-odo");
-      const cap = $("rally-cap");
-      const speed = $("rally-speed");
-      const page = $("rally-page");
-      if (odo) odo.textContent = state.odoTotal.toFixed(2);
-      if (cap) cap.textContent = state.heading == null ? "---" : String(Math.round(state.heading)).padStart(3,"0");
-      if (speed) speed.textContent = String(Math.round(state.speed || 0));
-      if (page) page.textContent = state.currentPdf ? (state.currentPage + " / " + state.currentPdf.numPages) : "— / —";
-      const gpx = $("rally-gpx");
-      if (gpx) gpx.textContent = state.gpxCurrentKm != null ? state.gpxCurrentKm.toFixed(2) : (state.gpxTrack.length ? "—" : "");
-      updateGpxPoiContext();
-    }
-    function setRallyMode(active) {
-      state.rallyMode = !!active;
-      try { localStorage.setItem("txc_rally_mode", state.rallyMode ? "1" : "0"); } catch(e) {}
-      updateRallyUI();
-      if (state.rallyMode) showStatus("Mode RALLY · roadbook + instruments");
-    }
-    function loadRallyMode() {
-      try { state.rallyMode = localStorage.getItem("txc_rally_mode") === "1"; } catch(e) { state.rallyMode = false; }
-      updateRallyUI();
-    }
-
-    function updateOdoDisplay() {
+    }function setMode(active) {
+      state.Mode = !!active;
+      try { localStorage.setItem("txc__mode", state.Mode ? "1" : "0"); } catch(e) {}
+      if (state.Mode) showStatus("Mode  · roadbook + instruments");
+    }function updateOdoDisplay() {
       const t = state.odoTotal.toFixed(2);
       const p = state.odoPartial.toFixed(2);
       const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
@@ -1611,7 +1465,6 @@
       showStatus("Roadbook llest · "+num+" pàgines");
       state.pdfScrollTop=savedScroll;
       updateCurrentPdfPageFromScroll();
-      updateRallyUI();
       try{
         localStorage.setItem("txc_pdf_zoom",String(state.zoom));
         localStorage.setItem("txc_pdf_scroll",String(Math.max(0,savedScroll)));
@@ -1684,15 +1537,10 @@
       try {
         const data=parseGpxText(await file.text(), file.name.replace(/\\.gpx$/i,""));
         state.gpxName=data.name; state.gpxTrack=data.points; state.gpxDistanceKm=data.distanceKm; state.gpxPointsOfInterest=data.pois||[]; state.gpxCurrentKm=null; state.gpxLastPoiId=null; state.gpxLastMatch=0;
-        saveGpx(); updateRallyUI(); showStatus("GPX carregat · "+data.points.length+" punts · "+data.distanceKm.toFixed(1)+" km · "+state.gpxPointsOfInterest.length+" punts importants");
+        saveGpx(); showStatus("GPX carregat · "+data.points.length+" punts · "+data.distanceKm.toFixed(1)+" km · "+state.gpxPointsOfInterest.length+" punts importants");
       } catch(err) { showStatus("GPX: "+(err.message||"fitxer invàlid")); }
       e.target.value="";
     });
-
-    const rallyEnterBtn = $("rally-enter");
-    const rallyExitBtn = $("rally-exit");
-    if (rallyEnterBtn) rallyEnterBtn.addEventListener("click", () => setRallyMode(true));
-    if (rallyExitBtn) rallyExitBtn.addEventListener("click", () => setRallyMode(false));
 
     $("pdf-input").addEventListener("change", e => {
       const file = e.target.files[0];
@@ -1757,7 +1605,6 @@
       const nextPage = best + 1;
       if (nextPage !== state.currentPage) {
         state.currentPage = nextPage;
-        updateRallyUI();
       }
     }
 
@@ -1825,18 +1672,12 @@
 
       if (plusKeys.includes(key) || plusKeys.includes(code)) {
         e.preventDefault();
-        if (!rallyPadAction("plus")) adjustOdoPartial(0.01);
+        adjustOdoPartial(0.01);
         return;
       }
       if (minusKeys.includes(key) || minusKeys.includes(code)) {
         e.preventDefault();
-        if (!rallyPadAction("minus")) adjustOdoPartial(-0.01);
-        return;
-      }
-
-      if (key === "r" || key === "R") {
-        e.preventDefault();
-        rallyPadAction("stage");
+        adjustOdoPartial(-0.01);
         return;
       }
 
@@ -1850,43 +1691,19 @@
       }
     }, true);
 
-    // Gamepad / alguns mandos HID com a joystick
+    // Gamepad / alguns mandos HID amb la joystick
     let lastPadNav = 0;
-    let lastPadAction = 0;
-    function rallyPadAction(action) {
-      if (!state.rallyMode) return false;
-      if (action === "next") { handleRoadbookNav(1); return true; }
-      if (action === "prev") { handleRoadbookNav(-1); return true; }
-      if (action === "plus") { adjustOdoPartial(0.01); return true; }
-      if (action === "minus") { adjustOdoPartial(-0.01); return true; }
-      if (action === "stage") { toggleRoute(); return true; }
-      return false;
-    }
     function pollGamepad() {
       const pads = navigator.getGamepads ? navigator.getGamepads() : [];
       const now = Date.now();
       for (const pad of pads) {
         if (!pad) continue;
-        // Eixos verticals o botons amunt/avall
         const axisY = pad.axes[1] || 0;
         const up = pad.buttons[12] && pad.buttons[12].pressed;
         const down = pad.buttons[13] && pad.buttons[13].pressed;
-        const plus = pad.buttons[0] && pad.buttons[0].pressed;
-        const minus = pad.buttons[1] && pad.buttons[1].pressed;
-        const stage = pad.buttons[9] && pad.buttons[9].pressed;
         if (now - lastPadNav > 220) {
-          if (up || axisY < -0.5) {
-            if (!rallyPadAction("prev")) handleRoadbookNav(-1);
-            lastPadNav = now;
-          } else if (down || axisY > 0.5) {
-            if (!rallyPadAction("next")) handleRoadbookNav(1);
-            lastPadNav = now;
-          }
-        }
-        if (state.rallyMode && now - lastPadAction > 350) {
-          if (plus) { rallyPadAction("plus"); lastPadAction = now; }
-          else if (minus) { rallyPadAction("minus"); lastPadAction = now; }
-          else if (stage) { rallyPadAction("stage"); lastPadAction = now; }
+          if (up || axisY < -0.5) { handleRoadbookNav(-1); lastPadNav = now; }
+          else if (down || axisY > 0.5) { handleRoadbookNav(1); lastPadNav = now; }
         }
       }
       requestAnimationFrame(pollGamepad);
@@ -1936,14 +1753,12 @@
       state.gpsAccuracy = null;
       state.pdfScrollTop = 0;
       state.compassActive = false;
-      state.rallyMode = false;
+      state.Mode = false;
       state.routeStartTime=null;
       state.routeStartOdo=0;
       state.routeMaxSpeed=0;
       clearGpx();
       updateCompassButton();
-      updateRallyUI();
-      localStorage.removeItem("txc_rally_mode");
       updateOdoDisplay();
       updateNotesOverlay();
       const container = $("pdf-canvas-container");
@@ -2038,7 +1853,6 @@
 
     loadSettings();
     loadGpx();
-    loadRallyMode();
     let resizeTimer;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
@@ -2054,8 +1868,7 @@
 
     function updateBatteryUI(){if(state.batteryLevel!=null&&state.batteryLevel<=.2)showStatus("Bateria baixa · "+Math.round(state.batteryLevel*100)+"%",4500);}
     async function initBattery(){if(!navigator.getBattery)return;try{const b=await navigator.getBattery(),sync=()=>{state.batteryLevel=b.level;state.batteryCharging=b.charging;updateBatteryUI();};["levelchange","chargingchange"].forEach(e=>b.addEventListener(e,sync));sync();}catch(e){}}
-    function preflight(){const items=[],gps=state.gpsOk&&state.gpsAccuracy!=null&&state.gpsAccuracy<=60;items.push(["GPS",gps?"OK · ±"+Math.round(state.gpsAccuracy)+" m":state.gpsOk?"Actiu · precisió >60 m":"No fix",gps?"ok":state.gpsOk?"warn":"bad"]);items.push(["Roadbook",state.currentPdf?"OK · "+state.currentPdf.numPages+" pàgines":"No carregat",state.currentPdf?"ok":"warn"]);items.push(["GPX",state.gpxTrack.length?state.gpxName+" · "+state.gpxPointsOfInterest.length+" punts importants":"No carregat",state.gpxTrack.length?"ok":"warn"]);const pads=navigator.getGamepads?Array.from(navigator.getGamepads()).filter(Boolean).length:0;items.push(["Comandament",pads?"Detectat · "+pads:"No detectat","warn"]);const bat=state.batteryLevel==null?"No disponible":Math.round(state.batteryLevel*100)+"%"+(state.batteryCharging?" · carregant":"");items.push(["Bateria",bat,state.batteryLevel==null?"warn":state.batteryLevel>.2?"ok":"bad"]);items.push(["Pantalla",document.fullscreenElement?"Pantalla completa":"Mode normal",document.fullscreenElement?"ok":"warn"]);items.push(["Mode",state.rallyMode?"RALLY actiu":"RALLY no actiu",state.rallyMode?"ok":"warn"]);$("ready-list").innerHTML=items.map(x=>"<div class='ready-item'><span>"+x[0]+"</span><strong class='ready-"+x[2]+"'>"+x[1]+"</strong></div>").join("");$("rally-ready").classList.add("visible");}
-    const readyClose=$("ready-close");if(readyClose)readyClose.addEventListener("click",()=>$("rally-ready").classList.remove("visible"));initBattery();
+initBattery();
 
     // --- Pantalla sempre encesa (Wake Lock) ---
     let wakeLock = null;
