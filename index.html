@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-04-12">
+  <meta name="app-version" content="2026-10-04-13">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -936,6 +936,47 @@
       #navegacio .nav-lean-needle{height:44px}
       #navegacio .nav-trip-grid>.big-card.time{height:58px}
       #navegacio .nav-weather{height:66px}
+    }
+
+
+    /* Roadbook final: la barra de controls sempre queda dins la pantalla */
+    #rb-instruments{
+      box-sizing:border-box;
+      height:142px;min-height:142px;max-height:142px;
+      grid-template-rows:minmax(0,1fr);
+      overflow:hidden;
+    }
+    #rb-instruments>.inst{min-height:0;height:auto;box-sizing:border-box;overflow:hidden}
+    #rb-instruments .inst.odo{justify-content:center}
+    #rb-instruments .odo-controls{min-height:0}
+    #rb-instruments .odo-btn{height:32px;min-height:32px}
+    #roadbook-main{min-height:0;overflow:hidden}
+    #roadbook-view{min-height:0;overflow:auto}
+    #roadbook .rb-toolbar{
+      box-sizing:border-box;
+      flex:0 0 auto;
+      min-height:0;
+      height:88px;
+      padding:4px 7px 5px;
+      gap:4px;
+      overflow:hidden;
+      position:relative;
+      z-index:5;
+    }
+    #roadbook .rb-row{height:39px;min-height:39px;flex:0 0 39px}
+    #roadbook .rb-btn{
+      box-sizing:border-box;
+      height:39px;min-height:39px;
+      padding:4px 7px;
+    }
+    #roadbook .rb-toolbar .rb-btn.wide{font-size:13px}
+    @media(max-height:760px){
+      #rb-instruments{
+        height:130px;min-height:130px;max-height:130px;
+      }
+      #roadbook .rb-toolbar{height:78px}
+      #roadbook .rb-row{height:34px;min-height:34px;flex-basis:34px}
+      #roadbook .rb-btn{height:34px;min-height:34px;padding:3px 6px}
     }
 
 </style>
