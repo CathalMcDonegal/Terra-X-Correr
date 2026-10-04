@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-04-10">
+  <meta name="app-version" content="2026-10-04-11">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -792,6 +792,91 @@
       #navegacio .nav-lean-gauge{height:62px}
       #navegacio .nav-lean-arc{height:52px}
       #navegacio .nav-lean-needle{height:46px}
+    }
+    /* Ajust final mòbil: una sola pantalla, sense blocs tallats */
+    #app{height:100vh;height:100svh;height:100dvh;min-height:0}
+    .screen.active{min-height:0}
+    #roadbook{min-height:0}
+    #rb-instruments{
+      grid-template-columns:1.45fr 1fr;
+      gap:5px;
+      padding:5px 7px;
+      height:126px;
+      min-height:126px;
+      max-height:126px;
+      overflow:hidden;
+    }
+    #rb-instruments .inst{padding:5px 6px;border-radius:11px}
+    #rb-instruments .inst .label{font-size:9px;margin-bottom:1px}
+    #rb-instruments .inst .value{font-size:32px;line-height:1}
+    #rb-instruments .inst .partial{font-size:13px;margin:1px 0}
+    #rb-instruments .inst.odo{display:flex;flex-direction:column;justify-content:center}
+    #rb-instruments .odo-controls{gap:4px;margin-top:4px}
+    #rb-instruments .odo-btn{min-height:34px;height:34px;padding:4px 6px;font-size:14px;border-radius:9px}
+    #rb-instruments .inst.combo{padding:5px 4px;gap:2px}
+    #rb-instruments .inst.combo .combo-row{gap:2px}
+    #rb-instruments .inst.combo .value{font-size:29px!important}
+    #rb-instruments .inst.combo .label{font-size:9px}
+    #rb-instruments .inst.combo .combo-block:nth-child(2) .value{font-size:25px!important}
+    #roadbook .rb-toolbar{
+      gap:5px;
+      padding:5px 7px 6px;
+      min-height:104px;
+    }
+    #roadbook .rb-row{gap:5px}
+    #roadbook .rb-btn{
+      min-height:45px;
+      height:45px;
+      padding:7px 8px;
+      border-radius:10px;
+      font-size:15px;
+    }
+    #roadbook .rb-btn.prev-btn,#roadbook .rb-btn.next-btn{font-size:21px}
+    #roadbook .rb-btn.zoom-btn{max-width:64px}
+    #roadbook .rb-toolbar .rb-btn.wide{font-size:14px}
+    #roadbook-main{min-height:0}
+    #roadbook-view{min-height:0}
+    
+    /* Navegació: alçada real i files compactes */
+    #navegacio{overflow:hidden!important;min-height:0}
+    #navegacio .nav-trip-grid{
+      flex:0 0 auto!important;
+      min-height:0!important;
+      height:auto!important;
+      grid-template-rows:180px 142px 202px 76px 88px;
+      gap:6px;
+      overflow:hidden;
+    }
+    #navegacio .nav-trip-main{padding:7px 10px 6px}
+    #navegacio .nav-trip-main .value{font-size:46px}
+    #navegacio .nav-trip-divider{margin:4px 14%}
+    #navegacio .nav-odo-actions{margin-top:4px}
+    #navegacio .nav-odo-actions .big-odo-btn{height:34px;min-height:34px;font-size:10px}
+    #navegacio .nav-trip-grid>.big-card.speed,
+    #navegacio .nav-trip-grid>.big-card.cap{min-height:0;height:142px;padding:5px}
+    #navegacio .nav-lean{height:202px;min-height:0;padding:6px 10px}
+    #navegacio .nav-lean-gauge{height:83px}
+    #navegacio .nav-lean-arc{height:69px}
+    #navegacio .nav-lean-needle{height:61px}
+    #navegacio .nav-trip-grid>.big-card.time{height:76px;min-height:0;padding:4px 8px}
+    #navegacio .nav-trip-grid>.big-card.time .value{font-size:27px}
+    #navegacio .nav-weather{height:88px;min-height:0;padding:4px 8px}
+    #navegacio .nav-weather .value{font-size:25px}
+    #navegacio .nav-weather #nav-weather-icon{font-size:24px}
+    #navegacio .gps-line{margin:1px 0 0;font-size:9px;line-height:13px}
+    @media(max-height:760px){
+      #rb-instruments{height:112px;min-height:112px;max-height:112px}
+      #roadbook .rb-toolbar{min-height:96px}
+      #roadbook .rb-btn{height:41px;min-height:41px;padding:5px 7px}
+      #navegacio .nav-trip-grid{grid-template-rows:155px 112px 174px 62px 72px}
+      #navegacio .nav-trip-grid>.big-card.speed,
+      #navegacio .nav-trip-grid>.big-card.cap{height:112px}
+      #navegacio .nav-lean{height:174px}
+      #navegacio .nav-lean-gauge{height:68px}
+      #navegacio .nav-lean-arc{height:56px}
+      #navegacio .nav-lean-needle{height:49px}
+      #navegacio .nav-trip-grid>.big-card.time{height:62px}
+      #navegacio .nav-weather{height:72px}
     }
 </style>
 </head>
