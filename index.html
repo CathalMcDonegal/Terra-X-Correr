@@ -878,6 +878,66 @@
       #navegacio .nav-trip-grid>.big-card.time{height:62px}
       #navegacio .nav-weather{height:72px}
     }
+
+    /* Correcció visual basada en les captures Android */
+    #rb-instruments{
+      height:148px;min-height:148px;max-height:148px;
+      overflow:visible;
+      grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);
+      align-items:stretch;
+    }
+    #rb-instruments .inst.odo{min-width:0}
+    #rb-instruments .odo-controls{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:4px;flex-wrap:nowrap;
+    }
+    #rb-instruments .odo-btn{
+      min-width:0;width:100%;height:32px;min-height:32px;
+      padding:2px 1px;font-size:12px;line-height:1;
+      border-radius:8px;white-space:nowrap;
+    }
+    #rb-instruments .odo-btn.danger{font-size:11px}
+    #rb-instruments .inst.combo{justify-content:center}
+    #roadbook .rb-toolbar{
+      gap:4px;padding:4px 7px calc(5px + env(safe-area-inset-bottom));
+      min-height:0;
+    }
+    #roadbook .rb-row{gap:5px}
+    #roadbook .rb-btn{
+      height:39px;min-height:39px;padding:4px 7px;
+      font-size:15px;border-radius:9px;
+    }
+    #roadbook .rb-btn.prev-btn,#roadbook .rb-btn.next-btn{font-size:21px}
+    #roadbook .rb-toolbar .rb-btn.wide{font-size:13px}
+    #navegacio .nav-trip-grid{
+      grid-template-rows:166px 132px 184px 68px 78px;
+      gap:6px;
+    }
+    #navegacio .nav-trip-main{padding:6px 10px}
+    #navegacio .nav-trip-main .value{font-size:44px}
+    #navegacio .nav-trip-grid>.big-card.speed,
+    #navegacio .nav-trip-grid>.big-card.cap{height:132px}
+    #navegacio .nav-lean{height:184px;padding:6px 10px}
+    #navegacio .nav-lean-gauge{height:75px}
+    #navegacio .nav-lean-arc{height:62px}
+    #navegacio .nav-lean-needle{height:54px}
+    #navegacio .nav-trip-grid>.big-card.time{height:68px}
+    #navegacio .nav-weather{height:78px}
+    @media(max-height:760px){
+      #rb-instruments{height:140px;min-height:140px;max-height:140px}
+      #roadbook .rb-btn{height:36px;min-height:36px}
+      #navegacio .nav-trip-grid{grid-template-rows:145px 108px 160px 58px 66px}
+      #navegacio .nav-trip-grid>.big-card.speed,
+      #navegacio .nav-trip-grid>.big-card.cap{height:108px}
+      #navegacio .nav-lean{height:160px}
+      #navegacio .nav-lean-gauge{height:61px}
+      #navegacio .nav-lean-arc{height:51px}
+      #navegacio .nav-lean-needle{height:44px}
+      #navegacio .nav-trip-grid>.big-card.time{height:58px}
+      #navegacio .nav-weather{height:66px}
+    }
+
 </style>
 </head>
 <body>
@@ -901,8 +961,8 @@
             <button class="odo-btn" data-adj="-0.01" title="-0.01">−−</button>
             <button class="odo-btn" data-adj="0.01" title="+0.01">++</button>
             <button class="odo-btn" data-adj="0.1" title="+0.1">+</button>
-            <button class="odo-btn danger" id="odo-reset" title="Reset parcial">Rp</button>
-            <button class="odo-btn danger" id="odo-reset-total" title="Reset total">Rt</button>
+            <button class="odo-btn danger" id="odo-reset" title="Posar parcial a zero" aria-label="Posar parcial a zero">↶P</button>
+            <button class="odo-btn danger" id="odo-reset-total" title="Posar total a zero" aria-label="Posar total a zero">↶T</button>
           </div>
         </div>
         <div class="inst combo">
@@ -943,8 +1003,8 @@
           <button class="rb-btn next-btn" id="btn-next">▼</button>
         </div>
         <div class="rb-row">
-          <label class="rb-btn wide file-btn" id="btn-load-pdf" for="pdf-input">PDF</label>
-          <button class="rb-btn primary wide" id="btn-fullscreen">Pantalla</button>
+          <label class="rb-btn wide file-btn" id="btn-load-pdf" for="pdf-input">📄 PDF</label>
+          <button class="rb-btn primary wide" id="btn-fullscreen">⛶ Pantalla</button>
           </div>
       </div>
     </div>
