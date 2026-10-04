@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-03-02">
+  <meta name="app-version" content="2026-10-03-03">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -716,6 +716,7 @@
     <div class="tabs">
       <button class="tab active" data-screen="roadbook">Roadbook</button>
       <button class="tab" data-screen="navegacio">Navegació</button>
+      <button class="tab" data-screen="dashboard">Dashboard</button>
       <button class="tab" data-screen="instruments">Instrumentació</button>
       <button class="tab" data-screen="manual">Manual</button>
     </div>
@@ -825,6 +826,75 @@
       <div class="gps-line">
         <span class="gps-dot" id="nav-gps-indicator"></span>
         <span id="nav-gps-status">Buscant GPS…</span>
+      </div>
+    </div>
+
+    #dashboard .dash-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px;height:100%;padding:10px;overflow:auto;align-content:start}
+    #dashboard .dash-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:12px;text-align:center;min-width:0}
+    #dashboard .dash-card.full{grid-column:1/-1}
+    #dashboard .dash-label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.7px}
+    #dashboard .dash-speed,#dashboard .dash-cap{min-height:205px;display:flex;flex-direction:column;justify-content:center}
+    #dashboard .dash-speed .dash-value{font-size:82px;line-height:.95;font-weight:900;color:#29b6f6;font-variant-numeric:tabular-nums}
+    #dashboard .dash-unit{font-size:16px;color:var(--muted);font-weight:800;margin-top:6px}
+    #dashboard .dash-arrow{font-size:52px;line-height:1;color:var(--accent2);margin:5px 0;display:inline-block}
+    #dashboard .dash-cardinal{font-size:26px;font-weight:900;color:var(--accent2)}
+    #dashboard .dash-deg{font-size:15px;color:var(--muted);margin-top:2px}
+    #dashboard .dash-lean{min-height:220px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    #dashboard .lean-gauge{position:relative;width:100%;max-width:330px;height:125px;margin:8px auto 0;overflow:hidden}
+    #dashboard .lean-arc{position:absolute;left:7%;right:7%;bottom:4px;height:108px;border:4px solid var(--border);border-bottom:0;border-radius:180px 180px 0 0}
+    #dashboard .lean-center{position:absolute;left:50%;bottom:0;width:3px;height:98px;background:var(--muted);transform-origin:50% 100%;transition:transform .12s linear}
+    #dashboard .lean-center:after{content:"";position:absolute;top:-5px;left:50%;width:13px;height:13px;border-radius:50%;background:var(--accent);transform:translateX(-50%)}
+    #dashboard .lean-ticks{position:absolute;left:10%;right:10%;bottom:0;display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-weight:800}
+    #dashboard .lean-value{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+    #dashboard .lean-side{font-size:12px;color:var(--muted);text-transform:uppercase}
+    #dashboard .dash-odo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    #dashboard .dash-odo-box{background:#111;border:1px solid var(--border);border-radius:13px;padding:9px}
+    #dashboard .dash-odo-value{font-size:27px;color:var(--accent);font-weight:900;font-variant-numeric:tabular-nums}
+    #dashboard .dash-status{font-size:13px;color:var(--muted);padding-bottom:4px}
+    #dashboard .dash-status .gps-dot{display:inline-block;margin-right:7px}
+    @media(max-width:520px){
+      #dashboard .dash-grid{grid-template-columns:1fr 1fr;gap:7px;padding:7px}
+      #dashboard .dash-card{border-radius:15px;padding:9px}
+      #dashboard .dash-speed,#dashboard .dash-cap{min-height:155px}
+      #dashboard .dash-speed .dash-value{font-size:58px}
+      #dashboard .dash-arrow{font-size:40px}
+      #dashboard .dash-cardinal{font-size:21px}
+      #dashboard .dash-lean{min-height:190px}
+      #dashboard .lean-gauge{height:108px}
+      #dashboard .lean-arc{height:94px}
+      #dashboard .lean-center{height:84px}
+    }
+
+    <div id="dashboard" class="screen">
+      <div class="dash-grid">
+        <div class="dash-card dash-speed">
+          <div class="dash-label">Velocitat</div>
+          <div class="dash-value" id="dash-speed">0</div>
+          <div class="dash-unit">KM/H</div>
+        </div>
+        <div class="dash-card dash-cap">
+          <div class="dash-label">Direcció</div>
+          <div class="dash-arrow" id="dash-dir-arrow">⬆</div>
+          <div class="dash-cardinal" id="dash-dir-cardinal">--</div>
+          <div class="dash-deg"><span id="dash-cap">---</span>°</div>
+        </div>
+        <div class="dash-card dash-lean full">
+          <div class="dash-label">Inclinòmetre</div>
+          <div class="lean-gauge" aria-label="Inclinació esquerra dreta">
+            <div class="lean-arc"></div>
+            <div class="lean-center" id="dash-lean-needle"></div>
+            <div class="lean-ticks"><span>30° E</span><span>0°</span><span>30° D</span></div>
+          </div>
+          <div class="lean-value" id="dash-lean-value">0°</div>
+          <div class="lean-side" id="dash-lean-side">CENTRAT</div>
+        </div>
+        <div class="dash-card dash-odo full">
+          <div class="dash-odo-box"><div class="dash-label">Total</div><div class="dash-odo-value"><span id="dash-odo-total">0.00</span> km</div></div>
+          <div class="dash-odo-box"><div class="dash-label">Parcial</div><div class="dash-odo-value"><span id="dash-odo-partial">0.00</span> km</div></div>
+        </div>
+        <div class="dash-card full">
+          <div class="dash-status"><span class="gps-dot" id="dash-gps-indicator"></span><span id="dash-gps-status">Buscant GPS…</span></div>
+        </div>
       </div>
     </div>
 
@@ -1110,6 +1180,8 @@
       set("big-odo-partial", p);
       set("nav-odo-total", t);
       set("nav-odo-partial", p);
+      set("dash-odo-total", t);
+      set("dash-odo-partial", p);
     }
 
     function adjustOdo(delta) {
@@ -1193,14 +1265,14 @@
       }
       const d = Math.round(deg) % 360;
       const card = headingToCardinal(d);
-      set("cap", d); set("big-cap", d); set("nav-cap", d);
-      set("dir-cardinal", card); set("big-dir-cardinal", card); set("nav-dir-cardinal", card);
-      rot("dir-arrow", d); rot("big-dir-arrow", d); rot("nav-dir-arrow", d);
+      set("cap", d); set("big-cap", d); set("nav-cap", d); set("dash-cap", d);
+      set("dir-cardinal", card); set("big-dir-cardinal", card); set("nav-dir-cardinal", card); set("dash-dir-cardinal", card);
+      rot("dir-arrow", d); rot("big-dir-arrow", d); rot("nav-dir-arrow", d); rot("dash-dir-arrow", d);
     }
 
     function setGpsStatus(text, ok) {
-      ["gps-status","nav-gps-status"].forEach(id => { const el=$(id); if(el) el.textContent=text; });
-      ["gps-indicator","nav-gps-indicator"].forEach(id => { const el=$(id); if(el) ok ? el.classList.add("ok") : el.classList.remove("ok"); });
+      ["gps-status","nav-gps-status","dash-gps-status"].forEach(id => { const el=$(id); if(el) el.textContent=text; });
+      ["gps-indicator","nav-gps-indicator","dash-gps-indicator"].forEach(id => { const el=$(id); if(el) ok ? el.classList.add("ok") : el.classList.remove("ok"); });
     }
     function saveSettingsDebounced() {
       clearTimeout(state.saveTimer);
@@ -1227,6 +1299,7 @@
         if(speed!=null&&!isNaN(speed)) state.speed=Math.max(0,speed*3.6);
         $("speed").textContent=Math.round(state.speed); $("big-speed").textContent=Math.round(state.speed);
         const ns=$("nav-speed"); if(ns) ns.textContent=Math.round(state.speed);
+        const ds=$("dash-speed"); if(ds) ds.textContent=Math.round(state.speed);
         if(heading!=null&&!isNaN(heading)&&(speed==null||speed>1.4)){ state.heading=Math.round(heading); state.lastGpsHeadingAt=Date.now(); updateDirection(state.heading); }
         if(state.lastLat!=null&&state.lastGpsTimestamp!=null){
           const distM=haversine(state.lastLat,state.lastLon,latitude,longitude);
@@ -1281,6 +1354,27 @@
         console.warn("No s'ha pogut activar la brúixola", e);
       }
     }
+
+    let lastLeanAt = 0;
+    function updateLean(gamma) {
+      if (!Number.isFinite(gamma)) return;
+      const clamped = Math.max(-45, Math.min(45, gamma));
+      const lean = Math.round(clamped);
+      const value = $("dash-lean-value"), side = $("dash-lean-side"), needle = $("dash-lean-needle");
+      if (value) value.textContent = Math.abs(lean) < 1 ? "0°" : Math.abs(lean) + "°";
+      if (side) side.textContent = Math.abs(lean) < 2 ? "CENTRAT" : (lean < 0 ? "ESQUERRA" : "DRETA");
+      if (needle) needle.style.transform = "rotate(" + clamped + "deg)";
+      lastLeanAt = Date.now();
+    }
+    window.addEventListener("deviceorientation", e => { if (e.gamma != null) updateLean(e.gamma); }, true);
+    function updateLeanStale() {
+      if (lastLeanAt && Date.now()-lastLeanAt > 2500) {
+        const side=$("dash-lean-side"), value=$("dash-lean-value");
+        if(side) side.textContent="SENSOR NO DISPONIBLE";
+        if(value) value.textContent="--";
+      }
+    }
+    setInterval(updateLeanStale,1000);
 
     function autoEnableCompass() {
       if (state.compassActive || typeof DeviceOrientationEvent === "undefined") return;
