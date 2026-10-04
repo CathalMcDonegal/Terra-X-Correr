@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-03-07">
+  <meta name="app-version" content="2026-10-04-08">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -708,44 +708,58 @@
       background: #333;
       color: var(--text);
     }
-      /* Dashboard moto: compacte, simètric i pensat per pantalla vertical */
-    #dashboard .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:100%;padding:8px;overflow:auto;align-content:start}
-    #dashboard .dash-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px;text-align:center;min-width:0}
+      /* Dashboard moto: aspecte instrumentació professional */
+    #dashboard{background:radial-gradient(circle at 50% -20%,rgba(0,230,118,.08),transparent 42%),var(--bg)}
+    #dashboard .dash-head{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 4px}
+    #dashboard .dash-kicker{font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:900}
+    #dashboard .dash-title{font-size:16px;letter-spacing:1px;font-weight:900}
+    #dashboard .dash-live{font-size:10px;font-weight:900;letter-spacing:1px;color:var(--accent);border:1px solid rgba(0,230,118,.35);border-radius:999px;padding:5px 8px}
+    #dashboard .dash-live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:4px}
+    #dashboard .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:calc(100% - 48px);padding:6px 8px 10px;overflow:auto;align-content:start}
+    #dashboard .dash-card{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012));border:1px solid var(--border);border-radius:16px;padding:10px;text-align:center;min-width:0;box-shadow:0 8px 22px rgba(0,0,0,.18)}
     #dashboard .dash-card.full{grid-column:1/-1}
-    #dashboard .dash-label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.6px}
-    #dashboard .dash-speed,#dashboard .dash-cap{height:154px;display:flex;flex-direction:column;justify-content:center}
-    #dashboard .dash-speed .dash-value{font-size:62px;line-height:.92;font-weight:900;color:#29b6f6;font-variant-numeric:tabular-nums}
-    #dashboard .dash-unit{font-size:14px;color:var(--muted);font-weight:800;margin-top:5px}
-    #dashboard .dash-arrow{font-size:42px;line-height:1;color:var(--accent2);margin:4px 0;display:inline-block}
-    #dashboard .dash-cardinal{font-size:22px;font-weight:900;color:var(--accent2)}
-    #dashboard .dash-deg{font-size:14px;color:var(--muted);margin-top:2px}
-    #dashboard .dash-lean{height:180px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center}
-    #dashboard .lean-gauge{position:relative;width:100%;max-width:330px;height:100px;margin:5px auto 0;overflow:hidden}
-    #dashboard .lean-arc{position:absolute;left:7%;right:7%;bottom:3px;height:86px;border:4px solid var(--border);border-bottom:0;border-radius:180px 180px 0 0}
-    #dashboard .lean-center{position:absolute;left:50%;bottom:0;width:3px;height:78px;background:var(--muted);transform-origin:50% 100%;transition:transform .12s linear}
-    #dashboard .lean-center:after{content:"";position:absolute;top:-5px;left:50%;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translateX(-50%)}
-    #dashboard .lean-ticks{position:absolute;left:10%;right:10%;bottom:0;display:flex;justify-content:space-between;color:var(--muted);font-size:10px;font-weight:800}
-    #dashboard .lean-value{font-size:27px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
-    #dashboard .lean-side{font-size:11px;color:var(--muted);text-transform:uppercase;margin-top:2px}
-    #dashboard .dash-lean-record{margin-top:4px;display:flex;align-items:baseline;justify-content:center;gap:6px;font-size:10px;color:var(--muted);text-transform:uppercase}
-    #dashboard .dash-lean-record strong{font-size:20px;color:var(--accent);font-variant-numeric:tabular-nums}
-    #dashboard .dash-lean-record small{font-size:10px;color:var(--muted)}
-    #dashboard .dash-odo{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-    #dashboard .dash-odo-box{background:#111;border:1px solid var(--border);border-radius:12px;padding:7px}
-    #dashboard .dash-odo-value{font-size:24px;color:var(--accent);font-weight:900;font-variant-numeric:tabular-nums}
-    #dashboard .dash-status{font-size:12px;color:var(--muted);padding:1px 0}
+    #dashboard .dash-label{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:900;letter-spacing:1px}
+    #dashboard .dash-speed,#dashboard .dash-cap{height:142px;display:flex;flex-direction:column;justify-content:center}
+    #dashboard .dash-speed .dash-value{font-size:60px;line-height:.9;font-weight:900;color:#29b6f6;font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(41,182,246,.12)}
+    #dashboard .dash-unit{font-size:12px;color:var(--muted);font-weight:900;letter-spacing:1px;margin-top:5px}
+    #dashboard .dash-arrow{font-size:38px;line-height:1;color:var(--accent2);margin:4px 0}
+    #dashboard .dash-cardinal{font-size:21px;font-weight:900;color:var(--accent2)}
+    #dashboard .dash-deg{font-size:13px;color:var(--muted);margin-top:2px}
+    #dashboard .dash-lean{height:202px;display:flex;flex-direction:column;justify-content:center}
+    #dashboard .dash-lean-top{display:flex;align-items:center;justify-content:space-between;text-align:left}
+    #dashboard .dash-subtitle{font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px}
+    #dashboard .dash-reset-btn{border:1px solid #555;background:#202020;color:var(--text);border-radius:8px;padding:6px 8px;font-size:9px;font-weight:900;white-space:nowrap}
+    #dashboard .dash-reset-btn:active{transform:scale(.97)}
+    #dashboard .lean-gauge{position:relative;width:100%;max-width:330px;height:104px;margin:3px auto 0;overflow:hidden}
+    #dashboard .lean-arc{position:absolute;left:7%;right:7%;bottom:3px;height:88px;border:4px solid var(--border);border-bottom:0;border-radius:180px 180px 0 0}
+    #dashboard .lean-center{position:absolute;left:50%;bottom:0;width:3px;height:80px;background:var(--muted);transform-origin:50% 100%;transition:transform .12s linear}
+    #dashboard .lean-center:after{content:"";position:absolute;top:-5px;left:50%;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translateX(-50%);box-shadow:0 0 10px rgba(0,230,118,.5)}
+    #dashboard .lean-ticks{position:absolute;left:10%;right:10%;bottom:0;display:flex;justify-content:space-between;color:var(--muted);font-size:9px;font-weight:900}
+    #dashboard .lean-readout{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-2px}
+    #dashboard .lean-readout>div{display:flex;flex-direction:column;align-items:center}
+    #dashboard .readout-caption{font-size:8px;color:var(--muted);font-weight:900;letter-spacing:1px}
+    #dashboard .lean-value,#dashboard .lean-record strong{font-size:26px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+    #dashboard .lean-side,#dashboard .lean-record small{font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+    #dashboard .lean-record{border-left:1px solid var(--border)}
+    #dashboard .lean-record strong{color:var(--accent)}
+    #dashboard .dash-odo{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:8px}
+    #dashboard .dash-odo-box{background:#111;border:1px solid var(--border);border-radius:11px;padding:7px}
+    #dashboard .dash-odo-value{font-size:22px;color:var(--accent);font-weight:900;font-variant-numeric:tabular-nums}
+    #dashboard .dash-odo-value small{font-size:10px;color:var(--muted)}
+    #dashboard .dash-status-card{padding:7px}
+    #dashboard .dash-status{font-size:11px;color:var(--muted)}
     #dashboard .dash-status .gps-dot{display:inline-block;margin-right:7px}
     @media(max-width:520px){
-      #dashboard .dash-grid{gap:6px;padding:6px}
+      #dashboard .dash-head{padding:8px 8px 3px}
+      #dashboard .dash-grid{gap:6px;padding:5px 6px 8px}
       #dashboard .dash-card{border-radius:14px;padding:8px}
-      #dashboard .dash-speed,#dashboard .dash-cap{height:148px}
-      #dashboard .dash-speed .dash-value{font-size:56px}
-      #dashboard .dash-arrow{font-size:38px}
-      #dashboard .dash-cardinal{font-size:20px}
-      #dashboard .dash-lean{height:172px}
-      #dashboard .lean-gauge{height:92px}
-      #dashboard .lean-arc{height:80px}
-      #dashboard .lean-center{height:72px}
+      #dashboard .dash-speed,#dashboard .dash-cap{height:136px}
+      #dashboard .dash-speed .dash-value{font-size:54px}
+      #dashboard .dash-arrow{font-size:36px}
+      #dashboard .dash-lean{height:194px}
+      #dashboard .lean-gauge{height:96px}
+      #dashboard .lean-arc{height:82px}
+      #dashboard .lean-center{height:74px}
     }
 
 
@@ -871,6 +885,13 @@
     </div>
 
     <div id="dashboard" class="screen">
+      <div class="dash-head">
+        <div>
+          <div class="dash-kicker">TERRA X CORRER</div>
+          <div class="dash-title">MOTO DASHBOARD</div>
+        </div>
+        <div class="dash-live"><span class="dash-live-dot"></span> LIVE</div>
+      </div>
       <div class="dash-grid">
         <div class="dash-card dash-speed">
           <div class="dash-label">Velocitat</div>
@@ -884,25 +905,28 @@
           <div class="dash-deg"><span id="dash-cap">---</span>°</div>
         </div>
         <div class="dash-card dash-lean full">
-          <div class="dash-label">Inclinació lateral</div>
+          <div class="dash-lean-top">
+            <div>
+              <div class="dash-label">Inclinació</div>
+              <div class="dash-subtitle">ANGLE LATERAL</div>
+            </div>
+            <button class="dash-reset-btn" id="dash-lean-reset" type="button">↺ RESET MÀX.</button>
+          </div>
           <div class="lean-gauge" aria-label="Inclinació esquerra dreta">
             <div class="lean-arc"></div>
             <div class="lean-center" id="dash-lean-needle"></div>
             <div class="lean-ticks"><span>30° E</span><span>0°</span><span>30° D</span></div>
           </div>
-          <div class="lean-value" id="dash-lean-value">0°</div>
-          <div class="lean-side" id="dash-lean-side">CENTRAT</div>
-          <div class="dash-lean-record">
-            <span>MÀXIM</span>
-            <strong id="dash-lean-max">0°</strong>
-            <small id="dash-lean-max-side">—</small>
+          <div class="lean-readout">
+            <div><span class="readout-caption">ACTUAL</span><strong id="dash-lean-value">0°</strong><small id="dash-lean-side">CENTRAT</small></div>
+            <div class="lean-record"><span class="readout-caption">RÈCORD</span><strong id="dash-lean-max">0°</strong><small id="dash-lean-max-side">—</small></div>
           </div>
         </div>
         <div class="dash-card dash-odo full">
-          <div class="dash-odo-box"><div class="dash-label">Total</div><div class="dash-odo-value"><span id="dash-odo-total">0.00</span> km</div></div>
-          <div class="dash-odo-box"><div class="dash-label">Parcial</div><div class="dash-odo-value"><span id="dash-odo-partial">0.00</span> km</div></div>
+          <div class="dash-odo-box"><div class="dash-label">Total</div><div class="dash-odo-value"><span id="dash-odo-total">0.00</span> <small>km</small></div></div>
+          <div class="dash-odo-box"><div class="dash-label">Parcial</div><div class="dash-odo-value"><span id="dash-odo-partial">0.00</span> <small>km</small></div></div>
         </div>
-        <div class="dash-card full">
+        <div class="dash-card dash-status-card full">
           <div class="dash-status"><span class="gps-dot" id="dash-gps-indicator"></span><span id="dash-gps-status">Buscant GPS…</span></div>
         </div>
       </div>
@@ -1381,6 +1405,14 @@
       if (sideEl) sideEl.textContent = maxLean > 0 ? maxLeanSide : "—";
     }
     renderMaxLean();
+    const dashLeanReset = $("dash-lean-reset");
+    if (dashLeanReset) dashLeanReset.addEventListener("click", () => {
+      maxLean = 0;
+      maxLeanSide = "—";
+      try { localStorage.removeItem("txc_max_lean"); } catch (e) {}
+      renderMaxLean();
+      showStatus("Rècord d'inclinació reiniciat");
+    });
 
     function updateLean(gamma) {
       if (!Number.isFinite(gamma)) return;
