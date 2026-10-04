@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-04-19">
+  <meta name="app-version" content="2026-10-04-20">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -816,6 +816,7 @@
     <div class="tabs">
       <button class="tab active" data-screen="roadbook">Roadbook</button>
       <button class="tab" data-screen="navegacio">Navegació</button>
+      <button class="tab" data-screen="ruta">Ruta</button>
       <button class="tab" data-screen="instruments">Instrumentació</button>
       <button class="tab" data-screen="manual">Manual</button>
     </div>
@@ -946,6 +947,8 @@
         <span id="nav-gps-status">Buscant GPS…</span>
       </div>
     </div>
+
+        <div id="ruta" class="screen"><div id="ruta-map" aria-label="Mapa de la ruta"></div><div class="route-location"><button class="route-locate-btn" id="route-locate" title="Centrar en la posició actual">⌖</button></div><div class="route-panel"><div class="route-stats"><div class="route-stat"><div class="label">Ruta</div><div class="value" id="route-distance">0.00</div><div class="unit">km</div></div><div class="route-stat"><div class="label">Temps</div><div class="value" id="route-duration">00:00</div><div class="unit">enregistrant</div></div><div class="route-stat"><div class="label">Velocitat</div><div class="value" id="route-speed">0</div><div class="unit">km/h</div></div></div><div class="route-actions"><button class="route-btn primary" id="route-record">● INICIAR</button><button class="route-btn export" id="route-export">GPX</button><button class="route-btn" id="route-clear">NOVA</button></div><div class="route-status" id="route-status">GPS preparat · la ruta encara no s'enregistra</div></div></div>
 
     <div id="instruments" class="screen">
       <div class="big-grid">
@@ -1133,6 +1136,15 @@
       routeMaxSpeed: 0,
       batteryLevel: null,
       batteryCharging: null,
+      trackRecording: false,
+      trackPoints: [],
+      trackDistanceKm: 0,
+      trackStartedAt: null,
+      trackElapsedBeforePause: 0,
+      trackLastSavedAt: 0,
+      routeMap: null,
+      routePolyline: null,
+      routeMarker: null,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -1157,6 +1169,7 @@
           updateNotesOverlay();
           if (state.currentPdf) setTimeout(() => renderPage(state.currentPage), 50);
         }
+        if (tab.dataset.screen === "ruta") setTimeout(() => initRouteMap(), 80);
       });
     });
 
