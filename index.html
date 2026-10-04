@@ -9,14 +9,13 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-04-20">
+  <meta name="app-version" content="2026-10-04-21">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Terra X Correr</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-  <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
@@ -809,6 +808,25 @@
       font-size:28px;
       line-height:1;
     }
+
+    /* Mapa i historial de rutes */
+    #ruta{background:#050505;min-height:0;overflow:hidden}
+    #ruta-map{flex:1;min-height:0;width:100%;background:#202020;position:relative;overflow:hidden;touch-action:none}
+    #route-map-tiles{position:absolute;inset:0;overflow:hidden}
+    .route-tile{position:absolute;width:256px;height:256px;user-select:none;-webkit-user-drag:none}
+    #route-map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+    #route-map-svg polyline{fill:none;stroke:#00e676;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px #000)}
+    #route-map-svg circle{fill:#00e676;stroke:#06150d;stroke-width:3}
+    .route-map-controls{position:absolute;right:9px;top:9px;z-index:20;display:flex;flex-direction:column;gap:5px}
+    .route-map-controls button{width:42px;height:42px;border-radius:10px;border:1px solid #444;background:rgba(18,18,18,.94);color:#fff;font-size:22px;font-weight:900;box-shadow:0 2px 8px #0008}
+    .route-map-info{position:absolute;left:8px;top:8px;z-index:20;background:rgba(10,10,10,.88);border:1px solid #333;border-radius:9px;padding:6px 9px;font-size:9px;color:#bbb;pointer-events:none}
+    .route-map-info strong{color:#00e676;font-size:11px}
+    .route-map-attribution{position:absolute;right:5px;bottom:4px;z-index:20;background:rgba(255,255,255,.8);color:#222;padding:2px 4px;font-size:8px;border-radius:3px}
+    .route-panel{flex-shrink:0;background:rgba(18,18,18,.98);border-top:1px solid var(--border);padding:7px 8px calc(7px + env(safe-area-inset-bottom));z-index:500}
+    .route-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:6px}
+    .route-stat{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:5px 3px;text-align:center}.route-stat .label{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}.route-stat .value{font-size:19px;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}.route-stat .unit{font-size:8px;color:var(--muted)}
+    .route-actions{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:5px}.route-btn{min-height:42px;border-radius:10px;border:1px solid var(--border);background:#252525;color:var(--text);font-size:12px;font-weight:900}.route-btn.primary{background:var(--accent);color:#000;border-color:var(--accent)}.route-btn.recording{background:#3b1018;color:#ff8a80;border:2px solid var(--danger)}.route-btn.export{border-color:var(--accent2);color:#ffb74d}.route-status{text-align:center;color:var(--muted);font-size:9px;margin-top:4px;min-height:12px}
+    #rutes{background:#050505;overflow:hidden}.routes-list{flex:1;overflow:auto;padding:8px}.routes-empty{text-align:center;color:var(--muted);padding:45px 20px}.route-history-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:7px}.route-history-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.route-history-name{font-size:15px;font-weight:900}.route-history-date{font-size:9px;color:var(--muted)}.route-history-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}.route-history-metric{background:#121212;border-radius:7px;padding:5px 2px;text-align:center}.route-history-metric span{display:block;font-size:7px;color:var(--muted);text-transform:uppercase}.route-history-metric strong{display:block;font-size:13px;margin-top:2px}.route-history-actions{display:flex;gap:5px;margin-top:7px}.route-history-actions button{flex:1;min-height:34px;border-radius:8px;border:1px solid var(--border);background:#252525;color:#fff;font-weight:800;font-size:10px}.route-history-actions .open{border-color:var(--accent);color:var(--accent)}.route-history-actions .delete{border-color:var(--danger);color:#ff8a80}.route-detail{display:none;flex:1;overflow:auto;padding:8px}.route-detail.show{display:block}.route-detail-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}.route-back{width:42px;height:38px;border-radius:9px;background:#252525;color:#fff;border:1px solid var(--border);font-size:18px}.route-detail-title{font-size:17px;font-weight:900}.route-detail-date{font-size:9px;color:var(--muted)}.route-detail-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.route-detail-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px;text-align:center}.route-detail-stat span{font-size:8px;color:var(--muted);display:block;text-transform:uppercase}.route-detail-stat strong{font-size:22px;display:block;margin-top:2px}.route-detail-stat small{font-size:9px;color:var(--muted)}.route-detail-actions{display:flex;gap:6px;margin-top:8px}.route-detail-actions button{flex:1;min-height:42px;border-radius:10px;border:1px solid var(--border);background:#252525;color:#fff;font-weight:900}.route-detail-actions .export{border-color:var(--accent2);color:#ffb74d}
 </style>
 </head>
 <body>
@@ -818,6 +836,7 @@
       <button class="tab active" data-screen="roadbook">Roadbook</button>
       <button class="tab" data-screen="navegacio">Navegació</button>
       <button class="tab" data-screen="ruta">Ruta</button>
+      <button class="tab" data-screen="rutes">Rutes</button>
       <button class="tab" data-screen="instruments">Instrumentació</button>
       <button class="tab" data-screen="manual">Manual</button>
     </div>
@@ -949,7 +968,17 @@
       </div>
     </div>
 
-        <div id="ruta" class="screen"><div id="ruta-map" aria-label="Mapa de la ruta"></div><div class="route-location"><button class="route-locate-btn" id="route-locate" title="Centrar en la posició actual">⌖</button></div><div class="route-panel"><div class="route-stats"><div class="route-stat"><div class="label">Ruta</div><div class="value" id="route-distance">0.00</div><div class="unit">km</div></div><div class="route-stat"><div class="label">Temps</div><div class="value" id="route-duration">00:00</div><div class="unit">enregistrant</div></div><div class="route-stat"><div class="label">Velocitat</div><div class="value" id="route-speed">0</div><div class="unit">km/h</div></div></div><div class="route-actions"><button class="route-btn primary" id="route-record">● INICIAR</button><button class="route-btn export" id="route-export">GPX</button><button class="route-btn" id="route-clear">NOVA</button></div><div class="route-status" id="route-status">GPS preparat · la ruta encara no s'enregistra</div></div></div>
+    <div id="ruta" class="screen">
+      <div id="ruta-map" aria-label="Mapa de la ruta">
+        <div id="route-map-tiles"></div><svg id="route-map-svg" preserveAspectRatio="none"><polyline id="route-map-line"></polyline><circle id="route-map-dot" r="7" cx="-20" cy="-20"></circle></svg>
+        <div class="route-map-info"><strong id="route-map-mode">MAPA</strong><br>OpenStreetMap</div>
+        <div class="route-map-controls"><button id="route-zoom-in">+</button><button id="route-zoom-out">−</button><button id="route-locate">⌖</button></div>
+        <div class="route-map-attribution">© OpenStreetMap contributors</div>
+      </div>
+      <div class="route-panel"><div class="route-stats"><div class="route-stat"><div class="label">Ruta</div><div class="value" id="route-distance">0.00</div><div class="unit">km</div></div><div class="route-stat"><div class="label">Temps</div><div class="value" id="route-duration">00:00</div><div class="unit">enregistrant</div></div><div class="route-stat"><div class="label">Velocitat</div><div class="value" id="route-speed">0</div><div class="unit">km/h</div></div></div><div class="route-actions"><button class="route-btn primary" id="route-record">● INICIAR</button><button class="route-btn export" id="route-export">GPX</button><button class="route-btn" id="route-clear">NOVA</button></div><div class="route-status" id="route-status">GPS preparat · la ruta encara no s'enregistra</div></div>
+    </div>
+
+    <div id="rutes" class="screen"><div id="routes-list" class="routes-list"></div><div id="route-detail" class="route-detail"></div></div>
 
     <div id="instruments" class="screen">
       <div class="big-grid">
@@ -1144,9 +1173,12 @@
       trackStartedAt: null,
       trackElapsedBeforePause: 0,
       trackLastSavedAt: 0,
-      routeMap: null,
-      routePolyline: null,
-      routeMarker: null,
+      routeMap: {zoom:15,centerLat:null,centerLon:null,dragging:false},
+      routeViewPoints: null,
+      routeHistory: [],
+      routeSessionStart: null,
+      routeSessionEnd: null,
+      routeMaxSpeed: 0,
       roadbook: { name: "Nou roadbook", notes: [] }
     };
 
@@ -1172,110 +1204,38 @@
           if (state.currentPdf) setTimeout(() => renderPage(state.currentPage), 50);
         }
         if (tab.dataset.screen === "ruta") setTimeout(() => initRouteMap(), 80);
+        if (tab.dataset.screen === "rutes") setTimeout(() => renderRouteHistory(), 40);
       });
     });
 
-    // --- Mapa i enregistrament de ruta ---
-    function routeElapsedMs(){
-      return state.trackElapsedBeforePause + (state.trackRecording && state.trackStartedAt ? Date.now()-state.trackStartedAt : 0);
-    }
-    function formatRouteTime(ms){
-      const total=Math.max(0,Math.floor(ms/1000)),h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;
-      return h>0?String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"):String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-    }
-    function updateRoutePanel(){
-      const d=$("route-distance"),t=$("route-duration"),s=$("route-speed"),b=$("route-record"),st=$("route-status");
-      if(d)d.textContent=state.trackDistanceKm.toFixed(2);
-      if(t)t.textContent=formatRouteTime(routeElapsedMs());
-      if(s)s.textContent=Math.round(state.speed||0);
-      if(b){b.textContent=state.trackRecording?"■ PARAR":"● INICIAR";b.classList.toggle("recording",state.trackRecording);b.classList.toggle("primary",!state.trackRecording);}
-      if(st)st.textContent=state.trackRecording?("Enregistrant · "+state.trackPoints.length+" punts GPS"):(state.trackPoints.length?("Ruta guardada · "+state.trackPoints.length+" punts"):"GPS preparat · la ruta encara no s'enregistra");
-    }
-    function saveRecordedRoute(){
-      try{localStorage.setItem("txc_recorded_route",JSON.stringify({points:state.trackPoints,distanceKm:state.trackDistanceKm,elapsedMs:routeElapsedMs()}));state.trackElapsedBeforePause=routeElapsedMs();if(state.trackRecording)state.trackStartedAt=Date.now();}catch(e){console.warn("No s'ha pogut guardar la ruta",e);}
-    }
-    function loadRecordedRoute(){
-      try{
-        const raw=localStorage.getItem("txc_recorded_route");if(!raw)return;
-        const data=JSON.parse(raw);if(!Array.isArray(data.points)||data.points.length<1)return;
-        state.trackPoints=data.points.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)).slice(-12000);
-        state.trackDistanceKm=Number(data.distanceKm)||0;state.trackElapsedBeforePause=Number(data.elapsedMs)||0;state.trackRecording=false;state.trackStartedAt=null;
-      }catch(e){console.warn("Ruta guardada invàlida",e);}
-    }
-    function drawRecordedRoute(fit){
-      if(!state.routeMap||typeof L==="undefined")return;
-      const latlngs=state.trackPoints.map(p=>[p.lat,p.lon]);
-      if(!state.routePolyline) state.routePolyline=L.polyline(latlngs,{color:"#00e676",weight:4,opacity:.9});
-      else state.routePolyline.setLatLngs(latlngs);
-      if(!state.routePolyline._map)state.routePolyline.addTo(state.routeMap);
-      const last=state.trackPoints[state.trackPoints.length-1];
-      if(last){
-        const ll=[last.lat,last.lon];
-        if(!state.routeMarker)state.routeMarker=L.circleMarker(ll,{radius:7,color:"#00e676",weight:3,fillColor:"#0a0a0a",fillOpacity:1}).addTo(state.routeMap);else state.routeMarker.setLatLng(ll);
-        if(fit&&state.trackPoints.length>1)state.routeMap.fitBounds(state.routePolyline.getBounds(),{padding:[20,20],maxZoom:17});
-        else if(fit)state.routeMap.setView(ll,16);
-      }
-    }
-    function initRouteMap(){
-      const el=$("ruta-map");if(!el)return;
-      if(typeof L==="undefined"){el.innerHTML='<div style="padding:24px;text-align:center;color:#999">No s’ha pogut carregar el mapa. Cal connexió a internet per al mapa base.</div>';updateRoutePanel();return;}
-      if(!state.routeMap){
-        const start=state.lastLat!=null?[state.lastLat,state.lastLon]:[41.65,1.75];
-        state.routeMap=L.map(el,{zoomControl:false,attributionControl:true}).setView(start,state.lastLat!=null?15:7);
-        L.control.zoom({position:"topright"}).addTo(state.routeMap);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(state.routeMap);
-        drawRecordedRoute(true);
-      }
-      setTimeout(()=>state.routeMap.invalidateSize(),60);updateRoutePanel();
-    }
-    function recordRoutePoint(lat,lon,timestamp,accuracy,speed){
-      if(!state.trackRecording||!Number.isFinite(lat)||!Number.isFinite(lon))return;
-      if(Number.isFinite(accuracy)&&accuracy>60)return;
-      const last=state.trackPoints[state.trackPoints.length-1];
-      if(last){
-        const distM=haversine(last.lat,last.lon,lat,lon),dt=Math.max(.1,(timestamp-(last.t||timestamp))/1000),implied=distM/dt*3.6;
-        if(distM<4)return;
-        if(distM>600||implied>180)return;
-        state.trackDistanceKm+=distM/1000;
-      }
-      state.trackPoints.push({lat,lon,t:timestamp,s:Number.isFinite(speed)?speed:0,acc:Number.isFinite(accuracy)?accuracy:null});
-      if(state.trackPoints.length>12000)state.trackPoints.shift();
-      if(state.routeMap){
-        const ll=[lat,lon];
-        if(!state.routePolyline)state.routePolyline=L.polyline([ll],{color:"#00e676",weight:4,opacity:.9}).addTo(state.routeMap);else state.routePolyline.addLatLng(ll);
-        if(!state.routeMarker)state.routeMarker=L.circleMarker(ll,{radius:7,color:"#00e676",weight:3,fillColor:"#0a0a0a",fillOpacity:1}).addTo(state.routeMap);else state.routeMarker.setLatLng(ll);
-        state.routeMap.panTo(ll,{animate:false});
-      }
-      const now=Date.now();if(now-state.trackLastSavedAt>5000){state.trackLastSavedAt=now;saveRecordedRoute();}
-      updateRoutePanel();
-    }
-    function toggleRouteRecording(){
-      if(state.trackRecording){state.trackElapsedBeforePause=routeElapsedMs();state.trackStartedAt=null;state.trackRecording=false;saveRecordedRoute();showStatus("Enregistrament pausat");}
-      else{state.trackRecording=true;state.trackStartedAt=Date.now();state.trackLastSavedAt=0;showStatus("Enregistrament de ruta iniciat");if(state.lastLat!=null)recordRoutePoint(state.lastLat,state.lastLon,Date.now(),state.gpsAccuracy,state.speed);}
-      updateRoutePanel();
-    }
-    function clearRecordedRoute(){
-      if(!state.trackPoints.length&&!state.trackDistanceKm)return;
-      if(!confirm("Esborrar la ruta enregistrada?"))return;
-      state.trackRecording=false;state.trackPoints=[];state.trackDistanceKm=0;state.trackStartedAt=null;state.trackElapsedBeforePause=0;
-      try{localStorage.removeItem("txc_recorded_route");}catch(e){}
-      if(state.routePolyline){state.routePolyline.setLatLngs([]);}if(state.routeMarker&&state.routeMap)state.routeMap.removeLayer(state.routeMarker);state.routeMarker=null;
-      updateRoutePanel();showStatus("Ruta esborrada");
-    }
-    function exportRecordedRoute(){
-      if(state.trackPoints.length<2){showStatus("No hi ha prou punts per exportar");return;}
-      const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-      const trk=state.trackPoints.map(p=>'<trkpt lat="'+Number(p.lat).toFixed(7)+'" lon="'+Number(p.lon).toFixed(7)+'"><time>'+new Date(p.t||Date.now()).toISOString()+'</time>'+(Number.isFinite(p.s)?'<extensions><speed>'+Number(p.s/3.6).toFixed(2)+'</speed></extensions>':"")+'</trkpt>').join("");
-      const g='<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Terra X Correr" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>Terra X Correr</name></metadata><trk><name>'+esc("Ruta Terra X Correr")+'</name><trkseg>'+trk+'</trkseg></trk></gpx>';
-      const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([g],{type:"application/gpx+xml"}));a.download="terra-x-correr-"+new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")+".gpx";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showStatus("GPX exportat");
-    }
-    const routeRecordBtn=$("route-record"),routeExportBtn=$("route-export"),routeClearBtn=$("route-clear"),routeLocateBtn=$("route-locate");
-    if(routeRecordBtn)routeRecordBtn.addEventListener("click",toggleRouteRecording);
-    if(routeExportBtn)routeExportBtn.addEventListener("click",exportRecordedRoute);
-    if(routeClearBtn)routeClearBtn.addEventListener("click",clearRecordedRoute);
-    if(routeLocateBtn)routeLocateBtn.addEventListener("click",()=>{if(state.routeMap&&state.lastLat!=null)state.routeMap.setView([state.lastLat,state.lastLon],Math.max(16,state.routeMap.getZoom()),{animate:true});else showStatus("Encara no tenim posició GPS");});
-    loadRecordedRoute();
-    setInterval(()=>updateRoutePanel(),1000);
+    // --- Ruta: mapa, enregistrament i historial ---
+    const TILE_SIZE=256, ROUTE_DB="txc_routes_db";
+    function openRouteDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(ROUTE_DB,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains("routes"))db.createObjectStore("routes",{keyPath:"id"});if(!db.objectStoreNames.contains("active"))db.createObjectStore("active",{keyPath:"id"});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+    async function routeDBPut(store,value){const db=await openRouteDB();return new Promise((resolve,reject)=>{const tx=db.transaction(store,"readwrite");tx.objectStore(store).put(value);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+    async function routeDBGet(store,key){const db=await openRouteDB();return new Promise((resolve,reject)=>{const tx=db.transaction(store,"readonly"),r=tx.objectStore(store).get(key);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error);});}
+    async function routeDBAll(){const db=await openRouteDB();return new Promise((resolve,reject)=>{const tx=db.transaction("routes","readonly"),r=tx.objectStore("routes").getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error);});}
+    async function routeDBDelete(key){const db=await openRouteDB();return new Promise((resolve,reject)=>{const tx=db.transaction("routes","readwrite");tx.objectStore("routes").delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}
+    async function routeDBClearActive(){const db=await openRouteDB();return new Promise(resolve=>{const tx=db.transaction("active","readwrite");tx.objectStore("active").delete("current");tx.oncomplete=resolve;tx.onerror=resolve;});}
+    function routeElapsedMs(){return state.trackStartedAt?Math.max(0,Date.now()-state.trackStartedAt):0;}
+    function formatRouteTime(ms){const total=Math.max(0,Math.floor(ms/1000)),h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;return h>0?String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"):String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");}
+    function routeAvgSpeed(distanceKm,durationMs){return durationMs>0?distanceKm/(durationMs/3600000):0;}
+    async function saveActiveRoute(){if(!state.trackSessionStart)return;try{await routeDBPut("active",{id:"current",startTime:state.trackSessionStart,points:state.trackPoints,distanceKm:state.trackDistanceKm,maxSpeed:state.routeMaxSpeed,elapsedMs:routeElapsedMs()});}catch(e){console.warn("No s'ha pogut guardar la ruta activa",e);}}
+    async function restoreActiveRoute(){try{const a=await routeDBGet("active","current");if(!a||!Array.isArray(a.points)||!a.points.length)return;state.trackPoints=a.points;state.trackDistanceKm=Number(a.distanceKm)||0;state.routeMaxSpeed=Number(a.maxSpeed)||0;state.trackSessionStart=Number(a.startTime)||Date.now();state.trackStartedAt=state.trackSessionStart;state.trackRecording=true;updateRoutePanel();showStatus("Ruta en curs restaurada");}catch(e){console.warn("No s'ha pogut restaurar la ruta",e);}}
+    function llToWorld(lat,lon,z){const n=2**z,x=(lon+180)/360*n,latRad=Math.max(-85.05112878,Math.min(85.05112878,lat))*Math.PI/180,y=(1-Math.log(Math.tan(latRad)+1/Math.cos(latRad))/Math.PI)/2*n;return{x,y};}
+    function worldToPixel(p,cx,cy,w,h){return[(p.x-cx)*TILE_SIZE+w/2,(p.y-cy)*TILE_SIZE+h/2];}
+    function routeMapPoints(){return state.trackRecording?state.trackPoints:(state.routeViewPoints||state.trackPoints);}
+    function renderRouteMap(){const map=$("ruta-map"),tiles=$("route-map-tiles"),svg=$("route-map-svg");if(!map||!tiles||!svg)return;const pts=routeMapPoints();let centerLat=state.routeMap.centerLat,centerLon=state.routeMap.centerLon;if(centerLat==null){const last=pts[pts.length-1];centerLat=last?.lat??state.lastLat??41.65;centerLon=last?.lon??state.lastLon??1.75;state.routeMap.centerLat=centerLat;state.routeMap.centerLon=centerLon;}const z=Math.max(5,Math.min(18,state.routeMap.zoom));const w=map.clientWidth,h=map.clientHeight,center=llToWorld(centerLat,centerLon,z),n=2**z;tiles.innerHTML="";const tx=Math.floor(center.x),ty=Math.floor(center.y);for(let dx=-1;dx<=1;dx++)for(let dy=-2;dy<=2;dy++){const x=((tx+dx)%n+n)%n,y=ty+dy;if(y<0||y>=n)continue;const img=document.createElement("img");img.className="route-tile";img.draggable=false;img.src="https://tile.openstreetmap.org/"+z+"/"+x+"/"+y+".png";img.style.left=((tx+dx)-center.x)*TILE_SIZE+w/2+"px";img.style.top=(y-center.y)*TILE_SIZE+h/2+"px";tiles.appendChild(img);}const line=$("route-map-line"),dot=$("route-map-dot"),coords=[];for(const p of pts){const q=llToWorld(p.lat,p.lon,z);const [px,py]=worldToPixel(q,center.x,center.y,w,h);coords.push(px.toFixed(1)+","+py.toFixed(1));}line.setAttribute("points",coords.join(" "));const last=pts[pts.length-1];if(last){const q=llToWorld(last.lat,last.lon,z),[px,py]=worldToPixel(q,center.x,center.y,w,h);dot.setAttribute("cx",px);dot.setAttribute("cy",py);}else{dot.setAttribute("cx",-20);dot.setAttribute("cy",-20);}const mode=$("route-map-mode");if(mode)mode.textContent=state.trackRecording?"ENREGISTRANT":(state.routeViewPoints?"RUTA GUARDADA":"MAPA");}
+    function initRouteMap(){const map=$("ruta-map");if(!map)return;state.routeMap.centerLat=null;state.routeMap.centerLon=null;renderRouteMap();if(!map.dataset.bound){map.dataset.bound="1";map.addEventListener("pointerdown",e=>{state.routeMap.dragging={x:e.clientX,y:e.clientY,lat:state.routeMap.centerLat,lon:state.routeMap.centerLon};map.setPointerCapture?.(e.pointerId);});map.addEventListener("pointermove",e=>{const d=state.routeMap.dragging;if(!d)return;const z=state.routeMap.zoom,scale=TILE_SIZE*2**z;state.routeMap.centerLon=d.lon-(e.clientX-d.x)/scale*360;const latPerPx=170/scale;state.routeMap.centerLat=Math.max(-85,Math.min(85,d.lat+(e.clientY-d.y)*latPerPx));renderRouteMap();});const end=()=>state.routeMap.dragging=false;map.addEventListener("pointerup",end);map.addEventListener("pointercancel",end);}$("route-zoom-in")?.addEventListener("click",()=>{state.routeMap.zoom=Math.min(18,state.routeMap.zoom+1);renderRouteMap();});$("route-zoom-out")?.addEventListener("click",()=>{state.routeMap.zoom=Math.max(5,state.routeMap.zoom-1);renderRouteMap();});$("route-locate")?.addEventListener("click",()=>{const p=routeMapPoints().at(-1);if(p){state.routeMap.centerLat=p.lat;state.routeMap.centerLon=p.lon;state.routeMap.zoom=Math.max(15,state.routeMap.zoom);renderRouteMap();}else showStatus("Encara no tenim posició GPS");});}
+    function updateRoutePanel(){const d=$("route-distance"),t=$("route-duration"),s=$("route-speed"),b=$("route-record"),st=$("route-status");if(d)d.textContent=state.trackDistanceKm.toFixed(2);if(t)t.textContent=formatRouteTime(state.trackSessionStart?Date.now()-state.trackSessionStart:0);if(s)s.textContent=Math.round(state.speed||0);if(b){b.textContent=state.trackRecording?"■ ATURAR I GUARDAR":"● INICIAR";b.classList.toggle("recording",state.trackRecording);b.classList.toggle("primary",!state.trackRecording);}if(st)st.textContent=state.trackRecording?("Enregistrant · "+state.trackPoints.length+" punts · màx "+Math.round(state.routeMaxSpeed)+" km/h"):(state.trackPoints.length?("Ruta preparada · màx "+Math.round(state.routeMaxSpeed)+" km/h"):"GPS preparat · la ruta encara no s'enregistra");}
+    function recordRoutePoint(lat,lon,timestamp,accuracy,speed){if(!state.trackRecording||!Number.isFinite(lat)||!Number.isFinite(lon))return;if(Number.isFinite(accuracy)&&accuracy>60)return;const last=state.trackPoints.at(-1);if(last){const distM=haversine(last.lat,last.lon,lat,lon),dt=Math.max(.1,(timestamp-(last.t||timestamp))/1000),implied=distM/dt*3.6;if(distM<4)return;if(distM>600||implied>180)return;state.trackDistanceKm+=distM/1000;}const sp=Number.isFinite(speed)?Math.max(0,speed):0;state.routeMaxSpeed=Math.max(state.routeMaxSpeed,sp);state.trackPoints.push({lat,lon,t:timestamp,s:sp,acc:Number.isFinite(accuracy)?accuracy:null});if(state.trackPoints.length>12000)state.trackPoints.shift();if(state.routeMap.centerLat==null||state.trackRecording){state.routeMap.centerLat=lat;state.routeMap.centerLon=lon;}renderRouteMap();if(Date.now()-state.trackLastSavedAt>5000){state.trackLastSavedAt=Date.now();saveActiveRoute();}updateRoutePanel();}
+    async function startRouteRecording(){if(state.trackRecording)return;if(!state.trackPoints.length){state.trackDistanceKm=0;state.routeMaxSpeed=0;state.trackPoints=[];}state.trackSessionStart=Date.now();state.trackStartedAt=state.trackSessionStart;state.routeViewPoints=null;state.routeMap.zoom=16;state.routeMap.centerLat=state.lastLat;state.routeMap.centerLon=state.lastLon;state.trackRecording=true;await saveActiveRoute();updateRoutePanel();showStatus("Enregistrament de ruta iniciat");if(state.lastLat!=null)recordRoutePoint(state.lastLat,state.lastLon,Date.now(),state.gpsAccuracy,state.speed);}
+    async function finishRouteRecording(){if(!state.trackRecording)return;const end=Date.now(),duration=end-state.trackSessionStart;if(state.trackPoints.length<2){showStatus("Cal tenir almenys dos punts GPS");return;}const def="Ruta "+new Date(state.trackSessionStart).toLocaleDateString("ca-ES")+" "+new Date(state.trackSessionStart).toLocaleTimeString("ca-ES",{hour:"2-digit",minute:"2-digit"});const name=(prompt("Nom de la ruta:",def)||def).trim()||def;const route={id:Date.now(),name,startTime:state.trackSessionStart,endTime:end,durationMs:duration,distanceKm:state.trackDistanceKm,maxSpeed:state.routeMaxSpeed,avgSpeed:routeAvgSpeed(state.trackDistanceKm,duration),points:state.trackPoints};try{await routeDBPut("routes",route);await routeDBClearActive();state.routeHistory.unshift(route);state.trackRecording=false;state.trackSessionStart=null;state.trackStartedAt=null;state.routeViewPoints=null;updateRoutePanel();renderRouteHistory();showStatus("Ruta guardada: "+name,3500);}catch(e){showStatus("No s'ha pogut guardar la ruta");console.error(e);}}
+    function clearCurrentRoute(){if(state.trackRecording){showStatus("Primer atura i guarda la ruta");return;}state.trackPoints=[];state.trackDistanceKm=0;state.routeMaxSpeed=0;state.routeViewPoints=null;state.routeMap.centerLat=state.lastLat;state.routeMap.centerLon=state.lastLon;renderRouteMap();updateRoutePanel();}
+    function exportRoute(route){if(!route||route.points.length<2){showStatus("No hi ha prou punts per exportar");return;}const trk=route.points.map(p=>'<trkpt lat="'+Number(p.lat).toFixed(7)+'" lon="'+Number(p.lon).toFixed(7)+'"><time>'+new Date(p.t||Date.now()).toISOString()+'</time><extensions><speed>'+Number((p.s||0)/3.6).toFixed(2)+'</speed></extensions></trkpt>').join("");const g='<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Terra X Correr" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>'+String(route.name).replace(/[<&>"]/g,"")+'</name></metadata><trk><name>'+String(route.name).replace(/[<&>"]/g,"")+'</name><trkseg>'+trk+'</trkseg></trk></gpx>';const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([g],{type:"application/gpx+xml"}));a.download=String(route.name).replace(/[^a-z0-9àèéíòóúüç _-]/gi,"_")+".gpx";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+    async function renderRouteHistory(){const list=$("routes-list"),detail=$("route-detail");if(!list||!detail)return;detail.classList.remove("show");list.style.display="block";try{state.routeHistory=(await routeDBAll()).sort((a,b)=>b.startTime-a.startTime);}catch(e){state.routeHistory=[];}if(!state.routeHistory.length){list.innerHTML='<div class="routes-empty"><div style="font-size:42px">🏍️</div><p>No hi ha rutes guardades.</p><p style="margin-top:8px">Comença un enregistrament des de <strong>Ruta</strong>.</p></div>';return;}list.innerHTML=state.routeHistory.map(r=>'<div class="route-history-card"><div class="route-history-top"><div class="route-history-name">'+escapeHtml(r.name)+'</div><div class="route-history-date">'+new Date(r.startTime).toLocaleDateString("ca-ES")+'</div></div><div class="route-history-grid"><div class="route-history-metric"><span>Km</span><strong>'+r.distanceKm.toFixed(2)+'</strong></div><div class="route-history-metric"><span>Màx</span><strong>'+Math.round(r.maxSpeed)+' km/h</strong></div><div class="route-history-metric"><span>Mitjana</span><strong>'+r.avgSpeed.toFixed(1)+' km/h</strong></div><div class="route-history-metric"><span>Temps</span><strong>'+formatRouteTime(r.durationMs)+'</strong></div></div><div class="route-history-actions"><button class="open" data-route-open="'+r.id+'">CONSULTAR</button><button data-route-export="'+r.id+'">GPX</button><button class="delete" data-route-delete="'+r.id+'">ESBORRAR</button></div></div>').join("");list.querySelectorAll("[data-route-open]").forEach(b=>b.onclick=()=>showRouteDetail(Number(b.dataset.routeOpen)));list.querySelectorAll("[data-route-export]").forEach(b=>b.onclick=()=>exportRoute(state.routeHistory.find(r=>r.id===Number(b.dataset.routeExport))));list.querySelectorAll("[data-route-delete]").forEach(b=>b.onclick=async()=>{if(!confirm("Esborrar aquesta ruta?"))return;await routeDBDelete(Number(b.dataset.routeDelete));renderRouteHistory();});}
+    function showRouteDetail(id){const r=state.routeHistory.find(x=>x.id===id);if(!r)return;const list=$("routes-list"),detail=$("route-detail");list.style.display="none";detail.classList.add("show");detail.innerHTML='<div class="route-detail-head"><button class="route-back" id="route-detail-back">‹</button><div><div class="route-detail-title">'+escapeHtml(r.name)+'</div><div class="route-detail-date">'+new Date(r.startTime).toLocaleDateString("ca-ES")+'</div></div></div><div class="route-detail-stats"><div class="route-detail-stat"><span>Km fets</span><strong>'+r.distanceKm.toFixed(2)+'</strong><small>km</small></div><div class="route-detail-stat"><span>Velocitat màxima</span><strong>'+Math.round(r.maxSpeed)+'</strong><small>km/h</small></div><div class="route-detail-stat"><span>Velocitat mitjana</span><strong>'+r.avgSpeed.toFixed(1)+'</strong><small>km/h</small></div><div class="route-detail-stat"><span>Durada</span><strong>'+formatRouteTime(r.durationMs)+'</strong><small></small></div><div class="route-detail-stat"><span>Hora sortida</span><strong>'+new Date(r.startTime).toLocaleTimeString("ca-ES",{hour:"2-digit",minute:"2-digit"})+'</strong><small></small></div><div class="route-detail-stat"><span>Hora arribada</span><strong>'+new Date(r.endTime).toLocaleTimeString("ca-ES",{hour:"2-digit",minute:"2-digit"})+'</strong><small></small></div></div><div class="route-detail-actions"><button id="route-detail-map">🗺️ VEURE AL MAPA</button><button class="export" id="route-detail-export">GPX</button></div>';$("route-detail-back").onclick=()=>renderRouteHistory();$("route-detail-map").onclick=()=>{state.routeViewPoints=r.points;state.trackPoints=r.points;state.trackDistanceKm=r.distanceKm;state.routeMaxSpeed=r.maxSpeed;state.trackRecording=false;state.routeMap.centerLat=r.points.at(-1)?.lat;state.routeMap.centerLon=r.points.at(-1)?.lon;document.querySelector('.tab[data-screen="ruta"]')?.click();setTimeout(()=>renderRouteMap(),50);};$("route-detail-export").onclick=()=>exportRoute(r);}
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+    const routeRecordBtn=$("route-record"),routeExportBtn=$("route-export"),routeClearBtn=$("route-clear");if(routeRecordBtn)routeRecordBtn.addEventListener("click",()=>state.trackRecording?finishRouteRecording():startRouteRecording());if(routeExportBtn)routeExportBtn.addEventListener("click",()=>{const r=state.routeViewPoints?{name:"Ruta consultada",points:state.routeViewPoints}:null;if(r)exportRoute(r);else showStatus("Primer guarda una ruta");});if(routeClearBtn)routeClearBtn.addEventListener("click",clearCurrentRoute);loadRecordedRoute();setInterval(updateRoutePanel,1000);restoreActiveRoute();
 
     function updateClock() {
       const now = new Date();
