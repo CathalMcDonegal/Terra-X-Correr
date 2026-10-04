@@ -1,4 +1,4 @@
-const CACHE = "txc-v33";
+const CACHE = "txc-v34";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.jpg", "./icon-192.png", "./icon-512.png", "./pdf.min.js", "./pdf.worker.min.js"];
 
 self.addEventListener("install", (e) => {
