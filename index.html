@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-03-06">
+  <meta name="app-version" content="2026-10-03-07">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -708,7 +708,48 @@
       background: #333;
       color: var(--text);
     }
-  </style>
+      /* Dashboard moto: compacte, simètric i pensat per pantalla vertical */
+    #dashboard .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:100%;padding:8px;overflow:auto;align-content:start}
+    #dashboard .dash-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px;text-align:center;min-width:0}
+    #dashboard .dash-card.full{grid-column:1/-1}
+    #dashboard .dash-label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.6px}
+    #dashboard .dash-speed,#dashboard .dash-cap{height:154px;display:flex;flex-direction:column;justify-content:center}
+    #dashboard .dash-speed .dash-value{font-size:62px;line-height:.92;font-weight:900;color:#29b6f6;font-variant-numeric:tabular-nums}
+    #dashboard .dash-unit{font-size:14px;color:var(--muted);font-weight:800;margin-top:5px}
+    #dashboard .dash-arrow{font-size:42px;line-height:1;color:var(--accent2);margin:4px 0;display:inline-block}
+    #dashboard .dash-cardinal{font-size:22px;font-weight:900;color:var(--accent2)}
+    #dashboard .dash-deg{font-size:14px;color:var(--muted);margin-top:2px}
+    #dashboard .dash-lean{height:180px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    #dashboard .lean-gauge{position:relative;width:100%;max-width:330px;height:100px;margin:5px auto 0;overflow:hidden}
+    #dashboard .lean-arc{position:absolute;left:7%;right:7%;bottom:3px;height:86px;border:4px solid var(--border);border-bottom:0;border-radius:180px 180px 0 0}
+    #dashboard .lean-center{position:absolute;left:50%;bottom:0;width:3px;height:78px;background:var(--muted);transform-origin:50% 100%;transition:transform .12s linear}
+    #dashboard .lean-center:after{content:"";position:absolute;top:-5px;left:50%;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translateX(-50%)}
+    #dashboard .lean-ticks{position:absolute;left:10%;right:10%;bottom:0;display:flex;justify-content:space-between;color:var(--muted);font-size:10px;font-weight:800}
+    #dashboard .lean-value{font-size:27px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+    #dashboard .lean-side{font-size:11px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+    #dashboard .dash-lean-record{margin-top:4px;display:flex;align-items:baseline;justify-content:center;gap:6px;font-size:10px;color:var(--muted);text-transform:uppercase}
+    #dashboard .dash-lean-record strong{font-size:20px;color:var(--accent);font-variant-numeric:tabular-nums}
+    #dashboard .dash-lean-record small{font-size:10px;color:var(--muted)}
+    #dashboard .dash-odo{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    #dashboard .dash-odo-box{background:#111;border:1px solid var(--border);border-radius:12px;padding:7px}
+    #dashboard .dash-odo-value{font-size:24px;color:var(--accent);font-weight:900;font-variant-numeric:tabular-nums}
+    #dashboard .dash-status{font-size:12px;color:var(--muted);padding:1px 0}
+    #dashboard .dash-status .gps-dot{display:inline-block;margin-right:7px}
+    @media(max-width:520px){
+      #dashboard .dash-grid{gap:6px;padding:6px}
+      #dashboard .dash-card{border-radius:14px;padding:8px}
+      #dashboard .dash-speed,#dashboard .dash-cap{height:148px}
+      #dashboard .dash-speed .dash-value{font-size:56px}
+      #dashboard .dash-arrow{font-size:38px}
+      #dashboard .dash-cardinal{font-size:20px}
+      #dashboard .dash-lean{height:172px}
+      #dashboard .lean-gauge{height:92px}
+      #dashboard .lean-arc{height:80px}
+      #dashboard .lean-center{height:72px}
+    }
+
+
+</style>
 </head>
 <body>
   <div id="app">
@@ -828,46 +869,6 @@
         <span id="nav-gps-status">Buscant GPS…</span>
       </div>
     </div>
-
-    /* Dashboard moto: compacte, simètric i pensat per pantalla vertical */
-    #dashboard .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:100%;padding:8px;overflow:auto;align-content:start}
-    #dashboard .dash-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px;text-align:center;min-width:0}
-    #dashboard .dash-card.full{grid-column:1/-1}
-    #dashboard .dash-label{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.6px}
-    #dashboard .dash-speed,#dashboard .dash-cap{height:154px;display:flex;flex-direction:column;justify-content:center}
-    #dashboard .dash-speed .dash-value{font-size:62px;line-height:.92;font-weight:900;color:#29b6f6;font-variant-numeric:tabular-nums}
-    #dashboard .dash-unit{font-size:14px;color:var(--muted);font-weight:800;margin-top:5px}
-    #dashboard .dash-arrow{font-size:42px;line-height:1;color:var(--accent2);margin:4px 0;display:inline-block}
-    #dashboard .dash-cardinal{font-size:22px;font-weight:900;color:var(--accent2)}
-    #dashboard .dash-deg{font-size:14px;color:var(--muted);margin-top:2px}
-    #dashboard .dash-lean{height:180px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center}
-    #dashboard .lean-gauge{position:relative;width:100%;max-width:330px;height:100px;margin:5px auto 0;overflow:hidden}
-    #dashboard .lean-arc{position:absolute;left:7%;right:7%;bottom:3px;height:86px;border:4px solid var(--border);border-bottom:0;border-radius:180px 180px 0 0}
-    #dashboard .lean-center{position:absolute;left:50%;bottom:0;width:3px;height:78px;background:var(--muted);transform-origin:50% 100%;transition:transform .12s linear}
-    #dashboard .lean-center:after{content:"";position:absolute;top:-5px;left:50%;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translateX(-50%)}
-    #dashboard .lean-ticks{position:absolute;left:10%;right:10%;bottom:0;display:flex;justify-content:space-between;color:var(--muted);font-size:10px;font-weight:800}
-    #dashboard .lean-value{font-size:27px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
-    #dashboard .lean-side{font-size:11px;color:var(--muted);text-transform:uppercase;margin-top:2px}
-    #dashboard .dash-lean-record{margin-top:4px;display:flex;align-items:baseline;justify-content:center;gap:6px;font-size:10px;color:var(--muted);text-transform:uppercase}
-    #dashboard .dash-lean-record strong{font-size:20px;color:var(--accent);font-variant-numeric:tabular-nums}
-    #dashboard .dash-lean-record small{font-size:10px;color:var(--muted)}
-    #dashboard .dash-odo{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-    #dashboard .dash-odo-box{background:#111;border:1px solid var(--border);border-radius:12px;padding:7px}
-    #dashboard .dash-odo-value{font-size:24px;color:var(--accent);font-weight:900;font-variant-numeric:tabular-nums}
-    #dashboard .dash-status{font-size:12px;color:var(--muted);padding:1px 0}
-    #dashboard .dash-status .gps-dot{display:inline-block;margin-right:7px}
-    @media(max-width:520px){
-      #dashboard .dash-grid{gap:6px;padding:6px}
-      #dashboard .dash-card{border-radius:14px;padding:8px}
-      #dashboard .dash-speed,#dashboard .dash-cap{height:148px}
-      #dashboard .dash-speed .dash-value{font-size:56px}
-      #dashboard .dash-arrow{font-size:38px}
-      #dashboard .dash-cardinal{font-size:20px}
-      #dashboard .dash-lean{height:172px}
-      #dashboard .lean-gauge{height:92px}
-      #dashboard .lean-arc{height:80px}
-      #dashboard .lean-center{height:72px}
-    }
 
     <div id="dashboard" class="screen">
       <div class="dash-grid">
