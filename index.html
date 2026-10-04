@@ -1573,7 +1573,7 @@
       const lib = await ensurePdfJs();
       const data = new Uint8Array(arrayBuffer);
       showStatus("Obrint document…");
-      const task = lib.getDocument({ data: data, verbosity: 0 });
+      const task = lib.getDocument({ data: data, verbosity: 0, disableWorker: true });
       task.onProgress = function(p) {
         if (p && p.total) showStatus("Llegint PDF " + Math.round(100 * p.loaded / p.total) + "%");
       };
