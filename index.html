@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-04-18">
+  <meta name="app-version" content="2026-10-04-19">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -915,7 +915,7 @@
           <div class="nav-lean-gauge" aria-label="Inclinació esquerra dreta">
             <div class="nav-lean-arc"></div>
             <div class="nav-lean-needle" id="nav-lean-needle"></div>
-            <div class="nav-lean-ticks"><span>30° E</span><span>0°</span><span>30° D</span></div>
+            <div class="nav-lean-ticks"><span>90° E</span><span>0°</span><span>90° D</span></div>
           </div>
           <div class="nav-lean-readout">
             <div><span>ACTUAL</span><strong id="nav-lean-value">0°</strong><small id="nav-lean-side">CENTRAT</small></div>
@@ -1407,7 +1407,7 @@
     try {
       const savedLean = JSON.parse(localStorage.getItem("txc_max_lean") || "null");
       if (savedLean && Number.isFinite(Number(savedLean.value))) {
-        maxLean = Math.max(0, Math.min(45, Number(savedLean.value)));
+        maxLean = Math.max(0, Math.min(90, Number(savedLean.value)));
         maxLeanSide = savedLean.side === "ESQUERRA" || savedLean.side === "DRETA" ? savedLean.side : "—";
       }
     } catch (e) {}
@@ -1428,7 +1428,7 @@
 
     function updateLean(gamma) {
       if (!Number.isFinite(gamma)) return;
-      const clamped = Math.max(-45, Math.min(45, gamma));
+      const clamped = Math.max(-90, Math.min(90, gamma));
       const absLean = Math.abs(clamped);
       const sideName = clamped < 0 ? "ESQUERRA" : "DRETA";
       const value = $("nav-lean-value"), side = $("nav-lean-side"), needle = $("nav-lean-needle");
