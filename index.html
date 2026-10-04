@@ -15,6 +15,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Terra X Correr</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="icon" type="image/jpeg" href="logo.jpg">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
@@ -1098,6 +1099,7 @@
   <input type="file" id="pdf-input" class="file-picker" accept="application/pdf">
   <input type="file" id="gpx-input" class="file-picker" accept=".gpx,application/gpx+xml,text/xml">
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="pdf.min.js"></script>
   <script>
     const state = {
@@ -1172,6 +1174,108 @@
         if (tab.dataset.screen === "ruta") setTimeout(() => initRouteMap(), 80);
       });
     });
+
+    // --- Mapa i enregistrament de ruta ---
+    function routeElapsedMs(){
+      return state.trackElapsedBeforePause + (state.trackRecording && state.trackStartedAt ? Date.now()-state.trackStartedAt : 0);
+    }
+    function formatRouteTime(ms){
+      const total=Math.max(0,Math.floor(ms/1000)),h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;
+      return h>0?String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"):String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    }
+    function updateRoutePanel(){
+      const d=$("route-distance"),t=$("route-duration"),s=$("route-speed"),b=$("route-record"),st=$("route-status");
+      if(d)d.textContent=state.trackDistanceKm.toFixed(2);
+      if(t)t.textContent=formatRouteTime(routeElapsedMs());
+      if(s)s.textContent=Math.round(state.speed||0);
+      if(b){b.textContent=state.trackRecording?"■ PARAR":"● INICIAR";b.classList.toggle("recording",state.trackRecording);b.classList.toggle("primary",!state.trackRecording);}
+      if(st)st.textContent=state.trackRecording?("Enregistrant · "+state.trackPoints.length+" punts GPS"):(state.trackPoints.length?("Ruta guardada · "+state.trackPoints.length+" punts"):"GPS preparat · la ruta encara no s'enregistra");
+    }
+    function saveRecordedRoute(){
+      try{localStorage.setItem("txc_recorded_route",JSON.stringify({points:state.trackPoints,distanceKm:state.trackDistanceKm,elapsedMs:routeElapsedMs()}));state.trackElapsedBeforePause=routeElapsedMs();if(state.trackRecording)state.trackStartedAt=Date.now();}catch(e){console.warn("No s'ha pogut guardar la ruta",e);}
+    }
+    function loadRecordedRoute(){
+      try{
+        const raw=localStorage.getItem("txc_recorded_route");if(!raw)return;
+        const data=JSON.parse(raw);if(!Array.isArray(data.points)||data.points.length<1)return;
+        state.trackPoints=data.points.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)).slice(-12000);
+        state.trackDistanceKm=Number(data.distanceKm)||0;state.trackElapsedBeforePause=Number(data.elapsedMs)||0;state.trackRecording=false;state.trackStartedAt=null;
+      }catch(e){console.warn("Ruta guardada invàlida",e);}
+    }
+    function drawRecordedRoute(fit){
+      if(!state.routeMap||typeof L==="undefined")return;
+      const latlngs=state.trackPoints.map(p=>[p.lat,p.lon]);
+      if(!state.routePolyline) state.routePolyline=L.polyline(latlngs,{color:"#00e676",weight:4,opacity:.9});
+      else state.routePolyline.setLatLngs(latlngs);
+      if(!state.routePolyline._map)state.routePolyline.addTo(state.routeMap);
+      const last=state.trackPoints[state.trackPoints.length-1];
+      if(last){
+        const ll=[last.lat,last.lon];
+        if(!state.routeMarker)state.routeMarker=L.circleMarker(ll,{radius:7,color:"#00e676",weight:3,fillColor:"#0a0a0a",fillOpacity:1}).addTo(state.routeMap);else state.routeMarker.setLatLng(ll);
+        if(fit&&state.trackPoints.length>1)state.routeMap.fitBounds(state.routePolyline.getBounds(),{padding:[20,20],maxZoom:17});
+        else if(fit)state.routeMap.setView(ll,16);
+      }
+    }
+    function initRouteMap(){
+      const el=$("ruta-map");if(!el)return;
+      if(typeof L==="undefined"){el.innerHTML='<div style="padding:24px;text-align:center;color:#999">No s’ha pogut carregar el mapa. Cal connexió a internet per al mapa base.</div>';updateRoutePanel();return;}
+      if(!state.routeMap){
+        const start=state.lastLat!=null?[state.lastLat,state.lastLon]:[41.65,1.75];
+        state.routeMap=L.map(el,{zoomControl:false,attributionControl:true}).setView(start,state.lastLat!=null?15:7);
+        L.control.zoom({position:"topright"}).addTo(state.routeMap);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(state.routeMap);
+        drawRecordedRoute(true);
+      }
+      setTimeout(()=>state.routeMap.invalidateSize(),60);updateRoutePanel();
+    }
+    function recordRoutePoint(lat,lon,timestamp,accuracy,speed){
+      if(!state.trackRecording||!Number.isFinite(lat)||!Number.isFinite(lon))return;
+      if(Number.isFinite(accuracy)&&accuracy>60)return;
+      const last=state.trackPoints[state.trackPoints.length-1];
+      if(last){
+        const distM=haversine(last.lat,last.lon,lat,lon),dt=Math.max(.1,(timestamp-(last.t||timestamp))/1000),implied=distM/dt*3.6;
+        if(distM<4)return;
+        if(distM>600||implied>180)return;
+        state.trackDistanceKm+=distM/1000;
+      }
+      state.trackPoints.push({lat,lon,t:timestamp,s:Number.isFinite(speed)?speed:0,acc:Number.isFinite(accuracy)?accuracy:null});
+      if(state.trackPoints.length>12000)state.trackPoints.shift();
+      if(state.routeMap){
+        const ll=[lat,lon];
+        if(!state.routePolyline)state.routePolyline=L.polyline([ll],{color:"#00e676",weight:4,opacity:.9}).addTo(state.routeMap);else state.routePolyline.addLatLng(ll);
+        if(!state.routeMarker)state.routeMarker=L.circleMarker(ll,{radius:7,color:"#00e676",weight:3,fillColor:"#0a0a0a",fillOpacity:1}).addTo(state.routeMap);else state.routeMarker.setLatLng(ll);
+        state.routeMap.panTo(ll,{animate:false});
+      }
+      const now=Date.now();if(now-state.trackLastSavedAt>5000){state.trackLastSavedAt=now;saveRecordedRoute();}
+      updateRoutePanel();
+    }
+    function toggleRouteRecording(){
+      if(state.trackRecording){state.trackElapsedBeforePause=routeElapsedMs();state.trackStartedAt=null;state.trackRecording=false;saveRecordedRoute();showStatus("Enregistrament pausat");}
+      else{state.trackRecording=true;state.trackStartedAt=Date.now();state.trackLastSavedAt=0;showStatus("Enregistrament de ruta iniciat");if(state.lastLat!=null)recordRoutePoint(state.lastLat,state.lastLon,Date.now(),state.gpsAccuracy,state.speed);}
+      updateRoutePanel();
+    }
+    function clearRecordedRoute(){
+      if(!state.trackPoints.length&&!state.trackDistanceKm)return;
+      if(!confirm("Esborrar la ruta enregistrada?"))return;
+      state.trackRecording=false;state.trackPoints=[];state.trackDistanceKm=0;state.trackStartedAt=null;state.trackElapsedBeforePause=0;
+      try{localStorage.removeItem("txc_recorded_route");}catch(e){}
+      if(state.routePolyline){state.routePolyline.setLatLngs([]);}if(state.routeMarker&&state.routeMap)state.routeMap.removeLayer(state.routeMarker);state.routeMarker=null;
+      updateRoutePanel();showStatus("Ruta esborrada");
+    }
+    function exportRecordedRoute(){
+      if(state.trackPoints.length<2){showStatus("No hi ha prou punts per exportar");return;}
+      const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+      const trk=state.trackPoints.map(p=>'<trkpt lat="'+Number(p.lat).toFixed(7)+'" lon="'+Number(p.lon).toFixed(7)+'"><time>'+new Date(p.t||Date.now()).toISOString()+'</time>'+(Number.isFinite(p.s)?'<extensions><speed>'+Number(p.s/3.6).toFixed(2)+'</speed></extensions>':"")+'</trkpt>').join("");
+      const g='<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Terra X Correr" xmlns="http://www.topografix.com/GPX/1/1"><metadata><name>Terra X Correr</name></metadata><trk><name>'+esc("Ruta Terra X Correr")+'</name><trkseg>'+trk+'</trkseg></trk></gpx>';
+      const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([g],{type:"application/gpx+xml"}));a.download="terra-x-correr-"+new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")+".gpx";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showStatus("GPX exportat");
+    }
+    const routeRecordBtn=$("route-record"),routeExportBtn=$("route-export"),routeClearBtn=$("route-clear"),routeLocateBtn=$("route-locate");
+    if(routeRecordBtn)routeRecordBtn.addEventListener("click",toggleRouteRecording);
+    if(routeExportBtn)routeExportBtn.addEventListener("click",exportRecordedRoute);
+    if(routeClearBtn)routeClearBtn.addEventListener("click",clearRecordedRoute);
+    if(routeLocateBtn)routeLocateBtn.addEventListener("click",()=>{if(state.routeMap&&state.lastLat!=null)state.routeMap.setView([state.lastLat,state.lastLon],Math.max(16,state.routeMap.getZoom()),{animate:true});else showStatus("Encara no tenim posició GPS");});
+    loadRecordedRoute();
+    setInterval(()=>updateRoutePanel(),1000);
 
     function updateClock() {
       const now = new Date();
@@ -1379,6 +1483,7 @@
             saveSettingsDebounced();
           }
         }
+        recordRoutePoint(latitude,longitude,pos.timestamp,accuracy,state.speed);
         state.lastLat=latitude; state.lastLon=longitude; state.lastGpsTimestamp=pos.timestamp;
         updateGpxPosition(latitude, longitude);
         if(typeof fetchWeather==="function") fetchWeather(latitude,longitude);
