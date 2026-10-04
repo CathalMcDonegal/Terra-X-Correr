@@ -1573,7 +1573,7 @@
       const lib = await ensurePdfJs();
       const data = new Uint8Array(arrayBuffer);
       showStatus("Obrint document…");
-      const task = lib.getDocument({ data: data, verbosity: 0, disableWorker: true });
+      const task = lib.getDocument({ data: data, verbosity: 0 });
       task.onProgress = function(p) {
         if (p && p.total) showStatus("Llegint PDF " + Math.round(100 * p.loaded / p.total) + "%");
       };
@@ -1692,11 +1692,12 @@
     async function loadPdf(file) {
       try {
         const arrayBuffer = await file.arrayBuffer();
-        const copy = arrayBuffer.slice(0);
-        await savePdfToDB(copy);
+        if (!arrayBuffer || arrayBuffer.byteLength < 5) throw new Error("PDF buit o invàlid");
+        // Obrim primer; només guardem el fitxer si PDF.js l'ha acceptat.
         await loadPdfFromBuffer(arrayBuffer, false);
+        await savePdfToDB(arrayBuffer.slice(0));
       } catch (err) {
-        console.error(err);
+        console.error("Error carregant PDF:", err);
         showStatus("Error: " + (err && err.message ? err.message : "PDF"));
         showPdfEmpty();
       }
