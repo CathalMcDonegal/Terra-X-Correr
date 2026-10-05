@@ -1,0 +1,165 @@
+name: Apply navigation features
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply navigation features
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import shutil
+          import sys
+
+          path = Path('index.html')
+          s = path.read_text(encoding='utf-8')
+          shutil.copy2(path, str(path) + '.nav.bak')
+
+          def rep(name, old, new, required=True):
+              global s
+              n = s.count(old)
+              if n != 1:
+                  print(f'✗ {name}: {n} coincidències, no aplicat')
+                  if required:
+                      raise SystemExit(1)
+                  return
+              s = s.replace(old, new, 1)
+              print(f'✓ {name}')
+
+          rep('HTML: targeta de sortida',
+              '<div class="big-card nav-lean full">',
+              '''<div class="big-card full nav-trip-stats">
+                    <div class="nts"><span>MOVIMENT</span><strong id="nav-trip-time">00:00:00</strong></div>
+                    <div class="nts"><span>MITJANA</span><strong id="nav-trip-avg">0.0</strong><small>km/h</small></div>
+                    <div class="nts"><span>MÀXIMA</span><strong id="nav-trip-max">0</strong><small>km/h</small></div>
+                    <div class="nts"><span>AUTONOMIA</span><strong id="nav-range-left">--</strong><small>km</small></div>
+                    <button class="big-odo-btn nts-btn" id="nav-trip-reset" type="button">↺ SORTIDA A 0</button>
+                    <button class="big-odo-btn nts-btn" id="nav-range-set" type="button">⛽ AUTONOMIA</button>
+                  </div>
+
+                  <div class="big-card nav-lean full">''')
+
+          rep('CSS: targeta de sortida',
+              '</style>',
+              '''.nav-trip-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 6px}
+              .nts{display:flex;flex-direction:column;align-items:center;min-width:0}
+              .nts span{font-size:10px;color:var(--muted);font-weight:900;letter-spacing:.5px}
+              .nts strong{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.15}
+              .nts small{font-size:11px;color:var(--muted)}
+              .nts-btn{grid-column:span 2;min-height:46px;font-size:13px;padding:6px}
+          </style>''')
+
+          JS = r'''// --- Sortida: temps en moviment, mitjana, màxima i autonomia ---
+              let trip = (() => {
+                const base = {ms:0, km:0, max:0, last:null, alerted:false};
+                try { return Object.assign(base, JSON.parse(localStorage.getItem("txc_trip") || "{}")); } catch (e) { return base; }
+              })();
+              let tripSavedAt = 0;
+              function fmtHMS(ms) {
+                const t = Math.floor(ms / 1000), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+                return [h, m, s].map(n => String(n).padStart(2, "0")).join(":");
+              }
+              function renderTrip() {
+                const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+                set("nav-trip-time", fmtHMS(trip.ms));
+                set("nav-trip-avg", trip.ms > 10000 ? (trip.km / (trip.ms / 3600000)).toFixed(1) : "0.0");
+                set("nav-trip-max", Math.round(trip.max));
+                const range = parseFloat(localStorage.getItem("txc_range")), el = $("nav-range-left");
+                if (range > 0) {
+                  const left = range - state.odoPartial, reserve = Math.max(10, range * 0.15);
+                  set("nav-range-left", Math.max(0, Math.round(left)));
+                  if (el) el.style.color = left <= reserve ? "#ff1744" : "";
+                  if (left <= reserve && !trip.alerted) {
+                    trip.alerted = true;
+                    showStatus("⛽ Reserva: queden ~" + Math.max(0, Math.round(left)) + " km", 6000);
+                    if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
+                  }
+                } else set("nav-range-left", "--");
+              }
+              function updateTrip(ts, kmh) {
+                if (trip.last != null) {
+                  const dt = ts - trip.last;
+                  if (dt > 0 && dt < 15000 && kmh >= 3) trip.ms += dt;
+                }
+                trip.last = ts;
+                if (kmh > trip.max && kmh < 250) trip.max = kmh;
+                renderTrip();
+                if (Date.now() - tripSavedAt > 5000) {
+                  tripSavedAt = Date.now();
+                  try { localStorage.setItem("txc_trip", JSON.stringify(trip)); } catch (e) {}
+                }
+              }
+              const tripResetBtn = $("nav-trip-reset"), rangeBtn = $("nav-range-set");
+              if (tripResetBtn) tripResetBtn.addEventListener("click", () => {
+                if (!confirm("Posar la sortida a zero?")) return;
+                trip = {ms:0, km:0, max:0, last:null, alerted:false};
+                try { localStorage.setItem("txc_trip", JSON.stringify(trip)); } catch (e) {}
+                renderTrip();
+              });
+              if (rangeBtn) rangeBtn.addEventListener("click", () => {
+                const v = parseFloat((prompt("Autonomia del dipòsit (km):", localStorage.getItem("txc_range") || "") || "").replace(",", "."));
+                if (v > 0) { localStorage.setItem("txc_range", String(v)); trip.alerted = false; renderTrip(); }
+              });
+              renderTrip();
+
+              '''
+          rep('JS: lògica de sortida', '// --- Temps (Open-Meteo, sense API key) ---', JS + '// --- Temps (Open-Meteo, sense API key) ---')
+          rep('GPS: estadístiques a cada fix',
+              'recordRoutePoint(latitude,longitude,pos.timestamp,accuracy,state.speed);',
+              'updateTrip(pos.timestamp,state.speed);recordRoutePoint(latitude,longitude,pos.timestamp,accuracy,state.speed);')
+          rep('Odòmetre: acumular km de la sortida',
+              'state.odoPartial+=distKm;',
+              'state.odoPartial+=distKm;trip.km+=distKm;')
+          rep('Repostar: reactivar l’avís de reserva',
+              'showStatus("Parcial reiniciat");',
+              'trip.alerted=false;renderTrip();showStatus("Parcial reiniciat");')
+          rep('Manual: Navegació',
+              'inclinació i meteorologia.',
+              'inclinació, meteorologia, temps en moviment, mitjana, màxima i autonomia. Fixa els km del dipòsit amb <strong>⛽ AUTONOMIA</strong>: l\'app avisa en entrar en reserva (queda el 15 % o 10 km) i es reactiva en posar el parcial a zero.',
+              required=False)
+
+          path.write_text(s, encoding='utf-8')
+          Path('index.html.nav.bak').unlink(missing_ok=True)
+
+          # Versió de l'aplicació i caché del Service Worker.
+          html = path.read_text(encoding='utf-8').replace('2026-10-04-21', '2026-10-05-01', 1)
+          path.write_text(html, encoding='utf-8')
+          sw = Path('sw.js')
+          sws = sw.read_text(encoding='utf-8')
+          sws = sws.replace('const CACHE = "txc-v55";', 'const CACHE = "txc-v56";', 1)
+          sw.write_text(sws, encoding='utf-8')
+          PY
+
+      - name: Validate and commit
+        shell: bash
+        run: |
+          node --check /dev/stdin < <(python3 - <<'PY'
+          import re
+          s=open('index.html',encoding='utf-8').read()
+          m=re.findall(r'<script(?:\s[^>]*)?>([\s\S]*?)</script>',s)
+          print('\n'.join(m))
+          PY
+          )
+          git diff --check
+          git status --short
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html sw.js
+          git commit -m "Add navigation trip stats and range warning"
+          git push
+          
+          # Remove this one-shot workflow from the repository after the patch commit.
+          git rm .github/workflows/apply-nav-features.yml
+          git commit -m "Remove one-shot navigation patch workflow"
+          git push
