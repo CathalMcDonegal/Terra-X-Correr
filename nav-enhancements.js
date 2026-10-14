@@ -53,14 +53,27 @@
     if(weather) grid.appendChild(weather);
   }
 
+  function updateTexts(){
+    const meta=document.querySelector('meta[name="app-version"]');
+    if(meta) meta.setAttribute('content','2026-10-14-01');
+    const empty=document.querySelector('.routes-empty p');
+    if(empty && /Comença un enregistrament/.test(empty.textContent)) empty.innerHTML='Entra a <strong>Navegació</strong> i la ruta s’enregistrarà automàticament.';
+    document.querySelectorAll('.editor-section p').forEach(p=>{
+      if(/Iniciar sortida/.test(p.textContent) && /Aturar sortida/.test(p.textContent)){
+        p.innerHTML='<strong>Navegació</strong> inicia automàticament l’enregistrament de la ruta quan entres a la pestanya. Mostra velocitat, temps en moviment, mitjana, màxima, autonomia, odòmetres i meteorologia. En sortir de Navegació, la ruta es guarda a <strong>Rutes</strong> amb nom i estadístiques.';
+      }
+    });
+  }
+
   function init(){
     rearrangeNav();
+    updateTexts();
     const st=$('route-status');
     if(st) st.textContent='La Navegació enregistra la ruta automàticament';
     document.querySelectorAll('.tab').forEach(t=>{
-      t.addEventListener('click',()=>setTimeout(()=>{rearrangeNav();syncNavState();},20));
+      t.addEventListener('click',()=>setTimeout(()=>{rearrangeNav();syncNavState();updateTexts();},20));
     });
-    setTimeout(()=>{rearrangeNav();syncNavState();},150);
+    setTimeout(()=>{rearrangeNav();syncNavState();updateTexts();},150);
     document.addEventListener('visibilitychange',()=>{
       if(document.visibilityState==='visible') setTimeout(syncNavState,100);
     });
