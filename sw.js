@@ -1,4 +1,4 @@
-const CACHE = "txc-v57";
+const CACHE = "txc-v58";
 const TILES = "txc-tiles-v1";
 const MAX_TILES = 500;
 const NETWORK_TIMEOUT = 3500;
