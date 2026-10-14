@@ -1,0 +1,58 @@
+/* Terra X Correr — ajustos finals de Navegació i Instrumentació */
+
+/* Navegació: hora més visible, etiqueta més discreta */
+#navegacio .big-card.time {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:clamp(8px,1.5vw,18px) !important;
+  flex-direction:row !important;
+}
+#navegacio .big-card.time .label {
+  font-size:clamp(10px,1.4vw,14px) !important;
+  margin:0 !important;
+  letter-spacing:.4px !important;
+}
+#navegacio .big-card.time .value {
+  font-size:clamp(42px,6vw,68px) !important;
+  line-height:1 !important;
+}
+
+/* Instrumentació: els 4 controls de +/− en una fila i els 2 resets junts a sota */
+#instruments .big-odo-controls {
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  grid-template-rows:auto auto !important;
+  align-items:center !important;
+  justify-items:stretch !important;
+  max-width:420px !important;
+  gap:8px !important;
+}
+#instruments .big-odo-controls > .big-odo-btn:not(.danger) {
+  grid-row:1 !important;
+}
+#instruments .big-odo-controls > .big-odo-btn.danger {
+  grid-column:2 !important;
+  grid-row:2 !important;
+  min-width:0 !important;
+}
+#instruments .big-odo-controls > .resets {
+  grid-column:3 !important;
+  grid-row:2 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:stretch !important;
+  gap:8px !important;
+  margin:0 !important;
+  width:100% !important;
+}
+#instruments .big-odo-controls > .resets .big-odo-btn,
+#instruments .big-odo-controls > .resets button {
+  flex:1 1 auto !important;
+  min-width:0 !important;
+}
+
+@media (max-width:380px) {
+  #instruments .big-odo-controls { gap:5px !important; }
+  #instruments .big-odo-controls > .big-odo-btn,
+  #instruments .big-odo-controls > .resets button { font-size:11px !important; padding-inline:4px !important; }
+}
