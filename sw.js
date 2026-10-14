@@ -1,8 +1,8 @@
-const CACHE = "txc-v69";
+const CACHE = "txc-v70";
 const TILES = "txc-tiles-v1";
 const MAX_TILES = 500;
 const NETWORK_TIMEOUT = 3500;
-const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.jpg", "./icon-192.png", "./icon-512.png", "./pdf.min.js", "./pdf.worker.min.js", "./nav-enhancements.css", "./nav-enhancements.js", "./responsive.css"];
+const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.jpg", "./icon-192.png", "./icon-512.png", "./pdf.min.js", "./pdf.worker.min.js", "./nav-enhancements.css", "./nav-enhancements.js", "./responsive.css", "./nav-tweaks.css"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => Promise.allSettled(ASSETS.map((a) => c.add(a))))); });
 self.addEventListener("message", (e) => { if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting(); });
 self.addEventListener("activate", (e) => { const keep = [CACHE, TILES]; e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => !keep.includes(k)).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
@@ -12,11 +12,12 @@ async function tileResponse(req) { const cache = await caches.open(TILES); const
 async function injectNavAssets(response) {
   try {
     const text = await response.text();
-    if (text.includes('data-txc-nav-enhancements') && text.includes('data-txc-responsive')) return new Response(text, {status: response.status, statusText: response.statusText, headers: response.headers});
+    if (text.includes('data-txc-nav-enhancements') && text.includes('data-txc-responsive') && text.includes('data-txc-tweaks')) return new Response(text, {status: response.status, statusText: response.statusText, headers: response.headers});
     const css = '<link data-txc-nav-enhancements rel="stylesheet" href="./nav-enhancements.css">';
     const responsive = '<link data-txc-responsive rel="stylesheet" href="./responsive.css">';
+    const tweaks = '<link data-txc-tweaks rel="stylesheet" href="./nav-tweaks.css">';
     const js = '<script data-txc-nav-enhancements src="./nav-enhancements.js"></script>';
-    const html = text.replace('</head>', css + responsive + '</head>').replace('</body>', js + '</body>');
+    const html = text.replace('</head>', css + responsive + tweaks + '</head>').replace('</body>', js + '</body>');
     const headers = new Headers(response.headers); headers.set('Content-Type', 'text/html; charset=utf-8');
     return new Response(html, {status: response.status, statusText: response.statusText, headers});
   } catch (e) { return response; }
