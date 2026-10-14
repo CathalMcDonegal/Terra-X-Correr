@@ -1,51 +1,32 @@
-/* Terra X Correr — responsive layout for phones, tablets and landscape displays */
+/* Terra X Correr — responsive layout */
 html, body, #app { width:100%; max-width:100%; min-width:0; }
 body { overflow:hidden; }
-
 .tabs { overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
 .tabs::-webkit-scrollbar { display:none; }
 .tab { flex:1 1 0; min-width:90px; white-space:nowrap; padding-inline:clamp(4px,1vw,12px); font-size:clamp(10px,1.35vw,14px); }
-
 .instruments { grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); padding:clamp(5px,1vw,12px); gap:clamp(5px,1vw,10px); }
 .inst { min-width:0; }
 .inst .value { font-size:clamp(22px,3vw,34px); }
 .dir-arrow { font-size:clamp(28px,4vw,42px); }
 .dir-cardinal { font-size:clamp(15px,2vw,20px); }
 .odo-btn { min-width:clamp(34px,4.5vw,46px); min-height:clamp(34px,5vw,42px); padding:5px 7px; }
-
 .rb-toolbar { padding:clamp(6px,1vw,12px); gap:clamp(5px,1vw,9px); }
 .rb-row { gap:clamp(5px,1vw,9px); }
 .rb-btn { min-height:clamp(46px,6vw,58px); font-size:clamp(15px,2.2vw,20px); padding:10px 12px; }
-.rb-toolbar .rb-row:first-child .rb-btn { min-height:clamp(46px,6vw,60px); }
-.rb-toolbar .rb-row:nth-child(2) .rb-btn { min-height:clamp(44px,5.5vw,56px); }
-
-.big-grid { width:min(100%, 900px); max-width:none; gap:clamp(7px,1.2vw,14px); padding-inline:clamp(7px,1.2vw,16px); }
+.big-grid { width:min(100%,900px); max-width:none; gap:clamp(7px,1.2vw,14px); padding-inline:clamp(7px,1.2vw,16px); }
 .big-card { min-width:0; border-radius:clamp(12px,1.8vw,18px); padding:clamp(12px,2vw,22px) clamp(8px,1.5vw,16px); }
 .big-card .label { font-size:clamp(11px,1.45vw,15px); }
 .big-card .value { font-size:clamp(34px,5vw,54px); }
 .big-odo-btn { min-width:0; min-height:clamp(44px,5.5vw,54px); padding:10px 8px; font-size:clamp(13px,1.8vw,17px); }
 .gps-line { font-size:clamp(11px,1.5vw,14px); margin:clamp(6px,1vw,12px); }
-
-/* Navigation adapts by available width instead of device model. */
-.nav-trip-grid { width:min(100%, 1100px); }
+.nav-trip-grid { width:min(100%,1100px); }
 .nav-trip-main .value { font-size:clamp(38px,7vw,70px); }
-#navegacio .nav-trip-grid > .big-card.speed,
-#navegacio .nav-trip-grid > .big-card.cap {
-  height:clamp(78px,12vw,150px);
-  min-height:clamp(78px,12vw,150px);
-  max-height:none;
-}
-#navegacio .nav-trip-grid > .big-card.speed .value { font-size:clamp(28px,4vw,46px); }
-#navegacio .nav-trip-grid > .big-card.cap .big-dir-arrow { font-size:clamp(24px,4vw,44px); }
-#navegacio .nav-trip-grid > .big-card.cap .big-dir-cardinal { font-size:clamp(14px,2vw,20px); }
 .nav-trip-stats { gap:clamp(4px,1vw,10px); padding:clamp(7px,1vw,12px); }
 .nts span { font-size:clamp(8px,1.2vw,11px); }
 .nts strong { font-size:clamp(17px,2.8vw,28px); }
 .nts-btn { min-height:clamp(40px,5vw,50px); font-size:clamp(11px,1.5vw,14px); }
 .nav-weather { min-height:clamp(82px,10vw,110px); }
 .nav-weather .value { font-size:clamp(28px,4vw,42px); }
-
-/* Route/map screen always fills whatever space the device provides. */
 #ruta { min-height:0; height:100%; }
 #ruta-map { min-height:0; flex:1 1 auto; }
 .route-map-controls { right:clamp(6px,1vw,12px); top:clamp(6px,1vw,12px); }
@@ -54,71 +35,32 @@ body { overflow:hidden; }
 .route-stat .value { font-size:clamp(16px,2.6vw,24px); }
 .route-btn { min-height:clamp(38px,5vw,48px); font-size:clamp(10px,1.5vw,13px); }
 
-/* Wide tablets: use the extra space instead of stretching cards vertically. */
+/* Navegació: només aquesta pantalla ocupa l'espai entre pestanyes i GPS. */
+#navegacio { flex:1 1 0 !important; min-height:0 !important; max-height:none !important; overflow:hidden !important; padding:0 !important; box-sizing:border-box; }
+#navegacio .nav-trip-grid { display:flex !important; flex-direction:column !important; flex:1 1 0 !important; width:100% !important; max-width:none !important; height:auto !important; min-height:0 !important; overflow:hidden !important; box-sizing:border-box; padding:clamp(5px,1vw,10px) !important; gap:clamp(5px,1vw,10px) !important; }
+#navegacio .nav-trip-grid > .big-card.speed,
+#navegacio .nav-trip-grid > .nav-trip-stats,
+#navegacio .nav-trip-grid > .nav-trip-main,
+#navegacio .nav-trip-grid > .big-card.time,
+#navegacio .nav-trip-grid > .nav-weather { width:100% !important; max-width:none !important; height:auto !important; min-height:0 !important; max-height:none !important; box-sizing:border-box; align-self:stretch; }
+#navegacio .nav-trip-grid > .big-card.speed { order:1; flex:1.05 1 0 !important; }
+#navegacio .nav-trip-grid > .nav-trip-stats { order:2; flex:1.15 1 0 !important; }
+#navegacio .nav-trip-grid > .nav-trip-main { order:3; flex:1.40 1 0 !important; }
+#navegacio .nav-trip-grid > .big-card.time { order:4; flex:.70 1 0 !important; }
+#navegacio .nav-trip-grid > .nav-weather { order:5; flex:.85 1 0 !important; }
+#navegacio .nav-trip-grid > .nav-lean,
+#navegacio .nav-trip-grid > .big-card.cap { display:none !important; }
+#navegacio > .gps-line { flex:0 0 auto !important; margin:2px 8px 6px !important; }
+
 @media (min-width:700px) {
-  .tabs { flex-wrap:nowrap; }
   .tab { min-width:0; }
   .instruments { grid-template-columns:1.2fr 1fr; }
   #roadbook-view { padding-inline:clamp(4px,2vw,24px); }
   #pdf-canvas-container canvas { margin-left:auto; margin-right:auto; }
-  #navegacio .nav-trip-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
-  #navegacio .nav-trip-grid > .nav-trip-main { grid-column:span 2; }
-  #navegacio .nav-trip-grid > .speed,
-  #navegacio .nav-trip-grid > .cap { grid-column:span 1; }
-  #navegacio .nav-trip-grid > .nav-trip-stats,
-  #navegacio .nav-trip-grid > .nav-lean,
-  #navegacio .nav-trip-grid > .time,
-  #navegacio .nav-trip-grid > .nav-weather { grid-column:1/-1; }
   .big-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
   #instruments .big-grid > .full { grid-column:1/-1; }
-
-  /* Tablets: Navigation uses the full viewport width and height. */
-  #navegacio {
-    height:calc(100dvh - 48px);
-    min-height:0;
-    overflow:hidden;
-    box-sizing:border-box;
-    padding-bottom:0;
-  }
-  #navegacio .nav-trip-grid {
-    display:grid;
-    grid-template-columns:1fr;
-    grid-template-rows:1.15fr 1.25fr 1.35fr .72fr .88fr;
-    width:100%;
-    max-width:none;
-    height:100%;
-    min-height:0;
-    flex:1 1 auto;
-    align-content:stretch;
-    box-sizing:border-box;
-    padding:clamp(5px,1vw,10px);
-    gap:clamp(5px,1vw,10px);
-  }
-  #navegacio .nav-trip-grid > .big-card.speed,
-  #navegacio .nav-trip-grid > .nav-trip-stats,
-  #navegacio .nav-trip-grid > .nav-trip-main,
-  #navegacio .nav-trip-grid > .big-card.time,
-  #navegacio .nav-trip-grid > .nav-weather {
-    grid-column:1;
-    width:100%;
-    height:auto;
-    min-height:0;
-    max-height:none;
-    box-sizing:border-box;
-    align-self:stretch;
-  }
-  #navegacio .nav-trip-grid > .big-card.speed { order:1; padding:8px; }
-  #navegacio .nav-trip-grid > .nav-trip-stats { order:2; }
-  #navegacio .nav-trip-grid > .nav-trip-main { order:3; padding:8px; }
-  #navegacio .nav-trip-grid > .big-card.time { order:4; }
-  #navegacio .nav-trip-grid > .nav-weather { order:5; }
-  #navegacio .nav-trip-grid > .nav-trip-main .value { font-size:clamp(32px,5vw,58px); }
-  #navegacio .nav-trip-grid > .nav-weather { min-height:0; }
-  #navegacio .nav-trip-grid > .nav-lean,
-  #navegacio .nav-trip-grid > .big-card.cap { display:none!important; }
+  #navegacio .nav-trip-grid { padding:clamp(6px,1vw,12px) !important; gap:clamp(6px,1vw,12px) !important; }
 }
-
-/* Landscape phones/tablets: prioritize the roadbook/map and controls. */
 @media (orientation:landscape) and (max-height:600px) {
   .tabs { min-height:38px; }
   .tab { padding-block:6px; font-size:10px; }
@@ -129,15 +71,9 @@ body { overflow:hidden; }
   .rb-toolbar { padding:4px 6px 6px; gap:4px; }
   .rb-row { gap:4px; }
   .rb-btn { min-height:40px !important; padding:6px 8px; font-size:15px; }
-  #navegacio, #instruments, #manual { padding-bottom:6px; }
   .big-card { padding:9px 8px; }
-  #navegacio .nav-trip-grid > .big-card.speed,
-  #navegacio .nav-trip-grid > .big-card.cap { height:68px; min-height:68px; }
-  .nav-trip-stats { padding:5px; }
-  .nav-lean { min-height:120px; }
+  #navegacio .nav-trip-grid { padding:4px !important; gap:4px !important; }
 }
-
-/* Small phones: prevent text/buttons from overflowing narrow widths. */
 @media (max-width:380px) {
   .tab { min-width:78px; font-size:9px; }
   .instruments { grid-template-columns:1.35fr 1fr; }
@@ -147,10 +83,8 @@ body { overflow:hidden; }
   .nav-odo-actions .big-odo-btn { font-size:10px; padding-inline:4px; }
   .route-history-grid { grid-template-columns:repeat(2,1fr); }
 }
-
-/* Very large tablets: cap content so it remains easy to read. */
 @media (min-width:1200px) {
-  .big-grid, .nav-trip-grid { max-width:1200px; margin-inline:auto; }
+  .big-grid { max-width:1200px; margin-inline:auto; }
   .tabs { padding-inline:clamp(0px,4vw,60px); }
   #navegacio .nav-trip-grid { max-width:none; margin-inline:0; }
 }
