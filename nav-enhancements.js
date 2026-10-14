@@ -96,7 +96,7 @@
 
   function updateTexts(){
     const meta=document.querySelector('meta[name="app-version"]');
-    if(meta) meta.setAttribute('content','2026-10-14-02');
+    if(meta) meta.setAttribute('content','2026-10-14-03');
     const empty=document.querySelector('.routes-empty p');
     if(empty && /Comença un enregistrament/.test(empty.textContent)) empty.innerHTML='Entra a <strong>Navegació</strong> i la ruta començarà a enregistrar-se. Quan vulguis acabar-la, prem <strong>DESAR RUTA</strong> i posa-li un nom.';
     document.querySelectorAll('.editor-section p').forEach(p=>{
