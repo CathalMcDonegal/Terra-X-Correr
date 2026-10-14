@@ -1,0 +1,26 @@
+/* Navegació renovada: velocitat principal + estadístiques + odòmetres */
+#navegacio .nav-trip-grid{display:flex;flex-direction:column;gap:7px;width:100%;max-width:560px;padding:7px;overflow:visible}
+#navegacio .nav-trip-grid>.big-card.speed{order:1;width:100%;height:24vh;min-height:145px;max-height:230px;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px}
+#navegacio .nav-trip-grid>.big-card.speed .label{font-size:13px;margin-bottom:3px}
+#navegacio .nav-trip-grid>.big-card.speed .value{font-size:clamp(64px,16vw,104px);line-height:.95;color:#40c4ff}
+#navegacio .nav-trip-grid>.big-card.speed .label:last-child{font-size:12px;margin-top:5px}
+#navegacio .nav-trip-grid>.nav-trip-stats{order:2;width:100%;grid-template-columns:repeat(4,1fr);gap:4px;padding:9px 5px;min-height:98px}
+#navegacio .nav-trip-grid>.nav-trip-stats .nts strong{font-size:21px}
+#navegacio .nav-trip-grid>.nav-trip-stats .nts span{font-size:9px}
+#navegacio .nav-trip-grid>.nav-trip-stats .nts small{font-size:9px}
+#navegacio .nav-trip-grid>.nav-trip-stats .nts-btn{min-height:38px;font-size:11px;grid-column:span 2;padding:4px}
+#navegacio .nav-trip-grid>.nav-trip-main{order:3;width:100%;padding:9px 8px}
+#navegacio .nav-trip-grid>.nav-trip-main .label{font-size:10px;margin-bottom:2px}
+#navegacio .nav-trip-grid>.nav-trip-main .value{font-size:38px}
+#navegacio .nav-trip-grid>.nav-trip-main .nav-trip-divider{margin:5px 12% 4px}
+#navegacio .nav-trip-grid>.nav-trip-main .big-partial{font-size:18px;margin-top:2px}
+#navegacio .nav-trip-grid>.nav-trip-main .nav-odo-actions{margin-top:6px}
+#navegacio .nav-trip-grid>.nav-trip-main .big-odo-btn{min-height:40px;font-size:11px;padding:5px}
+#navegacio .nav-trip-grid>.big-card.time{order:4;width:100%;height:58px;min-height:58px;padding:5px;display:flex;align-items:center;justify-content:center}
+#navegacio .nav-trip-grid>.big-card.time .label{font-size:10px;margin:0 8px 0 0}
+#navegacio .nav-trip-grid>.big-card.time .value{font-size:25px}
+#navegacio .nav-trip-grid>.nav-weather{order:5;width:100%;min-height:72px;padding:6px}
+#navegacio .nav-trip-grid>.nav-weather .value{font-size:30px}
+#navegacio .nav-trip-grid>.nav-weather #nav-weather-icon{font-size:28px}
+#navegacio .gps-line{font-size:11px;margin-top:2px;padding-bottom:5px}
+#navegacio .nav-lean,#navegacio .big-card.cap{display:none!important}
