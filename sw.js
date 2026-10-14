@@ -1,8 +1,8 @@
-const CACHE = "txc-v59";
+const CACHE = "txc-v60";
 const TILES = "txc-tiles-v1";
 const MAX_TILES = 500;
 const NETWORK_TIMEOUT = 3500;
-const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.jpg", "./icon-192.png", "./icon-512.png", "./pdf.min.js", "./pdf.worker.min.js", "./nav-enhancements.css", "./nav-enhancements.js"];
+const ASSETS = ["./", "./index.html", "./manifest.json", "./logo.jpg", "./icon-192.png", "./icon-512.png", "./pdf.min.js", "./pdf.worker.min.js", "./nav-enhancements.css", "./nav-enhancements.js", "./google-maps.js"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => Promise.allSettled(ASSETS.map((a) => c.add(a)))));
@@ -38,10 +38,11 @@ async function tileResponse(req) {
 async function injectNavAssets(response) {
   try {
     const text = await response.text();
-    if (text.includes('data-txc-nav-enhancements')) return new Response(text, {status: response.status, statusText: response.statusText, headers: response.headers});
+    if (text.includes('data-txc-nav-enhancements') && text.includes('data-txc-google-maps')) return new Response(text, {status: response.status, statusText: response.statusText, headers: response.headers});
     const css = '<link data-txc-nav-enhancements rel="stylesheet" href="./nav-enhancements.css">';
     const js = '<script data-txc-nav-enhancements src="./nav-enhancements.js"></script>';
-    const html = text.replace('</head>', css + '</head>').replace('</body>', js + '</body>');
+    const maps = '<script data-txc-google-maps src="./google-maps.js"></script>';
+    const html = text.replace('</head>', css + '</head>').replace('</body>', js + maps + '</body>');
     const headers = new Headers(response.headers);
     headers.set('Content-Type', 'text/html; charset=utf-8');
     return new Response(html, {status: response.status, statusText: response.statusText, headers});
