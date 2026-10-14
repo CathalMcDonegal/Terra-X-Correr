@@ -9,7 +9,9 @@
 #navegacio .nav-trip-grid>.nav-trip-stats .nts span{font-size:9px}
 #navegacio .nav-trip-grid>.nav-trip-stats .nts small{font-size:9px}
 #navegacio .nav-trip-grid>.nav-trip-stats .nts-btn{min-height:38px;font-size:11px;grid-column:span 2;padding:4px}
-#navegacio .nav-trip-grid>.nav-trip-stats .nav-save-route{grid-column:1 / -1;min-height:42px;font-size:12px;font-weight:800;letter-spacing:.2px}
+#navegacio .nav-trip-grid>.nav-trip-stats .nav-start-route{grid-column:span 2;border-color:var(--accent);color:var(--accent);background:#10251b;font-weight:900}
+#navegacio .nav-trip-grid>.nav-trip-stats .nav-start-route:disabled{opacity:.75}
+#navegacio .nav-trip-grid>.nav-trip-stats .nav-save-route{grid-column:span 2;min-height:38px;font-size:11px;font-weight:800;letter-spacing:.2px}
 #navegacio .nav-trip-grid>.nav-trip-stats .nav-save-route:disabled{opacity:.55}
 #navegacio .nav-trip-grid>.nav-trip-main{order:3;width:100%;padding:9px 8px}
 #navegacio .nav-trip-grid>.nav-trip-main .label{font-size:10px;margin-bottom:2px}
