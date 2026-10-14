@@ -26,3 +26,36 @@
 #navegacio .nav-trip-grid>.nav-weather #nav-weather-icon{font-size:28px}
 #navegacio .gps-line{font-size:11px;margin-top:2px;padding-bottom:5px}
 #navegacio .nav-lean,#navegacio .big-card.cap{display:none!important}
+
+/* Navegació: aprofitar tota l'alçada disponible, també en tablets */
+#navegacio{box-sizing:border-box;min-height:calc(100dvh - 42px);height:calc(100dvh - 42px);overflow-y:auto;overflow-x:hidden;padding-bottom:max(6px,env(safe-area-inset-bottom));}
+#navegacio .nav-trip-grid{box-sizing:border-box;width:100%;max-width:none;min-height:calc(100dvh - 48px);height:auto;padding:clamp(6px,1vw,12px);gap:clamp(6px,1vw,10px);}
+#navegacio .nav-trip-grid>.big-card.speed{height:clamp(105px,18vh,190px);min-height:105px;max-height:none;flex:0 0 clamp(105px,18vh,190px);}
+#navegacio .nav-trip-grid>.nav-trip-stats{min-height:120px;flex:1 1 150px;}
+#navegacio .nav-trip-grid>.nav-trip-main{min-height:145px;flex:1 1 190px;}
+#navegacio .nav-trip-grid>.big-card.time{height:clamp(58px,8vh,82px);min-height:58px;flex:0 0 clamp(58px,8vh,82px);}
+#navegacio .nav-trip-grid>.nav-weather{min-height:82px;flex:1 1 105px;}
+
+@media (min-width:700px) and (orientation:portrait){
+  #navegacio{min-height:calc(100dvh - 44px);height:calc(100dvh - 44px);}
+  #navegacio .nav-trip-grid{min-height:calc(100dvh - 50px);padding:10px 14px;gap:10px;}
+  #navegacio .nav-trip-grid>.big-card.speed{height:18vh;flex-basis:18vh;min-height:120px;}
+  #navegacio .nav-trip-grid>.nav-trip-stats{min-height:135px;flex-basis:17vh;}
+  #navegacio .nav-trip-grid>.nav-trip-main{min-height:165px;flex-basis:22vh;}
+  #navegacio .nav-trip-grid>.big-card.time{height:8vh;flex-basis:8vh;min-height:62px;}
+  #navegacio .nav-trip-grid>.nav-weather{min-height:90px;flex-basis:12vh;}
+}
+
+@media (max-width:699px){
+  #navegacio .nav-trip-grid{min-height:calc(100dvh - 48px);}
+}
+
+@media (orientation:landscape) and (max-height:600px){
+  #navegacio{min-height:calc(100dvh - 38px);height:calc(100dvh - 38px);}
+  #navegacio .nav-trip-grid{min-height:calc(100dvh - 44px);padding:5px 8px;gap:5px;}
+  #navegacio .nav-trip-grid>.big-card.speed{height:20vh;min-height:70px;flex-basis:20vh;}
+  #navegacio .nav-trip-grid>.nav-trip-stats{min-height:82px;flex-basis:24vh;}
+  #navegacio .nav-trip-grid>.nav-trip-main{min-height:100px;flex-basis:25vh;}
+  #navegacio .nav-trip-grid>.big-card.time{height:45px;min-height:45px;flex-basis:45px;}
+  #navegacio .nav-trip-grid>.nav-weather{min-height:58px;flex-basis:15vh;}
+}
