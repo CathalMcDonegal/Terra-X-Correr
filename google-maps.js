@@ -6,6 +6,8 @@
   let mode = localStorage.getItem(MODE_STORE) || 'google';
   let mapType = 'roadmap';
   let zoom = 15;
+  let lastGoogleRefreshAt = 0;
+  let lastGoogleCenter = null;
   let frame, map, tiles, svg, info, attribution, controls;
 
   function coords() {
@@ -97,9 +99,14 @@
     nav.style.background = '#00e676'; nav.style.color = '#000';
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(pos => {
-        window.__txcGoogleLat = pos.coords.latitude;
-        window.__txcGoogleLon = pos.coords.longitude;
-        if (mode === 'google' && key()) refreshGoogle();
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        const previous = lastGoogleCenter;
+        window.__txcGoogleLat = lat;
+        window.__txcGoogleLon = lon;
+        const moved = !previous || Math.abs(previous.lat - lat) > 0.002 || Math.abs(previous.lon - lon) > 0.002;
+        if (mode === 'google' && key() && moved && Date.now() - lastGoogleRefreshAt > 15000) {
+          lastGoogleCenter = {lat, lon}; lastGoogleRefreshAt = Date.now(); refreshGoogle();
+        }
       }, () => {}, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
     }
     const oldLocate = $('route-locate');
