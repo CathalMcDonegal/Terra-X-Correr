@@ -1,0 +1,12 @@
+/* Full-screen Navigation override */
+#navegacio{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0!important;box-sizing:border-box}
+#navegacio .nav-trip-grid{display:flex!important;flex-direction:column!important;width:100%!important;max-width:none!important;height:100%!important;min-height:0!important;flex:1 1 auto!important;box-sizing:border-box;padding:8px!important;gap:8px!important;overflow:visible!important}
+#navegacio .nav-trip-grid>.big-card.speed,#navegacio .nav-trip-grid>.nav-trip-stats,#navegacio .nav-trip-grid>.nav-trip-main,#navegacio .nav-trip-grid>.big-card.time,#navegacio .nav-trip-grid>.nav-weather{width:100%!important;max-width:none!important;min-height:0!important;max-height:none!important;height:auto!important;box-sizing:border-box;align-self:stretch}
+#navegacio .nav-trip-grid>.big-card.speed{order:1;flex:1.1 1 0!important}
+#navegacio .nav-trip-grid>.nav-trip-stats{order:2;flex:1.2 1 0!important}
+#navegacio .nav-trip-grid>.nav-trip-main{order:3;flex:1.45 1 0!important}
+#navegacio .nav-trip-grid>.big-card.time{order:4;flex:.72 1 0!important}
+#navegacio .nav-trip-grid>.nav-weather{order:5;flex:.9 1 0!important}
+#navegacio .nav-trip-grid>.nav-lean,#navegacio .nav-trip-grid>.big-card.cap{display:none!important}
+@media (min-width:700px){#navegacio .nav-trip-grid{padding:10px 14px!important;gap:10px!important}}
+@media (orientation:landscape) and (max-height:600px){#navegacio .nav-trip-grid{padding:5px 8px!important;gap:5px!important}}
