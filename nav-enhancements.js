@@ -11,7 +11,8 @@
     if(!rb) return;
     togglingRoute=true;
     try{
-      explicitRouteStart=true;
+      const recording=!!(/ATURAR/i.test(rb.textContent));
+      explicitRouteStart=!recording;
       rb.click();
       setTimeout(()=>{ updateRouteButton(); togglingRoute=false; },350);
     }catch(e){
@@ -27,25 +28,44 @@
       /* Navegació: mesures compactes i resets sempre en una sola fila */
       #navegacio .nav-trip-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;}
       #navegacio .nav-trip-stats .nts-btn{grid-column:span 2!important;width:100%!important;min-height:46px!important;}
-      #navegacio .nav-odo-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:8px!important;width:100%!important;}
-      #navegacio .nav-odo-actions .big-odo-btn{grid-column:auto!important;min-width:0!important;width:100%!important;min-height:34px!important;padding:4px 3px!important;font-size:10px!important;white-space:nowrap!important;}
-      #navegacio .nav-odo-actions .nav-route-zero{min-height:34px!important;font-size:10px!important;padding:4px 2px!important;}
+      #navegacio .nav-odo-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:6px!important;width:100%!important;}
+      #navegacio .nav-odo-actions .big-odo-btn{grid-column:auto!important;min-width:0!important;width:100%!important;min-height:30px!important;height:30px!important;padding:3px 3px!important;font-size:9px!important;white-space:nowrap!important;}
+      #navegacio .nav-odo-actions .nav-route-zero{min-height:30px!important;height:30px!important;font-size:9px!important;padding:3px 2px!important;}
       #navegacio .nav-start-route{background:var(--accent)!important;color:#000!important;border:2px solid var(--accent)!important;}
       #navegacio .nav-start-route.recording{background:#3b1018!important;color:#ff8a80!important;border:2px solid var(--danger)!important;}
       #navegacio .nav-trip-stats .nts-btn:disabled{opacity:1!important;}
+      #navegacio .big-card.time{min-height:0!important;overflow:hidden!important;padding-block:8px!important;}
+      #navegacio .big-card.time .label{font-size:9px!important;margin:0!important;}
+      #navegacio .big-card.time .value{font-size:clamp(40px,5.2vw,60px)!important;line-height:.92!important;}
+
+      /* Instrumentació / odòmetre: quatre ajustos junts i els dos resets junts a sota. */
+      #instruments .odo-controls{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:auto auto!important;gap:5px!important;align-items:center!important;justify-items:stretch!important;flex-wrap:nowrap!important;}
+      #instruments .odo-controls > .odo-btn:not(.danger){grid-row:1!important;min-width:0!important;min-height:32px!important;padding:4px 3px!important;font-size:11px!important;}
+      #instruments .odo-controls > #odo-reset{grid-column:2!important;grid-row:2!important;min-width:0!important;min-height:30px!important;padding:3px 4px!important;font-size:10px!important;margin:0!important;}
+      #instruments .odo-controls > #odo-reset-total{grid-column:3!important;grid-row:2!important;min-width:0!important;min-height:30px!important;padding:3px 4px!important;font-size:10px!important;margin:0!important;}
+
       @media(min-width:700px) and (orientation:portrait){
         #navegacio .nav-trip-stats .nts span{font-size:13px!important;}
         #navegacio .nav-trip-stats .nts strong{font-size:clamp(30px,4.2vw,42px)!important;}
         #navegacio .nav-trip-stats .nts small{font-size:12px!important;}
         #navegacio .nav-trip-stats .nts-btn{min-height:52px!important;font-size:15px!important;}
-        #navegacio .nav-odo-actions .big-odo-btn{min-height:40px!important;font-size:12px!important;padding:5px 4px!important;}
+        #navegacio .nav-odo-actions .big-odo-btn{min-height:34px!important;height:34px!important;font-size:11px!important;padding:4px 4px!important;}
+        #navegacio .big-card.time .label{font-size:10px!important;}
+        #navegacio .big-card.time .value{font-size:clamp(44px,5vw,64px)!important;}
+        #instruments .odo-controls > .odo-btn:not(.danger){min-height:34px!important;font-size:12px!important;}
+        #instruments .odo-controls > #odo-reset,#instruments .odo-controls > #odo-reset-total{min-height:32px!important;font-size:11px!important;}
       }
       @media(max-width:520px){
         #navegacio .nav-trip-stats .nts span{font-size:8px!important;}
         #navegacio .nav-trip-stats .nts strong{font-size:18px!important;}
         #navegacio .nav-trip-stats .nts small{font-size:9px!important;}
         #navegacio .nav-trip-stats .nts-btn{min-height:42px!important;font-size:11px!important;}
-        #navegacio .nav-odo-actions .big-odo-btn{font-size:9px!important;min-height:30px!important;padding:3px 2px!important;}
+        #navegacio .nav-odo-actions .big-odo-btn{font-size:9px!important;min-height:28px!important;height:28px!important;padding:2px!important;}
+        #navegacio .big-card.time{padding-block:6px!important;}
+        #navegacio .big-card.time .value{font-size:clamp(38px,11vw,52px)!important;}
+        #instruments .odo-controls{gap:4px!important;}
+        #instruments .odo-controls > .odo-btn:not(.danger){font-size:10px!important;min-height:30px!important;padding:3px 2px!important;}
+        #instruments .odo-controls > #odo-reset,#instruments .odo-controls > #odo-reset-total{font-size:9px!important;min-height:28px!important;padding:2px!important;}
       }
     `;
     document.head.appendChild(s);
@@ -76,7 +96,6 @@
     const odo=document.querySelector('#navegacio .nav-odo-actions');
     if(!stats) return;
 
-    /* Els tres zeros sempre queden junts i en una sola fila. */
     const found=findOdoButtons();
     if(odo){
       [found.total,found.trip,found.partial].filter(Boolean).forEach((btn,i)=>{
@@ -91,7 +110,6 @@
       });
     }
 
-    /* Una sola tecla: INICIAR RUTA / ATURAR RUTA. */
     let start=$('nav-start-route');
     if(!start){
       start=document.createElement('button');
@@ -103,7 +121,6 @@
     start.textContent='▶ INICIAR RUTA';
     const range=$('nav-range-set');
     if(range) range.textContent='⛽ AUTONOMIA';
-    /* Autonomia i inici de ruta van junts, després de les quatre mesures. */
     stats.appendChild(range||document.createElement('span'));
     stats.appendChild(start);
 
@@ -118,7 +135,6 @@
     const rb=$('route-record');
     const recording=!!(rb && /ATURAR/i.test(rb.textContent));
     if(!isNavScreen() || !recording || explicitRouteStart) return;
-    /* Si Navegació ha iniciat l'enregistrament sola, l'aturem sense prompt ni guardat. */
     if(typeof state!=='undefined' && state.trackRecording){
       state.trackRecording=false;
       state.trackSessionStart=null;
@@ -129,10 +145,15 @@
     }
   }
 
+  function openNavigationAsPrimary(){
+    const navTab=[...document.querySelectorAll('.tab')].find(t=>/Navegaci[oó]/i.test((t.textContent||'').trim()));
+    if(navTab && !isNavScreen()) navTab.click();
+  }
+
   function syncNavState(){
     const now=isNavScreen();
     if(now && !navActive){ navActive=true; ensureRouteButtons(); setTimeout(stopUnexpectedAutoRecording,80); }
-    else if(!now && navActive){ navActive=false; }
+    else if(!now && navActive){ navActive=false; explicitRouteStart=false; }
   }
 
   function rearrangeNav(){
@@ -145,7 +166,7 @@
   }
 
   function updateTexts(){
-    const meta=document.querySelector('meta[name="app-version"]'); if(meta) meta.setAttribute('content','2026-10-14-07');
+    const meta=document.querySelector('meta[name="app-version"]'); if(meta) meta.setAttribute('content','2026-10-15-01');
     const empty=document.querySelector('.routes-empty p');
     if(empty && /Comença un enregistrament/.test(empty.textContent)) empty.innerHTML='Entra a <strong>Navegació</strong> i prem <strong>INICIAR RUTA</strong>. Quan vulguis acabar-la, prem <strong>ATURAR RUTA</strong> i posa-li un nom.';
     document.querySelectorAll('.editor-section p').forEach(p=>{
@@ -157,10 +178,11 @@
     addTabletSizing();
     rearrangeNav();
     updateTexts();
+    openNavigationAsPrimary();
     document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>setTimeout(()=>{rearrangeNav();syncNavState();updateTexts();updateRouteButton();},20)));
-    setTimeout(()=>{addTabletSizing();rearrangeNav();syncNavState();updateTexts();updateRouteButton();},150);
-    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') setTimeout(()=>{syncNavState();updateRouteButton();},100); });
-    setInterval(updateRouteButton,1000);
+    setTimeout(()=>{addTabletSizing();rearrangeNav();syncNavState();updateTexts();updateRouteButton();stopUnexpectedAutoRecording();},150);
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') setTimeout(()=>{syncNavState();updateRouteButton();stopUnexpectedAutoRecording();},100); });
+    setInterval(()=>{stopUnexpectedAutoRecording();updateRouteButton();},1000);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
