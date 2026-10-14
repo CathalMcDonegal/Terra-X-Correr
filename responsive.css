@@ -71,6 +71,51 @@ body { overflow:hidden; }
   #navegacio .nav-trip-grid > .nav-weather { grid-column:1/-1; }
   .big-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
   #instruments .big-grid > .full { grid-column:1/-1; }
+
+  /* Tablets: Navigation uses the full viewport width and height. */
+  #navegacio {
+    height:calc(100dvh - 48px);
+    min-height:0;
+    overflow:hidden;
+    box-sizing:border-box;
+    padding-bottom:0;
+  }
+  #navegacio .nav-trip-grid {
+    display:grid;
+    grid-template-columns:1fr;
+    grid-template-rows:1.15fr 1.25fr 1.35fr .72fr .88fr;
+    width:100%;
+    max-width:none;
+    height:100%;
+    min-height:0;
+    flex:1 1 auto;
+    align-content:stretch;
+    box-sizing:border-box;
+    padding:clamp(5px,1vw,10px);
+    gap:clamp(5px,1vw,10px);
+  }
+  #navegacio .nav-trip-grid > .big-card.speed,
+  #navegacio .nav-trip-grid > .nav-trip-stats,
+  #navegacio .nav-trip-grid > .nav-trip-main,
+  #navegacio .nav-trip-grid > .big-card.time,
+  #navegacio .nav-trip-grid > .nav-weather {
+    grid-column:1;
+    width:100%;
+    height:auto;
+    min-height:0;
+    max-height:none;
+    box-sizing:border-box;
+    align-self:stretch;
+  }
+  #navegacio .nav-trip-grid > .big-card.speed { order:1; padding:8px; }
+  #navegacio .nav-trip-grid > .nav-trip-stats { order:2; }
+  #navegacio .nav-trip-grid > .nav-trip-main { order:3; padding:8px; }
+  #navegacio .nav-trip-grid > .big-card.time { order:4; }
+  #navegacio .nav-trip-grid > .nav-weather { order:5; }
+  #navegacio .nav-trip-grid > .nav-trip-main .value { font-size:clamp(32px,5vw,58px); }
+  #navegacio .nav-trip-grid > .nav-weather { min-height:0; }
+  #navegacio .nav-trip-grid > .nav-lean,
+  #navegacio .nav-trip-grid > .big-card.cap { display:none!important; }
 }
 
 /* Landscape phones/tablets: prioritize the roadbook/map and controls. */
@@ -107,4 +152,5 @@ body { overflow:hidden; }
 @media (min-width:1200px) {
   .big-grid, .nav-trip-grid { max-width:1200px; margin-inline:auto; }
   .tabs { padding-inline:clamp(0px,4vw,60px); }
+  #navegacio .nav-trip-grid { max-width:none; margin-inline:0; }
 }
