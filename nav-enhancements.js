@@ -3,6 +3,7 @@
   const $ = id => document.getElementById(id);
   let navActive = false;
   let togglingRoute = false;
+  let explicitRouteStart = false;
 
   async function toggleRoute(){
     if(togglingRoute) return;
@@ -10,6 +11,7 @@
     if(!rb) return;
     togglingRoute=true;
     try{
+      explicitRouteStart=true;
       rb.click();
       setTimeout(()=>{ updateRouteButton(); togglingRoute=false; },350);
     }catch(e){
@@ -22,11 +24,12 @@
     if($('txc-nav-tablet-style')) return;
     const s=document.createElement('style'); s.id='txc-nav-tablet-style';
     s.textContent=`
-      /* Navegació: mesures compactes i accions agrupades */
+      /* Navegació: mesures compactes i resets sempre en una sola fila */
       #navegacio .nav-trip-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;}
       #navegacio .nav-trip-stats .nts-btn{grid-column:span 2!important;width:100%!important;min-height:46px!important;}
-      #navegacio .nav-odo-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:8px!important;}
-      #navegacio .nav-odo-actions .big-odo-btn{min-height:38px!important;padding:5px 4px!important;font-size:11px!important;white-space:nowrap!important;}
+      #navegacio .nav-odo-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:8px!important;width:100%!important;}
+      #navegacio .nav-odo-actions .big-odo-btn{grid-column:auto!important;min-width:0!important;width:100%!important;min-height:34px!important;padding:4px 3px!important;font-size:10px!important;white-space:nowrap!important;}
+      #navegacio .nav-odo-actions .nav-route-zero{min-height:34px!important;font-size:10px!important;padding:4px 2px!important;}
       #navegacio .nav-start-route{background:var(--accent)!important;color:#000!important;border:2px solid var(--accent)!important;}
       #navegacio .nav-start-route.recording{background:#3b1018!important;color:#ff8a80!important;border:2px solid var(--danger)!important;}
       #navegacio .nav-trip-stats .nts-btn:disabled{opacity:1!important;}
@@ -35,14 +38,14 @@
         #navegacio .nav-trip-stats .nts strong{font-size:clamp(30px,4.2vw,42px)!important;}
         #navegacio .nav-trip-stats .nts small{font-size:12px!important;}
         #navegacio .nav-trip-stats .nts-btn{min-height:52px!important;font-size:15px!important;}
-        #navegacio .nav-odo-actions .big-odo-btn{min-height:44px!important;font-size:13px!important;padding:6px 5px!important;}
+        #navegacio .nav-odo-actions .big-odo-btn{min-height:40px!important;font-size:12px!important;padding:5px 4px!important;}
       }
       @media(max-width:520px){
         #navegacio .nav-trip-stats .nts span{font-size:8px!important;}
         #navegacio .nav-trip-stats .nts strong{font-size:18px!important;}
         #navegacio .nav-trip-stats .nts small{font-size:9px!important;}
         #navegacio .nav-trip-stats .nts-btn{min-height:42px!important;font-size:11px!important;}
-        #navegacio .nav-odo-actions .big-odo-btn{font-size:9px!important;min-height:34px!important;}
+        #navegacio .nav-odo-actions .big-odo-btn{font-size:9px!important;min-height:30px!important;padding:3px 2px!important;}
       }
     `;
     document.head.appendChild(s);
@@ -59,17 +62,33 @@
     if(st && isNavScreen()) st.textContent=recording?'Ruta en curs · prem ATURAR RUTA quan vulguis acabar':'Ruta aturada · prem INICIAR RUTA per començar';
   }
 
+  function findOdoButtons(){
+    const buttons=[...document.querySelectorAll('#navegacio button')];
+    return {
+      total:buttons.find(b=>/TOTAL\s+A\s*0/i.test(b.textContent)),
+      partial:buttons.find(b=>/PARCIAL\s+A\s*0/i.test(b.textContent)),
+      trip:buttons.find(b=>/SORTIDA\s+A\s*0|RUTA\s+A\s*0/i.test(b.textContent))
+    };
+  }
+
   function ensureRouteButtons(){
     const stats=document.querySelector('#navegacio .nav-trip-stats');
     const odo=document.querySelector('#navegacio .nav-odo-actions');
     if(!stats) return;
 
-    /* El reset de sortida queda amb els tres zeros de l'odòmetre. */
-    const tripReset=$('nav-trip-reset');
-    if(tripReset && odo && tripReset.parentElement!==odo){
-      tripReset.textContent='↺ RUTA A 0';
-      tripReset.classList.add('nav-route-zero');
-      odo.insertBefore(tripReset,odo.children[1]||null);
+    /* Els tres zeros sempre queden junts i en una sola fila. */
+    const found=findOdoButtons();
+    if(odo){
+      [found.total,found.trip,found.partial].filter(Boolean).forEach((btn,i)=>{
+        btn.classList.add('big-odo-btn');
+        btn.style.gridColumn='auto';
+        btn.style.width='100%';
+        if(i===1){
+          btn.textContent='↺ RUTA A 0';
+          btn.classList.add('nav-route-zero');
+        }
+        odo.appendChild(btn);
+      });
     }
 
     /* Una sola tecla: INICIAR RUTA / ATURAR RUTA. */
@@ -84,11 +103,10 @@
     start.textContent='▶ INICIAR RUTA';
     const range=$('nav-range-set');
     if(range) range.textContent='⛽ AUTONOMIA';
-    /* Les dues accions queden juntes després de les quatre mesures. */
+    /* Autonomia i inici de ruta van junts, després de les quatre mesures. */
     stats.appendChild(range||document.createElement('span'));
     stats.appendChild(start);
 
-    /* El botó antic de desar ja no es mostra: ATURAR RUTA fa el tancament i guardat. */
     const oldSave=$('nav-save-route');
     if(oldSave) oldSave.remove();
     updateRouteButton();
@@ -96,9 +114,24 @@
 
   function isNavScreen(){ const el=$('navegacio'); return !!(el && el.classList.contains('active')); }
 
+  function stopUnexpectedAutoRecording(){
+    const rb=$('route-record');
+    const recording=!!(rb && /ATURAR/i.test(rb.textContent));
+    if(!isNavScreen() || !recording || explicitRouteStart) return;
+    /* Si Navegació ha iniciat l'enregistrament sola, l'aturem sense prompt ni guardat. */
+    if(typeof state!=='undefined' && state.trackRecording){
+      state.trackRecording=false;
+      state.trackSessionStart=null;
+      state.trackStartedAt=null;
+      try{ if(typeof saveActiveRoute==='function') saveActiveRoute(); }catch(e){}
+      updateRouteButton();
+      if(typeof showStatus==='function') showStatus('Ruta preparada · prem INICIAR RUTA per començar');
+    }
+  }
+
   function syncNavState(){
     const now=isNavScreen();
-    if(now && !navActive){ navActive=true; ensureRouteButtons(); }
+    if(now && !navActive){ navActive=true; ensureRouteButtons(); setTimeout(stopUnexpectedAutoRecording,80); }
     else if(!now && navActive){ navActive=false; }
   }
 
@@ -112,7 +145,7 @@
   }
 
   function updateTexts(){
-    const meta=document.querySelector('meta[name="app-version"]'); if(meta) meta.setAttribute('content','2026-10-14-06');
+    const meta=document.querySelector('meta[name="app-version"]'); if(meta) meta.setAttribute('content','2026-10-14-07');
     const empty=document.querySelector('.routes-empty p');
     if(empty && /Comença un enregistrament/.test(empty.textContent)) empty.innerHTML='Entra a <strong>Navegació</strong> i prem <strong>INICIAR RUTA</strong>. Quan vulguis acabar-la, prem <strong>ATURAR RUTA</strong> i posa-li un nom.';
     document.querySelectorAll('.editor-section p').forEach(p=>{
