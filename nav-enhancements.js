@@ -4,12 +4,13 @@
   let navActive = false;
   let saving = false;
 
-  function ensureTripStarted(){
+  function startRoute(){
     try{
       const b=$('route-record');
       if(!b) return;
       if(/INICIAR/i.test(b.textContent)) b.click();
-    }catch(e){ console.warn('Inici ruta:',e); }
+      setTimeout(updateRouteButtons,180);
+    }catch(e){ console.warn('Iniciar ruta:',e); }
   }
 
   function saveRoute(){
@@ -18,12 +19,12 @@
       const b=$('route-record');
       if(!b) return;
       if(!/ATURAR/i.test(b.textContent)){
-        showSaveStatus('No hi ha cap ruta en curs.');
+        showSaveStatus('Primer inicia la ruta.');
         return;
       }
       saving=true;
       b.click();
-      setTimeout(()=>{saving=false; updateSaveButton();},300);
+      setTimeout(()=>{saving=false; updateRouteButtons();},300);
     }catch(e){
       saving=false;
       console.warn('Desar ruta:',e);
@@ -35,26 +36,43 @@
     if(st) st.textContent=text;
   }
 
-  function updateSaveButton(){
-    const b=$('nav-save-route');
+  function updateRouteButtons(){
+    const start=$('nav-start-route');
+    const save=$('nav-save-route');
     const rb=$('route-record');
-    if(!b) return;
     const recording=!!(rb && /ATURAR/i.test(rb.textContent));
-    b.disabled=!recording;
-    b.textContent=recording?'💾 DESAR RUTA':'💾 RUTA DESADA';
+    if(start){
+      start.disabled=recording;
+      start.textContent=recording?'🟢 RUTA EN CURS':'▶ INICIAR RUTA';
+    }
+    if(save){
+      save.disabled=!recording;
+      save.textContent=recording?'💾 DESAR RUTA':'💾 RUTA DESADA';
+    }
   }
 
-  function ensureSaveButton(){
+  function ensureRouteButtons(){
     const stats=document.querySelector('#navegacio .nav-trip-stats');
-    if(!stats || $('nav-save-route')) return;
-    const b=document.createElement('button');
-    b.id='nav-save-route';
-    b.type='button';
-    b.className='big-odo-btn nts-btn nav-save-route';
-    b.textContent='💾 DESAR RUTA';
-    b.addEventListener('click',saveRoute);
-    stats.appendChild(b);
-    updateSaveButton();
+    if(!stats) return;
+    if(!$('nav-start-route')){
+      const b=document.createElement('button');
+      b.id='nav-start-route';
+      b.type='button';
+      b.className='big-odo-btn nts-btn nav-start-route';
+      b.textContent='▶ INICIAR RUTA';
+      b.addEventListener('click',startRoute);
+      stats.insertBefore(b,stats.firstChild);
+    }
+    if(!$('nav-save-route')){
+      const b=document.createElement('button');
+      b.id='nav-save-route';
+      b.type='button';
+      b.className='big-odo-btn nts-btn nav-save-route';
+      b.textContent='💾 DESAR RUTA';
+      b.addEventListener('click',saveRoute);
+      stats.appendChild(b);
+    }
+    updateRouteButtons();
   }
 
   function isNavScreen(){
@@ -66,8 +84,7 @@
     const now=isNavScreen();
     if(now && !navActive){
       navActive=true;
-      ensureTripStarted();
-      setTimeout(updateSaveButton,120);
+      ensureRouteButtons();
     }else if(!now && navActive){
       /* Sortir de Navegació NO finalitza la ruta. Continua enregistrant-se. */
       navActive=false;
@@ -91,21 +108,24 @@
     if(odo) grid.appendChild(odo);
     if(time) grid.appendChild(time);
     if(weather) grid.appendChild(weather);
-    ensureSaveButton();
+    ensureRouteButtons();
   }
 
   function updateTexts(){
     const meta=document.querySelector('meta[name="app-version"]');
     if(meta) meta.setAttribute('content','2026-10-14-03');
     const empty=document.querySelector('.routes-empty p');
-    if(empty && /Comença un enregistrament/.test(empty.textContent)) empty.innerHTML='Entra a <strong>Navegació</strong> i la ruta començarà a enregistrar-se. Quan vulguis acabar-la, prem <strong>DESAR RUTA</strong> i posa-li un nom.';
+    if(empty && /Comença un enregistrament/.test(empty.textContent)) empty.innerHTML='Entra a <strong>Navegació</strong> i prem <strong>INICIAR RUTA</strong>. Quan vulguis acabar-la, prem <strong>DESAR RUTA</strong> i posa-li un nom.';
     document.querySelectorAll('.editor-section p').forEach(p=>{
       if(/Iniciar sortida/.test(p.textContent) && /Aturar sortida/.test(p.textContent)){
-        p.innerHTML='<strong>Navegació</strong> inicia l’enregistrament de la ruta. Pots canviar de pantalla o fins i tot apagar la pantalla sense finalitzar-la. Quan vulguis acabar, prem <strong>DESAR RUTA</strong>, posa-li un nom i quedarà guardada a <strong>Rutes</strong> amb les seves estadístiques.';
+        p.innerHTML='<strong>Navegació</strong> mostra les estadístiques de la sortida. Prem <strong>INICIAR RUTA</strong> quan vulguis començar a enregistrar-la. Pots canviar de pantalla o fins i tot apagar la pantalla sense finalitzar-la. Quan vulguis acabar, prem <strong>DESAR RUTA</strong>, posa-li un nom i quedarà guardada a <strong>Rutes</strong> amb les seves estadístiques.';
       }
     });
     const st=$('route-status');
-    if(st && isNavScreen()) st.textContent='Ruta en enregistrament · prem DESAR RUTA quan vulguis acabar';
+    if(st && isNavScreen()){
+      const rb=$('route-record');
+      st.textContent=rb && /ATURAR/i.test(rb.textContent) ? 'Ruta en enregistrament · prem DESAR RUTA quan vulguis acabar' : 'Ruta aturada · prem INICIAR RUTA per començar';
+    }
   }
 
   function init(){
@@ -116,22 +136,22 @@
         rearrangeNav();
         syncNavState();
         updateTexts();
-        updateSaveButton();
+        updateRouteButtons();
       },20));
     });
     setTimeout(()=>{
       rearrangeNav();
       syncNavState();
       updateTexts();
-      updateSaveButton();
+      updateRouteButtons();
     },150);
     document.addEventListener('visibilitychange',()=>{
       if(document.visibilityState==='visible') setTimeout(()=>{
         syncNavState();
-        updateSaveButton();
+        updateRouteButtons();
       },100);
     });
-    setInterval(updateSaveButton,1000);
+    setInterval(updateRouteButtons,1000);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
