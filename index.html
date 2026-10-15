@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="app-version" content="2026-10-05-01">
+  <meta name="app-version" content="2026-10-15-01">
   <meta name="apple-mobile-web-app-title" content="Terra X Correr">
   <meta name="application-name" content="Terra X Correr">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -424,18 +424,19 @@
     .big-odo-controls {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 14px;
-      max-width: 360px;
+      gap: 10px;
+      margin-top: 16px;
+      max-width: 480px;
+      width: 100%;
       margin-left: auto;
       margin-right: auto;
     }
     .big-odo-controls .resets {
       grid-column: 1 / -1;
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 4px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
     }
     .big-odo-btn {
       background: #252525;
@@ -449,10 +450,15 @@
     }
     .big-odo-btn:active { background: var(--accent); color: #000; }
     .big-odo-btn.danger {
-      flex: 1;
+      width: 100%;
       border: 2px solid var(--danger);
       color: #ff8a80;
       background: #2a1212;
+      min-height: 56px;
+      padding: 14px 12px;
+      font-size: 16px;
+      border-radius: 14px;
+      white-space: nowrap;
     }
     .gps-line {
       margin-top: 12px;
@@ -1664,7 +1670,10 @@
 
     async function openPdfDocument(arrayBuffer) {
       const lib = await ensurePdfJs();
-      // PDF.js pot transferir/desenganxar el buffer quan el passa al worker.\n      // Treballem amb una còpia perquè l’original continuï disponible per a IndexedDB.\n      const data = new Uint8Array(arrayBuffer.slice(0));\n      showStatus("Obrint document…");
+      // PDF.js pot transferir/desenganxar el buffer quan el passa al worker.
+      // Treballem amb una còpia perquè l'original continui disponible per a IndexedDB.
+      const data = new Uint8Array(arrayBuffer.slice(0));
+      showStatus("Obrint document…");
       const task = lib.getDocument({ data: data, verbosity: 0 });
       task.onProgress = function(p) {
         if (p && p.total) showStatus("Llegint PDF " + Math.round(100 * p.loaded / p.total) + "%");

@@ -115,3 +115,51 @@ body { overflow:hidden; }
 @media (max-width:380px) {
   #instruments .odo-controls > .odo-btn.danger { min-height:44px !important; padding:8px 12px !important; font-size:12px !important; }
 }
+
+
+/* ========== Tablet / Galaxy Tab Active 3: text i números més grans ========== */
+@media (min-width: 700px) and (min-height: 850px),
+       (min-width: 900px) {
+  .inst .value { font-size: clamp(32px, 4.5vw, 48px) !important; }
+  .inst .label { font-size: 15px !important; }
+  .inst.odo .partial { font-size: 20px !important; }
+  .inst.speed .value { font-size: 48px !important; }
+  .dir-arrow { font-size: clamp(48px, 6vw, 72px) !important; }
+  .dir-cardinal { font-size: 26px !important; }
+  .dir-deg { font-size: 18px !important; }
+
+  .big-card .value { font-size: clamp(52px, 7vw, 78px) !important; }
+  .big-card .label { font-size: 18px !important; }
+  .big-partial { font-size: 26px !important; }
+  .big-card.time .value { font-size: 44px !important; }
+  .big-dir-arrow { font-size: clamp(48px, 6vw, 72px) !important; }
+  .big-dir-cardinal { font-size: 26px !important; }
+  .big-dir-deg { font-size: 18px !important; }
+
+  .tab { font-size: 16px !important; padding: 14px 6px !important; }
+  .odo-btn { font-size: 18px !important; min-height: 48px !important; min-width: 48px !important; }
+  .big-odo-btn { font-size: 18px !important; min-height: 56px !important; }
+  .big-odo-btn.danger { font-size: 17px !important; min-height: 58px !important; }
+
+  #instruments .big-grid > .big-card.speed .value { font-size: 56px !important; }
+  #instruments .big-grid > .big-card.cap .big-dir-arrow { font-size: 56px !important; }
+  #instruments .big-grid > .big-card.cap .big-dir-cardinal { font-size: 24px !important; }
+}
+
+/* Instrumentació: resets amples i sense solapar-se */
+#instruments .big-odo-controls {
+  max-width: 520px !important;
+  gap: 12px !important;
+}
+#instruments .big-odo-controls .resets {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 14px !important;
+}
+#instruments .big-odo-btn.danger {
+  width: 100% !important;
+  min-height: 58px !important;
+  padding: 14px 16px !important;
+  font-size: 16px !important;
+  white-space: nowrap !important;
+}
