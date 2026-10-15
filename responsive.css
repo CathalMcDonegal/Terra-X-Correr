@@ -4,6 +4,7 @@ body { overflow:hidden; }
 .tabs { overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
 .tabs::-webkit-scrollbar { display:none; }
 .tab { flex:1 1 0; min-width:90px; white-space:nowrap; padding-inline:clamp(4px,1vw,12px); font-size:clamp(10px,1.35vw,14px); }
+.tab.active { color: var(--accent); }
 .instruments { grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); padding:clamp(5px,1vw,12px); gap:clamp(5px,1vw,10px); }
 .inst { min-width:0; }
 .inst .value { font-size:clamp(22px,3vw,34px); }
@@ -51,6 +52,18 @@ body { overflow:hidden; }
 #navegacio .nav-trip-grid > .nav-lean,
 #navegacio .nav-trip-grid > .big-card.cap { display:none !important; }
 #navegacio > .gps-line { flex:0 0 auto !important; margin:2px 8px 6px !important; }
+
+/* Roadbook / Instrumentació: quatre ajustos en una fila i els dos resets vermells junts a sota. */
+#instruments .odo-controls,
+#roadbook-main .odo-controls { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important; grid-template-rows:auto auto !important; gap:clamp(4px,0.8vw,7px) !important; align-items:center !important; justify-items:stretch !important; flex-wrap:nowrap !important; width:100% !important; }
+#instruments .odo-controls > .odo-btn:not(.danger),
+#roadbook-main .odo-controls > .odo-btn:not(.danger) { grid-row:1 !important; min-width:0 !important; width:100% !important; }
+#instruments .odo-controls > .odo-btn.danger,
+#roadbook-main .odo-controls > .odo-btn.danger { grid-row:2 !important; min-width:0 !important; width:100% !important; min-height:clamp(30px,4vw,38px) !important; padding:4px 5px !important; font-size:clamp(10px,1.4vw,13px) !important; margin:0 !important; }
+#instruments .odo-controls > .odo-btn.danger:first-of-type,
+#roadbook-main .odo-controls > .odo-btn.danger:first-of-type { grid-column:2 !important; }
+#instruments .odo-controls > .odo-btn.danger:last-of-type,
+#roadbook-main .odo-controls > .odo-btn.danger:last-of-type { grid-column:3 !important; }
 
 @media (min-width:700px) {
   .tab { min-width:0; }
