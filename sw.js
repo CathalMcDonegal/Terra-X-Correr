@@ -1,4 +1,4 @@
-const CACHE = "txc-v72";
+const CACHE = "txc-v73";
 const TILES = "txc-tiles-v1";
 const MAX_TILES = 500;
 const NETWORK_TIMEOUT = 3500;
@@ -12,12 +12,13 @@ async function tileResponse(req) { const cache = await caches.open(TILES); const
 async function injectNavAssets(response) {
   try {
     const text = await response.text();
-    if (text.includes('data-txc-nav-enhancements') && text.includes('data-txc-responsive') && text.includes('data-txc-tweaks')) return new Response(text, {status: response.status, statusText: response.statusText, headers: response.headers});
+    if (text.includes('data-txc-nav-enhancements') && text.includes('data-txc-responsive') && text.includes('data-txc-tweaks') && text.includes('data-txc-default-nav')) return new Response(text, {status: response.status, statusText: response.statusText, headers: response.headers});
     const css = '<link data-txc-nav-enhancements rel="stylesheet" href="./nav-enhancements.css">';
     const responsive = '<link data-txc-responsive rel="stylesheet" href="./responsive.css">';
     const tweaks = '<link data-txc-tweaks rel="stylesheet" href="./nav-tweaks.css">';
     const js = '<script data-txc-nav-enhancements src="./nav-enhancements.js"></script>';
-    const html = text.replace('</head>', css + responsive + tweaks + '</head>').replace('</body>', js + '</body>');
+    const defaultNav = '<script data-txc-default-nav>(function(){function openNav(){var tabs=[].slice.call(document.querySelectorAll(".tab"));var t=tabs.find(function(x){return /navegaci/i.test(x.textContent||"");});if(t)t.click();}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",openNav,{once:true});}else{setTimeout(openNav,0);}})();</script>';
+    const html = text.replace('</head>', css + responsive + tweaks + '</head>').replace('</body>', js + defaultNav + '</body>');
     const headers = new Headers(response.headers); headers.set('Content-Type', 'text/html; charset=utf-8');
     return new Response(html, {status: response.status, statusText: response.statusText, headers});
   } catch (e) { return response; }
