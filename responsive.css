@@ -36,7 +36,6 @@ body { overflow:hidden; }
 .route-stat .value { font-size:clamp(16px,2.6vw,24px); }
 .route-btn { min-height:clamp(38px,5vw,48px); font-size:clamp(10px,1.5vw,13px); }
 
-/* Navegació: només aquesta pantalla ocupa l'espai entre pestanyes i GPS. */
 #navegacio { flex:1 1 0 !important; min-height:0 !important; max-height:none !important; overflow:hidden !important; padding:0 !important; box-sizing:border-box; }
 #navegacio .nav-trip-grid { display:flex !important; flex-direction:column !important; flex:1 1 0 !important; width:100% !important; max-width:none !important; height:auto !important; min-height:0 !important; overflow:hidden !important; box-sizing:border-box; padding:clamp(5px,1vw,10px) !important; gap:clamp(5px,1vw,10px) !important; }
 #navegacio .nav-trip-grid > .big-card.speed,
@@ -53,7 +52,6 @@ body { overflow:hidden; }
 #navegacio .nav-trip-grid > .big-card.cap { display:none !important; }
 #navegacio > .gps-line { flex:0 0 auto !important; margin:2px 8px 6px !important; }
 
-/* Roadbook / Instrumentació: quatre ajustos en una fila i els dos resets vermells junts a sota. */
 #instruments .odo-controls,
 #roadbook-main .odo-controls { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important; grid-template-rows:auto auto !important; gap:clamp(4px,0.8vw,7px) !important; align-items:center !important; justify-items:stretch !important; flex-wrap:nowrap !important; width:100% !important; }
 #instruments .odo-controls > .odo-btn:not(.danger),
@@ -100,4 +98,20 @@ body { overflow:hidden; }
   .big-grid { max-width:1200px; margin-inline:auto; }
   .tabs { padding-inline:clamp(0px,4vw,60px); }
   #navegacio .nav-trip-grid { max-width:none; margin-inline:0; }
+}
+
+/* Ajust final: resets de la pantalla Instrumentació més llargs i fàcils de prémer. */
+#instruments .odo-controls > .odo-btn.danger:first-of-type { grid-column:1 / 3 !important; }
+#instruments .odo-controls > .odo-btn.danger:last-of-type { grid-column:3 / 5 !important; }
+#instruments .odo-controls > .odo-btn.danger {
+  min-height:44px !important;
+  padding:8px 14px !important;
+  font-size:clamp(12px,1.6vw,15px) !important;
+  font-weight:800 !important;
+  border-width:2px !important;
+  border-radius:10px !important;
+  white-space:nowrap !important;
+}
+@media (max-width:380px) {
+  #instruments .odo-controls > .odo-btn.danger { min-height:40px !important; padding:7px 9px !important; font-size:11px !important; }
 }
