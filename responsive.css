@@ -100,18 +100,18 @@ body { overflow:hidden; }
   #navegacio .nav-trip-grid { max-width:none; margin-inline:0; }
 }
 
-/* Ajust final: resets de la pantalla Instrumentació més llargs i fàcils de prémer. */
+/* Instrumentació: resets més llargs, alts i fàcils de prémer. */
 #instruments .odo-controls > .odo-btn.danger:first-of-type { grid-column:1 / 3 !important; }
 #instruments .odo-controls > .odo-btn.danger:last-of-type { grid-column:3 / 5 !important; }
 #instruments .odo-controls > .odo-btn.danger {
-  min-height:44px !important;
-  padding:8px 14px !important;
-  font-size:clamp(12px,1.6vw,15px) !important;
+  min-height:48px !important;
+  padding:9px 20px !important;
+  font-size:clamp(13px,1.8vw,16px) !important;
   font-weight:800 !important;
   border-width:2px !important;
   border-radius:10px !important;
   white-space:nowrap !important;
 }
 @media (max-width:380px) {
-  #instruments .odo-controls > .odo-btn.danger { min-height:40px !important; padding:7px 9px !important; font-size:11px !important; }
+  #instruments .odo-controls > .odo-btn.danger { min-height:44px !important; padding:8px 12px !important; font-size:12px !important; }
 }
